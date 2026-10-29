@@ -1,0 +1,732 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Footer from '../components/Footer.astro';
+import TopBar from '../components/TopBar.astro';
+import Header from '../components/Header.astro';
+import FloatingButton from '../components/FloatingButton.astro';
+
+const contactInfo = {
+  address: "جمهورية مصر العربية - القاهرة - التجمع الخامس",
+  addressLink: "https://maps.google.com",
+  phone: "19000",
+  email: "info@realestate-dev.com",
+  workingHours: "السبت - الخميس: من 9:00 صباحاً حتى 6:00 مساءً"
+};
+
+const channels = [
+  {
+    number: "01",
+    tag: "اتصال هاتفي مباشر",
+    title: "الخط الساخن",
+    desc: "تواصل معنا مباشرة عبر الخط الساخن لاستقبال كافة استفساراتكم وحجوزاتكم.",
+    value: "19000",
+    href: "tel:19000",
+    action: "اتصل بنا الآن",
+    icon: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.63A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>`,
+    glowColor: "rgba(56, 189, 248, 0.35)"
+  },
+  {
+    number: "02",
+    tag: "محادثة فورية",
+    title: "خدمة المبيعات",
+    desc: "فريق المبيعات والاستشارات متاح للتواصل الفوري ومشاركتكم كافة العروض والمخططات.",
+    value: "محادثة واتساب سريعة",
+    href: "#",
+    action: "بدء المحادثة",
+    icon: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>`,
+    glowColor: "rgba(16, 185, 129, 0.35)"
+  },
+  {
+    number: "03",
+    tag: "مراسلات رسمية",
+    title: "البريد الإلكتروني",
+    desc: "أرسل لنا استفساراتك وسيقوم مستشارونا بالرد خلال وقت قياسي مع ملفات تفصيلية.",
+    value: "info@realestate-dev.com",
+    href: "mailto:info@realestate-dev.com",
+    action: "إرسال بريد",
+    icon: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>`,
+    glowColor: "rgba(168, 85, 247, 0.35)"
+  },
+  {
+    number: "04",
+    tag: "زيارة المقر",
+    title: "المقر الرئيسي",
+    desc: "يسعدنا تشريفكم بزيارة مقر الشركة لمناقشة كافة الفرص الاستثمارية وعقود المشاريع.",
+    value: "القاهرة - التجمع الخامس",
+    href: "https://maps.google.com",
+    action: "الموقع على الخريطة",
+    icon: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>`,
+    glowColor: "rgba(245, 158, 11, 0.35)"
+  }
+];
+---
+
+<Layout title="تواصل معنا - للاستثمار والتطوير العقاري">
+  <TopBar />
+  <Header showMenu={true}/>
+
+  <main class="contact-page">
+    <!-- Top Futuristic Ambient Banner -->
+    <div class="page-banner">
+      <div class="banner-mesh"></div>
+      <div class="banner-glow banner-glow-1"></div>
+      <div class="banner-glow banner-glow-2"></div>
+      
+      <div class="banner-content">
+        <nav class="breadcrumb-nav">
+          <a href="/"><i class="fas fa-home"></i> الرئيسية</a>
+          <span class="sep">/</span>
+          <span class="current">تواصل معنا</span>
+        </nav>
+
+        <div class="banner-badge">
+          <span class="badge-dot"></span>
+          <span class="badge-text">قنوات تواصل متطورة وفورية</span>
+        </div>
+
+        <h1 class="page-title">تواصل مع خبرائنا ومستشارينا</h1>
+        <p class="banner-subtext">نحن هنا للاستماع إليك وتلبية تطلعاتك. فريقنا الهندسي والاستثماري جاهز دائماً لمساعدتك في اتخاذ القرار العقاري الأمثل.</p>
+      </div>
+    </div>
+
+    <div class="container">
+      <!-- 4 Holographic Glass Cards -->
+      <div class="contact-grid">
+        {channels.map((ch, idx) => (
+          <a 
+            href={ch.href} 
+            class="channel-card-link" 
+            data-idx={idx}
+            target={ch.href.startsWith("http") ? "_blank" : undefined}
+            rel={ch.href.startsWith("http") ? "noopener noreferrer" : undefined}
+            style={`--card-glow: ${ch.glowColor};`}
+          >
+            <article class="channel-card">
+              <div class="card-mesh"></div>
+              <div class="card-radial-light"></div>
+
+              <div class="card-top">
+                <span class="card-number">{ch.number}</span>
+                <span class="card-tag">{ch.tag}</span>
+              </div>
+
+              <div class="card-icon-wrapper" set:html={ch.icon}></div>
+
+              <div class="card-body">
+                <h3 class="channel-title">{ch.title}</h3>
+                <p class="channel-desc">{ch.desc}</p>
+                <div class="channel-value" dir={ch.number === "01" ? "ltr" : "auto"}>
+                  {ch.value}
+                </div>
+              </div>
+
+              <div class="card-footer">
+                <span class="cta-label">{ch.action}</span>
+                <span class="cta-arrow">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="19" y1="12" x2="5" y2="12"></line>
+                    <polyline points="12 19 5 12 12 5"></polyline>
+                  </svg>
+                </span>
+              </div>
+            </article>
+          </a>
+        ))}
+      </div>
+
+      <!-- Working Hours Glass Strip -->
+      <div class="working-hours-strip">
+        <div class="hours-icon">
+          <i class="far fa-clock"></i>
+        </div>
+        <div class="hours-text">
+          <span class="hours-label">أوقات العمل الرسمية:</span>
+          <span class="hours-val">{contactInfo.workingHours}</span>
+        </div>
+      </div>
+
+      <!-- Why Contact Us Section (Glass Panel) -->
+      <div class="why-contact-card">
+        <div class="why-header">
+          <span class="why-badge">شراكة ونجاح مستدام</span>
+          <h2 class="why-title">لماذا تتواصل معنا؟</h2>
+        </div>
+        <div class="why-content">
+          <p>نعتبر كل عميل شريكاً حقيقياً في مسيرتنا العمرانية. تواصلك معنا هو خطوتك الأولى نحو امتلاك مسكن راقٍ أو تحقيق استثمار عقاري ذكي ومدروس يحقق أعلى العوائد الرأسمالية بأمان تام.</p>
+          <p>فريقنا المتخصص يوفر لك دراسات جدوى شاملة، ومخططات تفصيلية، واستشارات مالية وهندسية متكاملة بشفافية ومصداقية تامة في كل مرحلة.</p>
+        </div>
+      </div>
+
+      <!-- Interactive Map Section -->
+      <div class="map-section">
+        <div class="map-header">
+          <h2 class="map-title">موقعنا على الخريطة</h2>
+          <p class="map-subtitle">يسعدنا استقبالكم في مقرنا الكائن في قلب التجمع الخامس</p>
+        </div>
+        <div class="map-frame">
+          <iframe 
+            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d110502.61185038332!2d31.3770176!3d30.0130557!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x14583c1380cba7ef%3A0xd541260e3e57ecbc!2sNew%20Cairo%2C%20Cairo%20Governorate!5e0!3m2!1sen!2seg!4v1700000000000" 
+            width="100%" 
+            height="460" 
+            style="border:0;" 
+            allowfullscreen="" 
+            loading="lazy" 
+            referrerpolicy="no-referrer-when-downgrade"
+          ></iframe>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <Footer />
+  <FloatingButton />
+</Layout>
+
+<script is:inline>
+  document.addEventListener('DOMContentLoaded', () => {
+    const cards = document.querySelectorAll('.channel-card-link');
+
+    const observer = new IntersectionObserver((entries, obs) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const card = entry.target;
+          const index = card.getAttribute('data-idx');
+          card.style.transitionDelay = `${index * 110}ms`;
+          card.classList.add('is-visible');
+          obs.unobserve(card);
+        }
+      });
+    }, { threshold: 0.12 });
+
+    cards.forEach(card => {
+      observer.observe(card);
+    });
+  });
+</script>
+
+<style>
+  .contact-page {
+    position: relative;
+    background: radial-gradient(circle at 50% 10%, #0d1627 0%, #080d19 60%, #050812 100%);
+    direction: rtl;
+    padding-bottom: 100px;
+    overflow: hidden;
+  }
+
+  /* Banner */
+  .page-banner {
+    position: relative;
+    padding: 70px 25px 60px;
+    background: linear-gradient(180deg, rgba(14, 23, 42, 0.9) 0%, rgba(8, 13, 25, 0.95) 100%);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    text-align: center;
+    overflow: hidden;
+  }
+
+  .banner-mesh {
+    position: absolute;
+    inset: 0;
+    background-size: 35px 35px;
+    background-image: 
+      linear-gradient(to right, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+    mask-image: radial-gradient(circle at center, black 40%, transparent 85%);
+    -webkit-mask-image: radial-gradient(circle at center, black 40%, transparent 85%);
+    pointer-events: none;
+  }
+
+  .banner-glow {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(100px);
+    pointer-events: none;
+    opacity: 0.35;
+  }
+
+  .banner-glow-1 {
+    width: 450px;
+    height: 450px;
+    top: -80px;
+    left: -60px;
+    background: radial-gradient(circle, rgba(56, 189, 248, 0.4) 0%, transparent 70%);
+  }
+
+  .banner-glow-2 {
+    width: 420px;
+    height: 420px;
+    bottom: -60px;
+    right: -60px;
+    background: radial-gradient(circle, rgba(211, 191, 169, 0.3) 0%, transparent 70%);
+  }
+
+  .banner-content {
+    position: relative;
+    z-index: 2;
+    max-width: 850px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .breadcrumb-nav {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.9rem;
+    color: #94a3b8;
+    margin-bottom: 20px;
+  }
+
+  .breadcrumb-nav a {
+    color: #94a3b8;
+    text-decoration: none;
+    transition: color 0.3s ease;
+  }
+
+  .breadcrumb-nav a:hover {
+    color: #d3bfa9;
+  }
+
+  .breadcrumb-nav .sep {
+    opacity: 0.4;
+  }
+
+  .breadcrumb-nav .current {
+    color: #ffffff;
+    font-weight: 700;
+  }
+
+  .banner-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 16px;
+    border-radius: 30px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(211, 191, 169, 0.3);
+    backdrop-filter: blur(10px);
+    margin-bottom: 20px;
+  }
+
+  .badge-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: #38bdf8;
+    box-shadow: 0 0 10px #38bdf8;
+  }
+
+  .badge-text {
+    font-family: 'Cairo', sans-serif;
+    font-size: 0.92rem;
+    font-weight: 700;
+    color: #d3bfa9;
+  }
+
+  .page-title {
+    font-family: 'Cairo', sans-serif;
+    font-size: 3rem;
+    font-weight: 800;
+    color: #ffffff;
+    margin-bottom: 15px;
+    background: linear-gradient(180deg, #ffffff 40%, #cbd5e1 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .banner-subtext {
+    font-family: 'Almarai', sans-serif;
+    font-size: 1.2rem;
+    color: #94a3b8;
+    line-height: 1.8;
+    margin: 0;
+  }
+
+  /* Container */
+  .container {
+    max-width: 1240px;
+    margin: 60px auto 0;
+    padding: 0 25px;
+  }
+
+  /* Cards Grid */
+  .contact-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
+    gap: 30px;
+    margin-bottom: 50px;
+  }
+
+  .channel-card-link {
+    text-decoration: none;
+    color: inherit;
+    display: block;
+    border-radius: 20px;
+    opacity: 0;
+    transform: translateY(40px);
+    transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1), transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .channel-card-link.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .channel-card {
+    position: relative;
+    height: 100%;
+    min-height: 380px;
+    padding: 35px 28px 25px;
+    border-radius: 20px;
+    background: linear-gradient(160deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0.015) 100%);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+    transition: transform 0.4s ease, border-color 0.4s ease, box-shadow 0.4s ease, background 0.4s ease;
+  }
+
+  .card-mesh {
+    position: absolute;
+    inset: 0;
+    background-size: 24px 24px;
+    background-image: 
+      radial-gradient(circle, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+    opacity: 0.6;
+    pointer-events: none;
+  }
+
+  .card-radial-light {
+    position: absolute;
+    top: -40px;
+    left: -40px;
+    width: 180px;
+    height: 180px;
+    border-radius: 50%;
+    background: radial-gradient(circle, var(--card-glow) 0%, transparent 70%);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.5s ease, transform 0.5s ease;
+  }
+
+  .channel-card-link:hover .channel-card {
+    transform: translateY(-10px);
+    border-color: rgba(255, 255, 255, 0.25);
+    box-shadow: 0 20px 45px rgba(0, 0, 0, 0.4), 0 0 35px var(--card-glow);
+    background: linear-gradient(160deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.03) 100%);
+  }
+
+  .channel-card-link:hover .card-radial-light {
+    opacity: 1;
+    transform: scale(1.4);
+  }
+
+  .card-top {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+  }
+
+  .card-number {
+    font-family: 'Cairo', monospace;
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: rgba(255, 255, 255, 0.25);
+    transition: color 0.3s ease;
+  }
+
+  .channel-card-link:hover .card-number {
+    color: #d3bfa9;
+  }
+
+  .card-tag {
+    font-family: 'Cairo', sans-serif;
+    font-size: 0.78rem;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    color: #94a3b8;
+  }
+
+  .channel-card-link:hover .card-tag {
+    color: #ffffff;
+    border-color: rgba(255, 255, 255, 0.3);
+  }
+
+  .card-icon-wrapper {
+    position: relative;
+    z-index: 2;
+    width: 60px;
+    height: 60px;
+    border-radius: 14px;
+    background: linear-gradient(145deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.03) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #ffffff;
+    margin-bottom: 25px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+    transition: transform 0.4s ease, border-color 0.4s ease;
+  }
+
+  .card-icon-wrapper :global(svg) {
+    width: 30px;
+    height: 30px;
+  }
+
+  .channel-card-link:hover .card-icon-wrapper {
+    transform: scale(1.1) rotate(-3deg);
+    border-color: rgba(255, 255, 255, 0.4);
+    box-shadow: 0 10px 25px var(--card-glow);
+  }
+
+  .card-body {
+    position: relative;
+    z-index: 2;
+    flex-grow: 1;
+    margin-bottom: 25px;
+  }
+
+  .channel-title {
+    font-family: 'Cairo', sans-serif;
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: #ffffff;
+    margin: 0 0 10px 0;
+  }
+
+  .channel-card-link:hover .channel-title {
+    color: #d3bfa9;
+  }
+
+  .channel-desc {
+    font-family: 'Almarai', sans-serif;
+    font-size: 0.92rem;
+    color: #94a3b8;
+    line-height: 1.6;
+    margin: 0 0 16px 0;
+  }
+
+  .channel-value {
+    font-family: 'Cairo', sans-serif;
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: #d3bfa9;
+    background: rgba(211, 191, 169, 0.1);
+    padding: 8px 14px;
+    border-radius: 10px;
+    border: 1px solid rgba(211, 191, 169, 0.25);
+    display: inline-block;
+    transition: all 0.3s ease;
+  }
+
+  .channel-card-link:hover .channel-value {
+    background: #d3bfa9;
+    color: #080d19;
+    border-color: #d3bfa9;
+  }
+
+  .card-footer {
+    position: relative;
+    z-index: 2;
+    padding-top: 18px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .cta-label {
+    font-family: 'Cairo', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #cbd5e1;
+  }
+
+  .cta-arrow {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #cbd5e1;
+    transition: transform 0.3s ease, background-color 0.3s ease, color 0.3s ease;
+  }
+
+  .cta-arrow svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  .channel-card-link:hover .cta-label {
+    color: #ffffff;
+  }
+
+  .channel-card-link:hover .cta-arrow {
+    transform: translateX(-4px);
+    background-color: #d3bfa9;
+    color: #0c1424;
+    border-color: #d3bfa9;
+  }
+
+  /* Working Hours */
+  .working-hours-strip {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    padding: 20px 30px;
+    border-radius: 16px;
+    background: linear-gradient(145deg, rgba(255, 255, 255, 0.04) 0%, rgba(255, 255, 255, 0.01) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(12px);
+    max-width: 750px;
+    margin: 0 auto 60px;
+  }
+
+  .hours-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    background: rgba(211, 191, 169, 0.12);
+    border: 1px solid rgba(211, 191, 169, 0.25);
+    color: #d3bfa9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.3rem;
+  }
+
+  .hours-text {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    font-family: 'Cairo', sans-serif;
+  }
+
+  .hours-label {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #ffffff;
+  }
+
+  .hours-val {
+    font-family: 'Almarai', sans-serif;
+    font-size: 1rem;
+    color: #d3bfa9;
+    font-weight: 600;
+  }
+
+  /* Why Contact Us */
+  .why-contact-card {
+    background: linear-gradient(145deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.015) 100%);
+    backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 20px;
+    padding: 45px 40px;
+    margin-bottom: 60px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+  }
+
+  .why-header {
+    text-align: center;
+    margin-bottom: 25px;
+  }
+
+  .why-badge {
+    display: inline-block;
+    font-family: 'Cairo', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #d3bfa9;
+    background: rgba(211, 191, 169, 0.1);
+    border: 1px solid rgba(211, 191, 169, 0.25);
+    padding: 4px 14px;
+    border-radius: 20px;
+    margin-bottom: 12px;
+  }
+
+  .why-title {
+    font-family: 'Cairo', sans-serif;
+    font-size: 2.2rem;
+    font-weight: 800;
+    color: #ffffff;
+    margin: 0;
+  }
+
+  .why-content p {
+    font-family: 'Almarai', sans-serif;
+    font-size: 1.12rem;
+    color: #cbd5e1;
+    line-height: 2;
+    margin-bottom: 15px;
+  }
+
+  /* Map Section */
+  .map-section {
+    margin-top: 50px;
+  }
+
+  .map-header {
+    text-align: center;
+    margin-bottom: 30px;
+  }
+
+  .map-title {
+    font-family: 'Cairo', sans-serif;
+    font-size: 2.2rem;
+    font-weight: 800;
+    color: #ffffff;
+    margin-bottom: 8px;
+  }
+
+  .map-subtitle {
+    font-family: 'Almarai', sans-serif;
+    font-size: 1.1rem;
+    color: #94a3b8;
+    margin: 0;
+  }
+
+  .map-frame {
+    border-radius: 20px;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.35);
+  }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .page-title {
+      font-size: 2.2rem;
+    }
+    .banner-subtext {
+      font-size: 1.05rem;
+    }
+    .working-hours-strip {
+      flex-direction: column;
+      text-align: center;
+    }
+    .hours-text {
+      flex-direction: column;
+      gap: 5px;
+    }
+    .why-contact-card {
+      padding: 30px 20px;
+    }
+  }
+</style>

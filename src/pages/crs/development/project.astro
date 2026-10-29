@@ -1,0 +1,4935 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import AdminLogin from '../../../components/AdminLogin.astro';
+---
+
+<Layout title="إدارة المباني والوحدات | نظام التطوير العقاري ERP">
+  <div class="project-details-root">
+    
+    <!-- Auth Loading State -->
+    <div id="auth-loading-message" class="loading-state">
+      <div class="spinner"></div>
+      <p>جارٍ تحميل بيانات المشروع والوحدات...</p>
+    </div>
+
+    <!-- Auth Login Container -->
+    <div id="admin-login-container" style="display: none;">
+      <AdminLogin />
+    </div>
+
+    <!-- Main Container -->
+    <main id="main-content" class="erp-container" style="display: none;">
+      
+      <!-- Top Navigation Header -->
+      <header class="erp-topbar">
+        <div class="brand-crumb">
+          <a href="/crs" class="back-link">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+            الرئيسية
+          </a>
+          <span class="sep">/</span>
+          <a href="/crs/development" class="back-link">نظام التطوير العقاري</a>
+          <span class="sep">/</span>
+          <span class="active-crumb" id="crumb-project-name">تفاصيل المشروع والوحدات</span>
+        </div>
+
+        <div class="topbar-actions">
+          <a href="/crs/development" class="btn btn-outline">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+            العودة للمشروعات
+          </a>
+          <button id="open-new-building-btn" class="btn btn-secondary">
+            <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="2" width="16" height="20" rx="2" ry="2"></rect><line x1="9" y1="22" x2="9" y2="22.01"></line><line x1="15" y1="22" x2="15" y2="22.01"></line><line x1="9" y1="6" x2="9" y2="6.01"></line><line x1="15" y1="6" x2="15" y2="6.01"></line><line x1="9" y1="10" x2="9" y2="10.01"></line><line x1="15" y1="10" x2="15" y2="10.01"></line><line x1="9" y1="14" x2="9" y2="14.01"></line><line x1="15" y1="14" x2="15" y2="14.01"></line><line x1="9" y1="18" x2="9" y2="18.01"></line><line x1="15" y1="18" x2="15" y2="18.01"></line></svg>
+            + إضافة مبنى/مكون جديد
+          </button>
+          <button id="open-new-unit-btn" class="btn btn-primary">
+            <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+            + إضافة وحدة جديدة
+          </button>
+        </div>
+      </header>
+
+      <!-- Project Hero Summary Banner -->
+      <section class="project-hero-summary">
+        <div class="hero-main-row">
+          <div class="project-identity">
+            <span class="project-tag-pill">مشروع قيد التطوير</span>
+            <h1 id="hero-project-name">جاري تحميل المشروع...</h1>
+            <p id="hero-project-address" class="project-sub-address">...</p>
+          </div>
+          <div class="project-buildings-pills" id="project-buildings-chips">
+            <!-- Buildings Chips will be injected here -->
+          </div>
+        </div>
+
+        <!-- Quick Summary Metrics (ملخص سريع للمشروع بألوان الحالة) -->
+        <div class="summary-kpi-ribbon">
+          <!-- Total Units -->
+          <div class="kpi-metric-box box-total">
+            <span class="kpi-lbl">إجمالي الوحدات</span>
+            <div class="kpi-num" id="kpi-total-units">0</div>
+            <span class="kpi-sub-text">بالمشروع ككل</span>
+          </div>
+
+          <!-- Available Units (الأخضر) -->
+          <div class="kpi-metric-box box-available">
+            <div class="kpi-head-row">
+              <span class="kpi-lbl">وحدات متاحة</span>
+              <span class="status-indicator-dot dot-available"></span>
+            </div>
+            <div class="kpi-num text-available" id="kpi-available-units">0</div>
+            <span class="kpi-sub-text">جاهزة للبيع والتعاقد</span>
+          </div>
+
+          <!-- Reserved Units (الأصفر) -->
+          <div class="kpi-metric-box box-reserved">
+            <div class="kpi-head-row">
+              <span class="kpi-lbl">وحدات محجوزة</span>
+              <span class="status-indicator-dot dot-reserved"></span>
+            </div>
+            <div class="kpi-num text-reserved" id="kpi-reserved-units">0</div>
+            <span class="kpi-sub-text">حجز مبدئي وفترة تعاقد</span>
+          </div>
+
+          <!-- Sold Units (الأحمر) -->
+          <div class="kpi-metric-box box-sold">
+            <div class="kpi-head-row">
+              <span class="kpi-lbl">وحدات مباعة</span>
+              <span class="status-indicator-dot dot-sold"></span>
+            </div>
+            <div class="kpi-num text-sold" id="kpi-sold-units">0</div>
+            <span class="kpi-sub-text">تم تحرير العقود الرسمية</span>
+          </div>
+
+          <!-- Total Portfolio Value -->
+          <div class="kpi-metric-box box-value">
+            <span class="kpi-lbl">القيمة الإجمالية للوحدات</span>
+            <div class="kpi-num kpi-price" id="kpi-total-portfolio-val">0 ج.م</div>
+            <span class="kpi-sub-text">إجمالي تقييم المبيعات</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Units Filter Toolbar & View Toggle -->
+      <section class="units-control-toolbar">
+        <div class="filters-wrap">
+          
+          <!-- Filter by Building -->
+          <div class="filter-group">
+            <label>المبنى / المكون:</label>
+            <select id="filter-building-select">
+              <option value="all">جميع المباني والمكونات</option>
+            </select>
+          </div>
+
+          <!-- Filter by Status -->
+          <div class="filter-group">
+            <label>حالة الوحدة:</label>
+            <select id="filter-status-select">
+              <option value="all">جميع الحالات</option>
+              <option value="available">🟢 متاحة (Available)</option>
+              <option value="reserved">🟡 محجوزة (Reserved)</option>
+              <option value="sold">🔴 مباعة (Sold)</option>
+            </select>
+          </div>
+
+          <!-- Filter by Unit Type -->
+          <div class="filter-group">
+            <label>نوع الوحدة:</label>
+            <select id="filter-type-select">
+              <option value="all">جميع الأنواع</option>
+              <option value="residential">سكني (شقة)</option>
+              <option value="commercial">تجاري (محل)</option>
+              <option value="administrative">إداري (مكتب)</option>
+              <option value="villa">فيلا مستقلة</option>
+            </select>
+          </div>
+
+          <!-- Search by Unit Number -->
+          <div class="filter-group search-group">
+            <label>بحث برقم الوحدة:</label>
+            <input type="text" id="filter-search-input" placeholder="مثال: شقة 101 أو G-01" />
+          </div>
+
+        </div>
+
+        <!-- View Switcher (Table vs Grid Cards) -->
+        <div class="view-switch-box">
+          <button id="view-mode-table" class="view-btn active" title="عرض جدول تفصيلي">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
+            جدول
+          </button>
+          <button id="view-mode-grid" class="view-btn" title="عرض شبكة بطاقات ملونة">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+            بطاقات ملونة
+          </button>
+        </div>
+      </section>
+
+      <!-- Units Container (Table View & Grid View) -->
+      <section class="units-display-section">
+        
+        <!-- Bulk Action Floating Bar (الحركة الذكية لتسعير وتعديل الشقق المحددة) -->
+        <div id="bulk-actions-bar" class="bulk-actions-floating-bar" style="display: none;">
+          <div class="bulk-stats-group">
+            <span class="bulk-badge-count" id="selected-units-count">0</span>
+            <span class="bulk-lbl-text">شقة محددة في المشروع</span>
+          </div>
+          <div class="bulk-buttons-group">
+            <button type="button" id="btn-open-bulk-edit" class="btn-magic-bulk">
+              ⚡ تطبيق التسعير والمواصفات على الشقق المحددة
+            </button>
+            <button type="button" id="btn-clear-selection" class="btn-ghost-clear">
+              إلغاء التحديد
+            </button>
+          </div>
+        </div>
+
+        <!-- Table View Container -->
+        <div id="units-table-container" class="units-table-wrap">
+          <table class="erp-units-table">
+            <thead>
+              <tr>
+                <th style="width: 44px; text-align: center;">
+                  <input type="checkbox" id="select-all-units-chk" title="تحديد جميع الشقق المعروضة" style="cursor: pointer; width: 17px; height: 17px;" />
+                </th>
+                <th>رقم الشقة</th>
+                <th>المبنى / العمارة</th>
+                <th>النوع</th>
+                <th>الدور</th>
+                <th>المواصفات (غرف / حمام)</th>
+                <th>الفيو والتشطيب</th>
+                <th>المساحة</th>
+                <th>سعر المتر</th>
+                <th>السعر الإجمالي 💰</th>
+                <th>البلان</th>
+                <th>الحالة</th>
+                <th>الأقساط والتحصيل 💳</th>
+                <th>الإجراءات</th>
+              </tr>
+            </thead>
+            <tbody id="units-tbody">
+              <!-- Dynamically rendered -->
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Grid Cards View Container (شبكة بطاقات ملونة) -->
+        <div id="units-grid-container" class="units-cards-grid" style="display: none;">
+          <!-- Dynamically rendered -->
+        </div>
+
+        <!-- Empty State -->
+        <div id="units-empty-state" class="empty-state-notice" style="display: none;">
+          <div class="empty-icon">🏢</div>
+          <h3>لا توجد وحدات مطابقة للبحث أو التصفية</h3>
+          <p>يمكنك تغيير شروط التصفية أو النقر على "+ إضافة وحدة جديدة" لإدراج وحدات بالمشروع.</p>
+        </div>
+
+      </section>
+
+    </main>
+
+    <!-- ========================================================
+         MODAL 1: إضافة مبنى / مكون جديد مع التوليد التلقائي للشقق
+         ======================================================== -->
+    <div id="building-modal" class="modal-backdrop" style="display: none;">
+      <div class="modal-card modal-large">
+        <div class="modal-header">
+          <div class="modal-title-pod">
+            <div class="pod-icon icon-bld">🏢</div>
+            <div>
+              <h3>إضافة مبنى / مكون جديد</h3>
+              <p>تسجيل العمارة وتقسيم أدوارها وتوليد الشقق تلقائياً</p>
+            </div>
+          </div>
+          <button class="close-modal-btn" id="close-bld-modal">&times;</button>
+        </div>
+
+        <form id="new-building-form" class="modal-body-form">
+          <!-- 1. تابعة لأي مشروع؟ -->
+          <div class="form-group">
+            <label>تابعة لأي مشروع؟ *</label>
+            <select id="bld-project-select" required>
+              <!-- Dynamically populated with projects list -->
+            </select>
+          </div>
+
+          <!-- 2. اسم أو رقم العمارة -->
+          <div class="form-group">
+            <label>اسم أو رقم العمارة *</label>
+            <input type="text" id="bld-name-input" placeholder="مثال: عمارة B1 أو البرج السكني 1" required />
+          </div>
+
+          <!-- 3. عدد الأدوار و 4. كل دور فيه كام شقة؟ -->
+          <div class="form-row">
+            <div class="form-group">
+              <label>عدد الأدوار في العمارة * <span class="hint-small">(بخلاف الدور الأرضي)</span></label>
+              <input type="number" id="bld-floors-input" value="5" min="1" max="50" placeholder="مثال: 5" required />
+            </div>
+
+            <div class="form-group">
+              <label>كل دور فيه كام شقة؟ *</label>
+              <input type="number" id="bld-apts-per-floor-input" value="4" min="1" max="20" placeholder="مثال: 4" required />
+            </div>
+          </div>
+
+          <!-- 💡 الحركة الذكية في الصفحة (زرار "اعمل الشقق لوحدك") -->
+          <div class="smart-generator-pod">
+            <div class="smart-pod-header">
+              <div class="smart-pod-title">
+                <span class="sparkle-icon">💡</span>
+                <span>الحركة الذكية: إنشاء شقق العمارة تلقائياً</span>
+              </div>
+              <span class="smart-pod-badge">توفير الوقت والمجهود</span>
+            </div>
+            <p class="smart-pod-desc">
+              بدلاً من إدخال الشقق شقة شقة يدوياً، انقر على الزر ليقوم السيستم بحساب (الأرضي + الأدوار المتكررة × عدد الشقق) وتوليد وترقيم كافة الشقق كودياً بترتيب تسلسلي دقيق في ثانية واحدة!
+            </p>
+
+            <div class="default-specs-row">
+              <div class="form-group">
+                <label>مساحة الشقة الافتراضية (م²)</label>
+                <input type="number" id="bld-def-area" value="130" step="any" placeholder="130" />
+              </div>
+              <div class="form-group">
+                <label>سعر المتر الافتراضي (ج.م)</label>
+                <input type="number" id="bld-def-ppm" value="20000" step="any" placeholder="20000" />
+              </div>
+            </div>
+
+            <button type="button" id="btn-smart-generate-units" class="btn-magic-action">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+              <span>إنشاء شقق العمارة تلقائياً ⚡</span>
+            </button>
+          </div>
+
+          <!-- Generated Units Preview Box -->
+          <div id="generated-units-preview-box" class="generated-preview-box" style="display: none;">
+            <div class="preview-box-header">
+              <div class="preview-header-stats">
+                <span class="preview-badge-success" id="gen-stats-badge">0 شقة جاهزة</span>
+                <span class="preview-sub-text" id="gen-stats-text">...</span>
+              </div>
+              <button type="button" id="btn-clear-generated" class="btn-clear-ghost">إعادة ضبط</button>
+            </div>
+
+            <div class="preview-units-table-wrap">
+              <table class="preview-units-table">
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>كود ورقم الشقة</th>
+                    <th>الدور</th>
+                    <th>النوع</th>
+                    <th>المساحة</th>
+                    <th>سعر المتر</th>
+                    <th>الإجمالي المحسوب</th>
+                  </tr>
+                </thead>
+                <tbody id="generated-units-tbody">
+                  <!-- Dynamically populated with generated unit rows -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="modal-footer-actions">
+            <button type="submit" class="btn btn-primary" id="save-bld-btn">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              <span id="save-bld-btn-text">حفظ المبنى والمتابعة</span>
+            </button>
+            <button type="button" class="btn btn-secondary" id="cancel-bld-btn">إلغاء</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- ========================================================
+         MODAL 2: إضافة أو تعديل مواصفات وتسعير الشقة
+         ======================================================== -->
+    <div id="unit-modal" class="modal-backdrop" style="display: none;">
+      <div class="modal-card modal-large">
+        <div class="modal-header">
+          <div class="modal-title-pod">
+            <div class="pod-icon icon-unit">🔑</div>
+            <div>
+              <h3 id="unit-modal-heading">مواصفات وتسعير الشقة</h3>
+              <p id="unit-modal-subheading">تسجيل المواصفات التسويقية وحساب إجمالي السعر تلقائياً</p>
+            </div>
+          </div>
+          <button class="close-modal-btn" id="close-unit-modal">&times;</button>
+        </div>
+
+        <form id="new-unit-form" class="modal-body-form">
+          <input type="hidden" id="unit-id-input" value="" />
+
+          <!-- الجزء الأول: بيانات الوحدة والمبنى الأساسية -->
+          <div class="modal-section-pod">
+            <div class="section-pod-title">
+              <span class="step-num">1</span>
+              <span>بيانات الموقع والعمارة</span>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group" style="flex: 1.5;">
+                <label>المبنى / المكون التابع له *</label>
+                <select id="unit-bld-select" required>
+                  <!-- Dynamically populated -->
+                </select>
+              </div>
+
+              <div class="form-group" style="flex: 1;">
+                <label>رقم أو كود الشقة *</label>
+                <input type="text" id="unit-num-input" placeholder="مثال: NKH-B1-101" required />
+              </div>
+
+              <div class="form-group" style="flex: 0.8;">
+                <label>رقم الدور *</label>
+                <input type="number" id="unit-floor-input" value="1" min="0" max="100" required />
+              </div>
+
+              <div class="form-group" style="flex: 1.2;">
+                <label>حالة الشقة *</label>
+                <select id="unit-status-select" required>
+                  <option value="available" selected>🟢 متاحة للبيع (Available)</option>
+                  <option value="reserved">🟡 محجوزة مبدئياً (Reserved)</option>
+                  <option value="sold">🔴 مباعة رسمياً (Sold)</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- الجزء الثاني: مواصفات الشقة (عشان العميل يسأل عليها) -->
+          <div class="modal-section-pod">
+            <div class="section-pod-title">
+              <span class="step-num">2</span>
+              <span>مواصفات الشقة (بيانات العرض التسويقي للعميل)</span>
+            </div>
+
+            <div class="form-row">
+              <!-- نوع الوحدة -->
+              <div class="form-group" style="flex: 1.2;">
+                <label>نوع الوحدة *</label>
+                <select id="unit-type-select" required>
+                  <option value="residential" selected>🏢 شقة سكنية (Apartment)</option>
+                  <option value="duplex">🏛️ دوبلكس (Duplex)</option>
+                  <option value="penthouse">🌆 بنتهاوس (Penthouse)</option>
+                  <option value="commercial">🏪 محل تجاري (Commercial)</option>
+                  <option value="administrative">💼 مكتب إداري (Administrative)</option>
+                  <option value="villa">🏡 فيلا مستقلة / تاون هاوس (Villa)</option>
+                </select>
+              </div>
+
+              <!-- عدد الغرف والحمامات -->
+              <div class="form-group" style="flex: 0.9;">
+                <label>عدد غرف النوم</label>
+                <input type="number" id="unit-rooms-input" value="3" min="1" max="20" placeholder="مثال: 3" />
+              </div>
+
+              <div class="form-group" style="flex: 0.9;">
+                <label>عدد الحمامات</label>
+                <input type="number" id="unit-baths-input" value="2" min="1" max="10" placeholder="مثال: 2" />
+              </div>
+
+              <!-- الفيو (بتبص على إيه؟) -->
+              <div class="form-group" style="flex: 1.2;">
+                <label>الفيو (الإطلالة)</label>
+                <select id="unit-view-select">
+                  <option value="على جنينة">🌳 على جنينة (Garden View)</option>
+                  <option value="على حمام سباحة">🏊‍♂️ على حمام سباحة (Pool View)</option>
+                  <option value="على الشارع الرئيسي">🛣️ على الشارع الرئيسي (Main Street)</option>
+                  <option value="فيو داخلي / خلفي">🏢 فيو داخلي / خلفي</option>
+                  <option value="واجهة بحرية مفتوحة">🌊 واجهة بحرية مفتوحة</option>
+                </select>
+              </div>
+
+              <!-- نوع التشطيب -->
+              <div class="form-group" style="flex: 1.2;">
+                <label>نوع التشطيب</label>
+                <select id="unit-finishing-select">
+                  <option value="طوب أحمر">🧱 طوب أحمر</option>
+                  <option value="نص تشطيب" selected>🔨 نصف تشطيب (محارة وحلوق)</option>
+                  <option value="متشطبة بالكامل">✨ متشطبة بالكامل (سوبر لوكس)</option>
+                  <option value="ألترا سوبر لوكس">🌟 ألترا سوبر لوكس</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- الجزء الثالث: المساحة والفلوس (السيستم هو اللي بيحسب!) 💰 -->
+          <div class="modal-section-pod">
+            <div class="section-pod-title">
+              <span class="step-num">3</span>
+              <span>المساحة والفلوس (حساب لحظي أوتوماتيك 💰)</span>
+            </div>
+
+            <div class="pricing-calc-box">
+              <div class="calc-inputs-row">
+                <div class="form-group">
+                  <label>مساحة الشقة (م²) *</label>
+                  <input type="number" id="unit-area-input" step="any" placeholder="مثال: 150" value="150" required />
+                </div>
+
+                <div class="form-group">
+                  <label>سعر المتر المربع (ج.م) *</label>
+                  <input type="number" id="unit-ppm-input" step="any" placeholder="مثال: 20000" value="20000" required />
+                </div>
+
+                <div class="form-group">
+                  <label>مساحة الجنينة (م²) <span class="hint-small">(للأرضي أو 0)</span></label>
+                  <input type="number" id="unit-garden-input" step="any" value="0" placeholder="0" />
+                </div>
+              </div>
+
+              <!-- LIVE AUTO-CALCULATED TOTAL DISPLAY -->
+              <div class="auto-calc-display-card">
+                <div class="calc-label-row">
+                  <span class="calc-title">إجمالي سعر الشقة (السيستم بيحسبه لوحده):</span>
+                  <span class="formula-tag">مساحة الشقة × سعر المتر</span>
+                </div>
+                <div class="calc-result-sum">
+                  <span id="auto-total-price-text">3,000,000</span>
+                  <span class="currency-tag">جنيه مصري</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- صورة رسمة الشقة الهندسية "البلان" (Floor Plan) -->
+          <div class="modal-section-pod">
+            <div class="section-pod-title">
+              <span class="step-num">📐</span>
+              <span>صورة رسمة الشقة الهندسية "البلان" (للطباعة للعميل)</span>
+            </div>
+
+            <div class="plan-upload-container">
+              <div class="plan-upload-box" id="plan-drop-zone">
+                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#0284c7" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+                <p>اختر صورة رسمة الشقة الهندسية (البلان) لتسهيل طباعتها للعميل</p>
+                <input type="file" id="unit-plan-file-input" accept="image/*" style="display: none;" />
+                <button type="button" class="btn btn-sm btn-outline" id="btn-trigger-plan-upload">
+                  📁 اختيار صورة البلان
+                </button>
+                <input type="hidden" id="unit-plan-data" />
+              </div>
+
+              <div id="plan-preview-wrapper" class="plan-preview-card" style="display: none;">
+                <img id="unit-plan-preview-img" src="" alt="رسمة الشقة الهندسية" />
+                <div class="plan-preview-overlay">
+                  <button type="button" class="btn-preview-action text-danger" id="btn-remove-plan" title="حذف الصورة">&times; إزالة البلان</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-group" style="margin-top: 0.75rem;">
+              <label>ملاحظات إضافية على الوحدة</label>
+              <input type="text" id="unit-notes-input" placeholder="مثال: واجهة بحرية صريحة، استلام فوري، حصة في الجراج" />
+            </div>
+          </div>
+
+          <div class="modal-footer-actions">
+            <button type="submit" class="btn btn-primary" id="save-unit-btn">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              <span id="save-unit-btn-text">تأكيد وحفظ الشقة</span>
+            </button>
+            <button type="button" class="btn btn-secondary" id="cancel-unit-btn">إلغاء</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- ========================================================
+         MODAL 3: التعديل والتسعير الجماعي للشقق (الحركة الذكية ⚡)
+         ======================================================== -->
+    <div id="bulk-edit-modal" class="modal-backdrop" style="display: none;">
+      <div class="modal-card modal-large">
+        <div class="modal-header">
+          <div class="modal-title-pod">
+            <div class="pod-icon icon-magic">⚡</div>
+            <div>
+              <h3>تطبيق المواصفات والتسعير على الشقق المحددة</h3>
+              <p>تعديل أسعار ومواصفات <span id="bulk-modal-count-badge" class="highlight-badge">0 شقة</span> في ثانية واحدة</p>
+            </div>
+          </div>
+          <button class="close-modal-btn" id="close-bulk-modal">&times;</button>
+        </div>
+
+        <form id="bulk-edit-form" class="modal-body-form">
+          <div class="smart-generator-pod">
+            <div class="smart-pod-title">
+              <span class="sparkle-icon">💡</span>
+              <span>الحركة الذكية: تحديد الشقق وتطبيق السعر والمواصفات بضغطة زر واحدة</span>
+            </div>
+            <p class="smart-pod-desc">
+              حدد المساحة وسعر المتر والمواصفات للشقق المتشابهة، والسيستم سيقوم بضرب السعر وتطبيقه على كافة الشقق المحددة فوراً لتوفير الوقت.
+            </p>
+
+            <div class="calc-inputs-row">
+              <div class="form-group">
+                <label>مساحة الشقة (م²) *</label>
+                <input type="number" id="bulk-area-input" value="150" step="any" placeholder="150" required />
+              </div>
+              <div class="form-group">
+                <label>سعر المتر المربع (ج.م) *</label>
+                <input type="number" id="bulk-ppm-input" value="20000" step="any" placeholder="20000" required />
+              </div>
+              <div class="form-group">
+                <label>مساحة الجنينة (م²)</label>
+                <input type="number" id="bulk-garden-input" value="0" step="any" placeholder="0" />
+              </div>
+            </div>
+
+            <!-- Auto calc total box in bulk modal -->
+            <div class="auto-calc-display-card" style="margin-top: 0.75rem;">
+              <div class="calc-label-row">
+                <span class="calc-title">إجمالي سعر الشقة المحسوب لكل وحدة:</span>
+                <span class="formula-tag">المساحة × سعر المتر</span>
+              </div>
+              <div class="calc-result-sum">
+                <span id="bulk-auto-total-text">3,000,000</span>
+                <span class="currency-tag">جنيه مصري</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Specs row for bulk update -->
+          <div class="form-row" style="margin-top: 1rem;">
+            <div class="form-group" style="flex: 1.2;">
+              <label>نوع الوحدة</label>
+              <select id="bulk-type-select">
+                <option value="residential" selected>شقة سكنية</option>
+                <option value="duplex">دوبلكس</option>
+                <option value="penthouse">بنتهاوس</option>
+                <option value="commercial">محل تجاري</option>
+                <option value="administrative">مكتب إداري</option>
+                <option value="villa">فيلا</option>
+              </select>
+            </div>
+
+            <div class="form-group" style="flex: 0.9;">
+              <label>عدد غرف النوم</label>
+              <input type="number" id="bulk-rooms-input" value="3" min="1" max="20" />
+            </div>
+
+            <div class="form-group" style="flex: 0.9;">
+              <label>عدد الحمامات</label>
+              <input type="number" id="bulk-baths-input" value="2" min="1" max="10" />
+            </div>
+
+            <div class="form-group" style="flex: 1.2;">
+              <label>الفيو (الإطلالة)</label>
+              <select id="bulk-view-select">
+                <option value="على جنينة" selected>🌳 على جنينة</option>
+                <option value="على حمام سباحة">🏊‍♂️ على حمام سباحة</option>
+                <option value="على الشارع الرئيسي">🛣️ على الشارع الرئيسي</option>
+                <option value="فيو داخلي / خلفي">🏢 فيو داخلي / خلفي</option>
+              </select>
+            </div>
+
+            <div class="form-group" style="flex: 1.2;">
+              <label>نوع التشطيب</label>
+              <select id="bulk-finishing-select">
+                <option value="طوب أحمر">طوب أحمر</option>
+                <option value="نص تشطيب" selected>نصف تشطيب</option>
+                <option value="متشطبة بالكامل">متشطبة بالكامل</option>
+                <option value="ألترا سوبر لوكس">ألترا سوبر لوكس</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="modal-footer-actions">
+            <button type="submit" class="btn btn-primary" id="btn-submit-bulk-edit">
+              ⚡ تطبيق التسعير والمواصفات على الشقق المحددة الآن
+            </button>
+            <button type="button" class="btn btn-secondary" id="btn-cancel-bulk-edit">إلغاء</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- ========================================================
+         MODAL 4: عرض وطباعة رسمة الشقة الهندسية "البلان" للعميل
+         ======================================================== -->
+    <div id="plan-view-modal" class="modal-backdrop" style="display: none;">
+      <div class="modal-card modal-large print-ready-card">
+        <div class="modal-header no-print">
+          <div class="modal-title-pod">
+            <div class="pod-icon icon-plan">📐</div>
+            <div>
+              <h3>المخطط المعماري للشقة (البلان)</h3>
+              <p>رسمة ومواصفات الشقة جاهزة للطباعة والتسليم للعميل</p>
+            </div>
+          </div>
+          <button class="close-modal-btn" id="close-plan-modal">&times;</button>
+        </div>
+
+        <div class="plan-printable-content" id="plan-printable-area">
+          <!-- Printable Header -->
+          <div class="plan-print-header">
+            <div class="print-brand">
+              <h2 id="plan-modal-proj-name">اسم المشروع</h2>
+              <span class="print-sub-brand">بروشور تفاصيل الوحدة السكنية والمخطط المعماري</span>
+            </div>
+            <div class="print-unit-crest">
+              <span class="crest-code" id="plan-modal-unit-code">NKH-B1-101</span>
+              <span class="crest-bld" id="plan-modal-bld-name">عمارة B1</span>
+            </div>
+          </div>
+
+          <!-- Specs Ribbon -->
+          <div class="plan-specs-ribbon">
+            <div class="ribbon-box">
+              <span class="r-lbl">المساحة الإجمالية</span>
+              <span class="r-val" id="plan-modal-area">150 م²</span>
+            </div>
+            <div class="ribbon-box">
+              <span class="r-lbl">الدور</span>
+              <span class="r-val" id="plan-modal-floor">الدور الأول</span>
+            </div>
+            <div class="ribbon-box">
+              <span class="r-lbl">التقسيم الداخلي</span>
+              <span class="r-val" id="plan-modal-rooms">3 غرف + 2 حمام</span>
+            </div>
+            <div class="ribbon-box">
+              <span class="r-lbl">الإطلالة والفيو</span>
+              <span class="r-val" id="plan-modal-view">على جنينة</span>
+            </div>
+            <div class="ribbon-box">
+              <span class="r-lbl">نوع التشطيب</span>
+              <span class="r-val" id="plan-modal-finishing">نصف تشطيب</span>
+            </div>
+            <div class="ribbon-box highlight-ribbon">
+              <span class="r-lbl">إجمالي السعر</span>
+              <span class="r-val" id="plan-modal-price">3,000,000 ج.م</span>
+            </div>
+          </div>
+
+          <!-- Floor Plan Image -->
+          <div class="plan-image-large-wrap">
+            <img id="plan-modal-img" src="" alt="المخطط المعماري للشقة" />
+            <div id="plan-modal-no-img" class="no-plan-notice" style="display: none;">
+              <p>لم يتم رفع رسمة هندسية بعد لهذه الشقة. يمكنك رفعها من زر "تعديل الشقة".</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer-actions no-print">
+          <button type="button" class="btn btn-primary" id="btn-print-plan">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+            <span>طباعة بروشور الشقة للعميل 🖨️</span>
+          </button>
+          <button type="button" class="btn btn-secondary" id="btn-close-plan">إغلاق</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========================================================
+         MODAL 5: حجز وتعاقد الوحدة وجدولة الأقساط الذكية
+         ======================================================== -->
+    <div id="unit-contract-modal" class="modal-backdrop" style="display: none;">
+      <div class="modal-card modal-large">
+        <div class="modal-header">
+          <div class="modal-title-pod">
+            <div class="pod-icon icon-contract" style="background: #ecfdf5; color: #059669;">📝</div>
+            <div>
+              <h3>حجز وتعاقد الشقة وجدولة الأقساط الذكية</h3>
+              <p>خطة سداد سهلة وتوليد فوري لجميع الأقساط مع توريد فوري للمقدم في الخزينة</p>
+            </div>
+          </div>
+          <button class="close-modal-btn" id="close-contract-modal">&times;</button>
+        </div>
+
+        <form id="unit-contract-form" class="modal-body-form">
+          <input type="hidden" id="contract-unit-id" />
+          <input type="hidden" id="contract-project-id" />
+
+          <!-- الجزء 1: بيانات الوحدة المتعاقد عليها -->
+          <div class="unit-contract-hero-card">
+            <div class="hero-card-col">
+              <span class="hero-card-lbl">الوحدة والعمارة:</span>
+              <strong id="contract-unit-code-bld" class="hero-card-val">...</strong>
+            </div>
+            <div class="hero-card-col">
+              <span class="hero-card-lbl">المساحة والمواصفات:</span>
+              <strong id="contract-unit-specs" class="hero-card-val">...</strong>
+            </div>
+            <div class="hero-card-col price-highlight">
+              <span class="hero-card-lbl">إجمالي السعر (محسوب آلياً):</span>
+              <strong id="contract-unit-price" class="hero-card-price">0 ج.م</strong>
+            </div>
+          </div>
+
+          <!-- الجزء 2: بيانات العميل -->
+          <div class="modal-section-pod">
+            <div class="section-pod-title">
+              <span class="step-num">1</span>
+              <span>بيانات العميل (المشتري)</span>
+            </div>
+            <div class="form-row">
+              <div class="form-group" style="flex: 1.5;">
+                <label>اسم العميل بالكامل *</label>
+                <input type="text" id="contract-client-name" placeholder="مثال: أحمد محمد علي" required />
+              </div>
+              <div class="form-group" style="flex: 1.2;">
+                <label>رقم هاتف العميل (للتواصل والواتساب) *</label>
+                <input type="tel" id="contract-client-phone" placeholder="مثال: 01012345678" required />
+              </div>
+              <div class="form-group" style="flex: 1.2;">
+                <label>الرقم القومي للعميل</label>
+                <input type="text" id="contract-client-nid" placeholder="14 رقم" maxlength="14" />
+              </div>
+            </div>
+          </div>
+
+          <!-- الجزء 3: خطة ونظام السداد -->
+          <div class="modal-section-pod">
+            <div class="section-pod-title">
+              <span class="step-num">2</span>
+              <span>نظام السداد وخطة التقسيط 💰</span>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group" style="flex: 1.2;">
+                <label>خطة السداد المعيارية للمشروع</label>
+                <select id="contract-plan-select">
+                  <option value="custom">⚙️ خطة مخصصة (حدد المقدم والسنوات)</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label>نسبة المقدم (%)</label>
+                <input type="number" id="contract-dp-percent" value="10" min="0" max="100" step="any" placeholder="10" />
+              </div>
+
+              <div class="form-group">
+                <label>قيمة المقدم المحسوبة (ج.م) *</label>
+                <input type="number" id="contract-dp-amount" step="any" placeholder="300000" required />
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label>فترة التقسيط (سنوات) *</label>
+                <select id="contract-years-select">
+                  <option value="1">سنة واحدة (1)</option>
+                  <option value="2">سنتان (2)</option>
+                  <option value="3" selected>3 سنوات (3)</option>
+                  <option value="4">4 سنوات (4)</option>
+                  <option value="5">5 سنوات (5)</option>
+                  <option value="6">6 سنوات (6)</option>
+                  <option value="7">7 سنوات (7)</option>
+                  <option value="8">8 سنوات (8)</option>
+                  <option value="10">10 سنوات (10)</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label>دورية الأقساط *</label>
+                <select id="contract-freq-select">
+                  <option value="quarterly" selected>ربع سنوي (كل 3 شهور) - الأكثر استخداماً ⭐</option>
+                  <option value="monthly">شهري (كل شهر)</option>
+                  <option value="semi_annual">نصف سنوي (كل 6 شهور)</option>
+                  <option value="annual">سنوي (كل سنة)</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label>نسبة وديعة الصيانة (%)</label>
+                <input type="number" id="contract-maint-percent" value="5" min="0" max="25" step="any" placeholder="5" />
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label>تاريخ استحقاق أول قسط *</label>
+                <input type="date" id="contract-start-date" required />
+              </div>
+
+              <div class="form-group" style="flex: 1.5;">
+                <label>الخزينة المستلمة للمقدم (توريد فوري) *</label>
+                <select id="contract-treasury-select">
+                </select>
+              </div>
+            </div>
+
+            <!-- زر التوليد التلقائي لجدول الأقساط -->
+            <button type="button" id="btn-generate-schedule-preview" class="btn-magic-action" style="margin-top: 0.5rem;">
+              <span>⚡ اضغط هنا لتوليد ومراجعة جدول الأقساط تلقائياً</span>
+            </button>
+          </div>
+
+          <!-- صندوق استعراض جدول الأقساط المولد تلقائياً -->
+          <div id="contract-schedule-preview-box" class="schedule-preview-card" style="display: none;">
+            <div class="preview-box-header">
+              <div class="preview-header-stats">
+                <span class="preview-badge-success" id="prev-installments-count-badge">12 قسط</span>
+                <span class="preview-sub-text" id="prev-installment-amount-text">قيمة القسط: 0 ج.م</span>
+              </div>
+              <div id="prev-maintenance-tag" class="preview-sub-text" style="color: #0284c7; font-weight: 700;"></div>
+            </div>
+
+            <div class="schedule-preview-table-wrap">
+              <table class="erp-table preview-table">
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>البيان</th>
+                    <th>تاريخ الاستحقاق</th>
+                    <th>القيمة المستحقة</th>
+                    <th>النوع</th>
+                  </tr>
+                </thead>
+                <tbody id="contract-schedule-tbody">
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="modal-footer-actions">
+            <button type="submit" class="btn btn-primary" id="btn-confirm-contract-save">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              <span>تأكيد التعاقد وجدولة الأقساط وتوريد المقدم 💾</span>
+            </button>
+            <button type="button" class="btn btn-secondary" id="btn-close-contract-modal">إلغاء</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- ========================================================
+         MODAL 6: كشف حساب الوحدة والأقساط والمتابعة المالية
+         ======================================================== -->
+    <div id="unit-statement-modal" class="modal-backdrop" style="display: none;">
+      <div class="modal-card modal-large" id="printable-statement-card">
+        <div class="modal-header no-print">
+          <div class="modal-title-pod">
+            <div class="pod-icon icon-statement" style="background: #eff6ff; color: #2563eb;">📊</div>
+            <div>
+              <h3>كشف حساب وموقف أقساط الوحدة <span id="stmt-unit-title">...</span></h3>
+              <p>العميل: <strong id="stmt-client-name">...</strong> · هاتف: <span id="stmt-client-phone">...</span></p>
+            </div>
+          </div>
+          <button class="close-modal-btn" id="close-statement-modal">&times;</button>
+        </div>
+
+        <div class="modal-body-form" style="padding: 1.25rem 1.75rem;">
+          
+          <!-- Printable Brand Header (Only visible on print or statement view) -->
+          <div class="statement-print-header">
+            <div class="print-brand-info">
+              <h2>شركة إنجاز للتطوير والاستثمار العقاري</h2>
+              <p>كشف حساب مالي تفصيلي للأقساط والاستحقاقات للوحدة السكنية</p>
+            </div>
+            <div class="print-statement-meta">
+              <div><strong>تاريخ الاستخراج:</strong> <span id="stmt-print-date"></span></div>
+              <div><strong>كود الوحدة:</strong> <span id="stmt-print-unit"></span></div>
+              <div><strong>اسم المشروع:</strong> <span id="stmt-print-project"></span></div>
+            </div>
+          </div>
+
+          <!-- Financial KPI Cards Row -->
+          <div class="statement-kpis-grid">
+            <div class="stmt-kpi-card">
+              <span class="kpi-lbl">إجمالي قيمة العقد</span>
+              <span class="kpi-val" id="stmt-total-price">0 ج.م</span>
+              <span class="kpi-sub" id="stmt-down-payment-sub">المقدم: 0 ج.م</span>
+            </div>
+
+            <div class="stmt-kpi-card card-paid">
+              <span class="kpi-lbl">إجمالي المبالغ المحصلة</span>
+              <span class="kpi-val text-success" id="stmt-total-paid">0 ج.م</span>
+              <span class="kpi-sub" id="stmt-paid-count-sub">0 أقساط مسددة</span>
+            </div>
+
+            <div class="stmt-kpi-card card-remaining">
+              <span class="kpi-lbl">إجمالي المتبقي غير المسدد</span>
+              <span class="kpi-val text-primary" id="stmt-total-remaining">0 ج.م</span>
+              <span class="kpi-sub" id="stmt-pending-count-sub">0 أقساط متبقية</span>
+            </div>
+
+            <div class="stmt-kpi-card card-overdue" id="stmt-overdue-card">
+              <span class="kpi-lbl">الموقف المالي</span>
+              <span class="kpi-val" id="stmt-status-indicator">ملتزم بالسداد 🟢</span>
+              <span class="kpi-sub" id="stmt-overdue-sub">لا توجد متأخرات</span>
+            </div>
+          </div>
+
+          <!-- Progress Bar -->
+          <div class="payment-progress-container">
+            <div class="progress-label-row">
+              <span class="prog-txt">نسبة السداد المالي للوحدة</span>
+              <strong class="prog-pct" id="stmt-progress-pct-text">0%</strong>
+            </div>
+            <div class="progress-track">
+              <div class="progress-fill-bar" id="stmt-progress-bar" style="width: 0%;"></div>
+            </div>
+          </div>
+
+          <!-- Installments Filter Chips (No Print) -->
+          <div class="statement-filter-bar no-print">
+            <div class="filter-chips-group">
+              <button type="button" class="stmt-chip active" data-filter="all">جميع الأقساط (<span id="count-all-inst">0</span>)</button>
+              <button type="button" class="stmt-chip" data-filter="pending">المستحقة والجارية (<span id="count-pending-inst">0</span>)</button>
+              <button type="button" class="stmt-chip" data-filter="paid">المسددة 🟢 (<span id="count-paid-inst">0</span>)</button>
+              <button type="button" class="stmt-chip" data-filter="overdue">المتأخرة 🔴 (<span id="count-overdue-inst">0</span>)</button>
+            </div>
+            <button type="button" class="btn btn-sm btn-outline no-print" id="btn-print-statement-top">
+              🖨️ طباعة كشف الحساب
+            </button>
+          </div>
+
+          <!-- Installments Table -->
+          <div class="table-responsive statement-table-wrap">
+            <table class="erp-table statement-table">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>بيان القسط</th>
+                  <th>تاريخ الاستحقاق</th>
+                  <th>المبلغ المستحق</th>
+                  <th>المسدد وتاريخ السداد</th>
+                  <th>حالة القسط</th>
+                  <th class="no-print">إجراءات المتابعة والتحصيل</th>
+                </tr>
+              </thead>
+              <tbody id="statement-tbody">
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Statement Printable Signatures -->
+          <div class="statement-signatures-row">
+            <div class="sig-col">
+              <p>توقيع مسؤول المبيعات والتعاقدات</p>
+              <div class="sig-line">.....................................</div>
+            </div>
+            <div class="sig-col">
+              <p>توقيع المحاسب ومسؤول التحصيل</p>
+              <div class="sig-line">.....................................</div>
+            </div>
+            <div class="sig-col">
+              <p>اعتماد الإدارة المالية والختم</p>
+              <div class="sig-line">.....................................</div>
+            </div>
+          </div>
+
+          <div class="modal-footer-actions no-print">
+            <button type="button" class="btn btn-primary" id="btn-print-statement">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+              <span>طباعة كشف الحساب الرسمي للعميل 🖨️</span>
+            </button>
+            <button type="button" class="btn btn-secondary" id="btn-close-statement">إغلاق</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========================================================
+         MODAL 7: تحصيل القسط السريع وتوريد الخزينة بنقرة واحدة
+         ======================================================== -->
+    <div id="quick-pay-modal" class="modal-backdrop" style="display: none; z-index: 1050;">
+      <div class="modal-card modal-medium">
+        <div class="modal-header">
+          <div class="modal-title-pod">
+            <div class="pod-icon icon-pay" style="background: #f0fdf4; color: #16a34a;">💵</div>
+            <div>
+              <h3>تحصيل قسط وإصدار إيصال استلام</h3>
+              <p>تسجيل سداد القسط والتسميع الفوري في الخزينة المحددة</p>
+            </div>
+          </div>
+          <button class="close-modal-btn" id="close-quick-pay-modal">&times;</button>
+        </div>
+
+        <form id="quick-pay-form" class="modal-body-form">
+          <input type="hidden" id="quick-pay-installment-id" />
+
+          <div class="pay-info-strip">
+            <div class="strip-item"><span class="strip-lbl">القسط:</span> <strong id="quick-pay-inst-title">...</strong></div>
+            <div class="strip-item"><span class="strip-lbl">الوحدة:</span> <strong id="quick-pay-unit-code">...</strong></div>
+            <div class="strip-item"><span class="strip-lbl">العميل:</span> <strong id="quick-pay-client-name">...</strong></div>
+            <div class="strip-item price"><span class="strip-lbl">المستحق:</span> <strong id="quick-pay-due-amount">0 ج.م</strong></div>
+          </div>
+
+          <div class="form-row" style="margin-top: 1rem;">
+            <div class="form-group">
+              <label>المبلغ المسدد فعلياً (ج.م) *</label>
+              <input type="number" id="quick-pay-actual-amount" step="any" required />
+            </div>
+
+            <div class="form-group">
+              <label>غرامة تأخير إن وجدت (ج.م)</label>
+              <input type="number" id="quick-pay-penalty" value="0" step="any" />
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>طريقة الدفع *</label>
+              <select id="quick-pay-method" required>
+                <option value="cash" selected>نقداً في مقر الشركة</option>
+                <option value="bank_transfer">تحويل بنكي</option>
+                <option value="vodafone_cash">محفظة إلكترونية (فودافون كاش)</option>
+                <option value="cheque">شيك بنكي مقبول الدفع</option>
+                <option value="online_card">بطاقة بنكية (فيزا / ماستركارد)</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label>الخزينة المودع بها *</label>
+              <select id="quick-pay-treasury-select" required>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>ملاحظات السداد أو رقم الشيك / الحوالة</label>
+            <input type="text" id="quick-pay-notes" placeholder="مثال: تحويل بنكي على حساب البنك الأهلي أو رقم الشيك 45892" />
+          </div>
+
+          <div class="modal-footer-actions">
+            <button type="submit" class="btn btn-success" id="btn-confirm-pay">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              <span>تأكيد التحصيل وتوريد للخزنة فوراً 💵</span>
+            </button>
+            <button type="button" class="btn btn-secondary" id="btn-cancel-quick-pay">إلغاء</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- ========================================================
+         MODAL 8: إيصال استلام نقدية الكتروني رسمي (قابل للطباعة)
+         ======================================================== -->
+    <div id="receipt-view-modal" class="modal-backdrop" style="display: none; z-index: 1100;">
+      <div class="modal-card modal-receipt">
+        <div class="receipt-card-body" id="printable-receipt-card">
+          <div class="receipt-top-header">
+            <div class="receipt-company">
+              <h3>شركة إنجاز للتطوير العقاري</h3>
+              <p>إيصال استلام نقدية رسمي (سداد قسط)</p>
+            </div>
+            <div class="receipt-number-badge">
+              <span>رقم الإيصال:</span>
+              <strong id="receipt-modal-num">REC-000000</strong>
+            </div>
+          </div>
+
+          <div class="receipt-grid">
+            <div class="receipt-row">
+              <span class="r-head">وصلنا من السيد / السيدة:</span>
+              <strong class="r-data" id="receipt-modal-client">...</strong>
+            </div>
+            <div class="receipt-row">
+              <span class="r-head">رقم الهاتف:</span>
+              <span class="r-data" id="receipt-modal-phone">...</span>
+            </div>
+            <div class="receipt-row">
+              <span class="r-head">وذلك عن المشروع والوحدة:</span>
+              <strong class="r-data" id="receipt-modal-unit-project">...</strong>
+            </div>
+            <div class="receipt-row">
+              <span class="r-head">البيان:</span>
+              <span class="r-data" id="receipt-modal-title">...</span>
+            </div>
+            <div class="receipt-row">
+              <span class="r-head">طريقة السداد:</span>
+              <span class="r-data" id="receipt-modal-method">نقداً</span>
+            </div>
+            <div class="receipt-row total-highlight">
+              <span class="r-head">المبلغ الإجمالي المستلم:</span>
+              <strong class="r-data text-success" id="receipt-modal-amount">0 ج.م</strong>
+            </div>
+            <div class="receipt-row">
+              <span class="r-head">تاريخ وساعة السداد:</span>
+              <span class="r-data" id="receipt-modal-date">...</span>
+            </div>
+          </div>
+
+          <div class="receipt-signatures">
+            <div class="sig-box">
+              <p>توقيع المستلم (الخزينة)</p>
+              <div class="sig-dot">.....................</div>
+            </div>
+            <div class="sig-box">
+              <p>توقيع العميل / المودع</p>
+              <div class="sig-dot">.....................</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer-actions no-print">
+          <button type="button" class="btn btn-primary" id="btn-print-receipt">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+            <span>طباعة الإيصال الفوري 🖨️</span>
+          </button>
+          <button type="button" class="btn btn-secondary" id="btn-close-receipt">إلغاء</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</Layout>
+
+<style is:global>
+  * {
+    box-sizing: border-box;
+  }
+
+  .project-details-root {
+    direction: rtl;
+    font-family: 'Cairo', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background-color: #f8fafc;
+    min-height: 100vh;
+    color: #0f172a;
+    padding-bottom: 4rem;
+  }
+
+  /* Loading State */
+  .loading-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 80vh;
+    gap: 1rem;
+    color: #475569;
+  }
+
+  .spinner {
+    width: 44px;
+    height: 44px;
+    border: 4px solid #e2e8f0;
+    border-top-color: #2563eb;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+
+  /* Header Topbar */
+  .erp-topbar {
+    background: #ffffff;
+    border-bottom: 1px solid #e2e8f0;
+    padding: 1rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    z-index: 40;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+  }
+
+  .brand-crumb {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    font-size: 0.9rem;
+    font-weight: 700;
+  }
+
+  .back-link {
+    color: #475569;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    transition: color 0.2s;
+  }
+
+  .back-link:hover {
+    color: #2563eb;
+  }
+
+  .sep {
+    color: #cbd5e1;
+  }
+
+  .active-crumb {
+    color: #0f172a;
+    font-weight: 800;
+  }
+
+  .topbar-actions {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.65rem 1.15rem;
+    border-radius: 10px;
+    font-size: 0.88rem;
+    font-weight: 700;
+    cursor: pointer;
+    border: none;
+    text-decoration: none;
+    transition: all 0.2s ease;
+  }
+
+  .btn-primary {
+    background: #2563eb;
+    color: #ffffff;
+    box-shadow: 0 2px 6px rgba(37, 99, 235, 0.25);
+  }
+
+  .btn-primary:hover {
+    background: #1d4ed8;
+    transform: translateY(-1px);
+  }
+
+  .btn-secondary {
+    background: #0f172a;
+    color: #ffffff;
+  }
+
+  .btn-secondary:hover {
+    background: #1e293b;
+    transform: translateY(-1px);
+  }
+
+  .btn-outline {
+    background: #ffffff;
+    border: 1px solid #cbd5e1;
+    color: #475569;
+  }
+
+  .btn-outline:hover {
+    background: #f1f5f9;
+    color: #0f172a;
+  }
+
+  /* Project Hero Summary Banner */
+  .project-hero-summary {
+    background: #ffffff;
+    border-bottom: 1px solid #e2e8f0;
+    padding: 2rem;
+  }
+
+  .hero-main-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1.75rem;
+    gap: 1.5rem;
+  }
+
+  .project-identity {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+  }
+
+  .project-tag-pill {
+    display: inline-block;
+    align-self: flex-start;
+    font-size: 0.74rem;
+    font-weight: 800;
+    color: #2563eb;
+    background: #eff6ff;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    border: 1px solid #dbeafe;
+  }
+
+  .project-identity h1 {
+    margin: 0;
+    font-size: 1.75rem;
+    font-weight: 900;
+    color: #0f172a;
+  }
+
+  .project-sub-address {
+    margin: 0;
+    font-size: 0.95rem;
+    color: #64748b;
+  }
+
+  .project-buildings-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    max-width: 500px;
+    justify-content: flex-end;
+  }
+
+  .bld-chip-badge {
+    background: #f1f5f9;
+    border: 1px solid #e2e8f0;
+    padding: 0.35rem 0.75rem;
+    border-radius: 8px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: #334155;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+
+  /* Summary KPI Ribbon */
+  .summary-kpi-ribbon {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 1.25rem;
+  }
+
+  .kpi-metric-box {
+    background: #f8fafc;
+    border-radius: 14px;
+    padding: 1.2rem 1.4rem;
+    border: 1.5px solid #e2e8f0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .kpi-head-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .kpi-lbl {
+    font-size: 0.78rem;
+    font-weight: 800;
+    color: #64748b;
+  }
+
+  .kpi-num {
+    font-size: 1.75rem;
+    font-weight: 900;
+    color: #0f172a;
+    letter-spacing: -0.5px;
+    line-height: 1.2;
+  }
+
+  .kpi-price {
+    font-size: 1.4rem;
+  }
+
+  .kpi-sub-text {
+    font-size: 0.72rem;
+    color: #94a3b8;
+    font-weight: 600;
+  }
+
+  /* KPI Color Coding */
+  .box-available {
+    background: #f0fdf4;
+    border-color: #bbf7d0;
+  }
+  .text-available {
+    color: #16a34a;
+  }
+  .dot-available {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background-color: #10b981;
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2);
+  }
+
+  .box-reserved {
+    background: #fffbeb;
+    border-color: #fde68a;
+  }
+  .text-reserved {
+    color: #d97706;
+  }
+  .dot-reserved {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background-color: #f59e0b;
+    box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.2);
+  }
+
+  .box-sold {
+    background: #fef2f2;
+    border-color: #fecaca;
+  }
+  .text-sold {
+    color: #dc2626;
+  }
+  .dot-sold {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background-color: #ef4444;
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.2);
+  }
+
+  /* Units Control Toolbar */
+  .units-control-toolbar {
+    padding: 1.25rem 2rem;
+    background: #ffffff;
+    border-bottom: 1px solid #e2e8f0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+  }
+
+  .filters-wrap {
+    display: flex;
+    gap: 1.25rem;
+    align-items: center;
+    flex-wrap: wrap;
+    flex: 1;
+  }
+
+  .filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+  }
+
+  .filter-group label {
+    font-size: 0.74rem;
+    font-weight: 700;
+    color: #64748b;
+  }
+
+  .filter-group select,
+  .filter-group input {
+    padding: 0.45rem 0.75rem;
+    border-radius: 8px;
+    border: 1px solid #cbd5e1;
+    font-family: inherit;
+    font-size: 0.85rem;
+    font-weight: 600;
+    background: #ffffff;
+    color: #1e293b;
+    min-width: 140px;
+  }
+
+  .search-group input {
+    min-width: 180px;
+  }
+
+  .view-switch-box {
+    display: flex;
+    background: #f1f5f9;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 3px;
+    gap: 3px;
+  }
+
+  .view-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.45rem 0.85rem;
+    border-radius: 8px;
+    border: none;
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: #64748b;
+    background: transparent;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .view-btn.active {
+    background: #ffffff;
+    color: #0f172a;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  }
+
+  /* Units Display Section */
+  .units-display-section {
+    padding: 2rem;
+  }
+
+  /* Table View */
+  .units-table-wrap {
+    background: #ffffff;
+    border-radius: 16px;
+    border: 1px solid #e2e8f0;
+    overflow-x: auto;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+  }
+
+  .erp-units-table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: right;
+  }
+
+  .erp-units-table th {
+    background: #f8fafc;
+    padding: 1rem 1.25rem;
+    font-size: 0.82rem;
+    font-weight: 800;
+    color: #475569;
+    border-bottom: 1px solid #e2e8f0;
+    white-space: nowrap;
+  }
+
+  .erp-units-table td {
+    padding: 1.1rem 1.25rem;
+    font-size: 0.88rem;
+    color: #1e293b;
+    border-bottom: 1px solid #f1f5f9;
+    vertical-align: middle;
+  }
+
+  .erp-units-table tr:hover td {
+    background-color: #fafafa;
+  }
+
+  .unit-code-badge {
+    font-weight: 800;
+    font-size: 0.95rem;
+    color: #0f172a;
+  }
+
+  .unit-type-pill {
+    display: inline-block;
+    padding: 0.2rem 0.6rem;
+    border-radius: 6px;
+    font-size: 0.74rem;
+    font-weight: 700;
+    background: #f1f5f9;
+    color: #475569;
+  }
+
+  .status-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.3rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.78rem;
+    font-weight: 800;
+  }
+
+  .tag-available {
+    background: #dcfce7;
+    color: #15803d;
+    border: 1px solid #bbf7d0;
+  }
+
+  .tag-reserved {
+    background: #fef3c7;
+    color: #b45309;
+    border: 1px solid #fde68a;
+  }
+
+  .tag-sold {
+    background: #fee2e2;
+    color: #b91c1c;
+    border: 1px solid #fecaca;
+  }
+
+  /* Unit Status Select in Table */
+  .status-quick-select {
+    padding: 0.3rem 0.5rem;
+    border-radius: 8px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    border: 1px solid #cbd5e1;
+    background: #ffffff;
+    cursor: pointer;
+  }
+
+  /* Cards Grid View (بطاقات ملونة حسب الحالة) */
+  .units-cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+    gap: 1.25rem;
+  }
+
+  .unit-card {
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 1.4rem;
+    border: 2px solid transparent;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 1rem;
+    transition: all 0.25s ease;
+  }
+
+  .unit-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.06);
+  }
+
+  /* Color-coded card borders and themes */
+  .unit-card.status-available {
+    border-color: #86efac;
+    background: linear-gradient(180deg, #f0fdf4 0%, #ffffff 40%);
+  }
+
+  .unit-card.status-reserved {
+    border-color: #fde047;
+    background: linear-gradient(180deg, #fefce8 0%, #ffffff 40%);
+  }
+
+  .unit-card.status-sold {
+    border-color: #fca5a5;
+    background: linear-gradient(180deg, #fef2f2 0%, #ffffff 40%);
+  }
+
+  .unit-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+  }
+
+  .card-unit-title {
+    margin: 0;
+    font-size: 1.2rem;
+    font-weight: 900;
+    color: #0f172a;
+  }
+
+  .card-bld-name {
+    margin: 0.15rem 0 0 0;
+    font-size: 0.8rem;
+    color: #64748b;
+    font-weight: 700;
+  }
+
+  .unit-specs-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 0.65rem 0.5rem;
+    text-align: center;
+  }
+
+  .spec-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+  }
+
+  .spec-item:not(:last-child) {
+    border-left: 1px solid #f1f5f9;
+  }
+
+  .spec-lbl {
+    font-size: 0.68rem;
+    color: #94a3b8;
+    font-weight: 700;
+  }
+
+  .spec-val {
+    font-size: 0.88rem;
+    font-weight: 800;
+    color: #0f172a;
+  }
+
+  .unit-card-price-pod {
+    background: #f8fafc;
+    border-radius: 10px;
+    padding: 0.75rem 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .price-lbl-group {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .price-lbl {
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: #64748b;
+  }
+
+  .price-ppm-str {
+    font-size: 0.75rem;
+    color: #94a3b8;
+  }
+
+  .price-total-str {
+    font-size: 1.15rem;
+    font-weight: 900;
+    color: #0f172a;
+  }
+
+  /* Empty State */
+  .empty-state-notice {
+    background: #ffffff;
+    border: 2px dashed #e2e8f0;
+    border-radius: 18px;
+    padding: 3.5rem 2rem;
+    text-align: center;
+  }
+
+  .empty-icon {
+    font-size: 2.8rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .empty-state-notice h3 {
+    margin: 0 0 0.4rem 0;
+    font-size: 1.2rem;
+    font-weight: 800;
+    color: #0f172a;
+  }
+
+  .empty-state-notice p {
+    margin: 0;
+    font-size: 0.9rem;
+    color: #64748b;
+  }
+
+  /* ========================================================
+     MODALS
+     ======================================================== */
+  .modal-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(15, 23, 42, 0.65);
+    backdrop-filter: blur(6px);
+    display: flex;
+    align-items: flex-start; /* Crucial: Aligns to top so header is never pushed off-screen */
+    justify-content: center;
+    z-index: 1000;
+    padding: 2.5rem 1rem;
+    overflow-y: auto;
+  }
+
+  .modal-card {
+    background: #ffffff;
+    border-radius: 20px;
+    width: 100%;
+    max-width: 580px;
+    margin: 0 auto;
+    max-height: calc(100vh - 5rem);
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.35);
+    overflow: hidden;
+    animation: modalPop 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    position: relative;
+    border: 1px solid rgba(226, 232, 240, 0.8);
+  }
+
+  .modal-large {
+    max-width: 840px;
+  }
+
+  @keyframes modalPop {
+    from { transform: scale(0.96) translateY(-10px); opacity: 0; }
+    to { transform: scale(1) translateY(0); opacity: 1; }
+  }
+
+  .modal-header {
+    background: #ffffff;
+    border-bottom: 1.5px solid #f1f5f9;
+    padding: 1.25rem 1.75rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-shrink: 0;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+
+  .modal-title-pod {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+  }
+
+  .pod-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.4rem;
+    flex-shrink: 0;
+  }
+
+  .icon-bld { background: #e0e7ff; }
+  .icon-unit { background: #dcfce7; }
+
+  .modal-title-pod h3 {
+    margin: 0 0 0.15rem 0;
+    font-size: 1.2rem;
+    font-weight: 800;
+    color: #0f172a;
+  }
+
+  .modal-title-pod p {
+    margin: 0;
+    font-size: 0.82rem;
+    color: #64748b;
+  }
+
+  .close-modal-btn {
+    background: #f1f5f9;
+    border: none;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: #64748b;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+    transition: all 0.2s ease;
+  }
+
+  .close-modal-btn:hover {
+    background: #fee2e2;
+    color: #ef4444;
+  }
+
+  .modal-body-form {
+    padding: 1.5rem 1.75rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.15rem;
+    overflow-y: auto;
+    flex: 1;
+    min-height: 0;
+    scrollbar-width: thin;
+    scrollbar-color: #cbd5e1 transparent;
+  }
+
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    flex: 1;
+  }
+
+  .form-group label {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: #334155;
+  }
+
+  .form-group input,
+  .form-group select,
+  .form-group textarea {
+    padding: 0.65rem 0.85rem;
+    border-radius: 10px;
+    border: 1.5px solid #cbd5e1;
+    font-family: inherit;
+    font-size: 0.9rem;
+    color: #0f172a;
+    background: #ffffff;
+    transition: border-color 0.2s;
+  }
+
+  .form-group input:focus,
+  .form-group select:focus,
+  .form-group textarea:focus {
+    outline: none;
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+  }
+
+  .hint-text {
+    font-size: 0.7rem;
+    color: #94a3b8;
+  }
+
+  .form-row {
+    display: flex;
+    gap: 1rem;
+    align-items: flex-start;
+  }
+
+  .form-row > .form-group {
+    flex: 1;
+    min-width: 0;
+  }
+
+  /* Auto-calculation Box */
+  .pricing-calc-box {
+    background: #f8fafc;
+    border: 1.5px dashed #cbd5e1;
+    border-radius: 14px;
+    padding: 1rem 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+  }
+
+  .calc-inputs-row {
+    display: flex;
+    gap: 1rem;
+  }
+
+  .calc-inputs-row > .form-group {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .auto-calc-display-card {
+    background: #eff6ff;
+    border: 1.5px solid #bfdbfe;
+    border-radius: 12px;
+    padding: 0.85rem 1.15rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .calc-label-row {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+  }
+
+  .calc-title {
+    font-size: 0.84rem;
+    font-weight: 800;
+    color: #1e40af;
+  }
+
+  .formula-tag {
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: #3b82f6;
+  }
+
+  .calc-result-sum {
+    display: flex;
+    align-items: baseline;
+    gap: 0.35rem;
+  }
+
+  .calc-result-sum #auto-total-price-text,
+  .calc-result-sum #bulk-auto-total-text {
+    font-size: 1.5rem;
+    font-weight: 900;
+    color: #1d4ed8;
+    letter-spacing: -0.5px;
+  }
+
+  .currency-tag {
+    font-size: 0.82rem;
+    font-weight: 800;
+    color: #3b82f6;
+  }
+
+  .modal-footer-actions {
+    position: sticky;
+    bottom: -1.5rem;
+    background: #ffffff;
+    border-top: 1.5px solid #f1f5f9;
+    padding: 1rem 1.75rem;
+    margin: 1.25rem -1.75rem -1.5rem -1.75rem;
+    display: flex;
+    gap: 0.75rem;
+    justify-content: flex-end;
+    align-items: center;
+    z-index: 10;
+    box-shadow: 0 -4px 15px rgba(0, 0, 0, 0.04);
+  }
+
+  /* Smart Generator Pod Styles (حركة توليد الشقق الذكية) */
+  .smart-generator-pod {
+    background: linear-gradient(135deg, #f0fdf4 0%, #e6fcf5 50%, #eff6ff 100%);
+    border: 1.5px solid #86efac;
+    border-radius: 14px;
+    padding: 1.25rem;
+    margin: 0.75rem 0;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.08);
+  }
+
+  .smart-pod-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+  }
+
+  .smart-pod-title {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.95rem;
+    font-weight: 800;
+    color: #14532d;
+  }
+
+  .sparkle-icon {
+    font-size: 1.2rem;
+  }
+
+  .smart-pod-badge {
+    background: #dcfce7;
+    color: #15803d;
+    font-size: 0.75rem;
+    font-weight: 800;
+    padding: 0.25rem 0.65rem;
+    border-radius: 9999px;
+    border: 1px solid #bbf7d0;
+  }
+
+  .smart-pod-desc {
+    font-size: 0.82rem;
+    color: #166534;
+    line-height: 1.5;
+    margin: 0 0 1rem 0;
+  }
+
+  .default-specs-row {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  .default-specs-row .form-group {
+    flex: 1;
+  }
+
+  .btn-magic-action {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    width: 100%;
+    padding: 0.85rem 1.25rem;
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: #ffffff;
+    border: none;
+    border-radius: 10px;
+    font-size: 0.95rem;
+    font-weight: 800;
+    font-family: inherit;
+    cursor: pointer;
+    box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35);
+    transition: all 0.2s ease;
+  }
+
+  .btn-magic-action:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(16, 185, 129, 0.45);
+    background: linear-gradient(135deg, #059669 0%, #047857 100%);
+  }
+
+  .btn-magic-action:active {
+    transform: translateY(0);
+  }
+
+  /* Generated Units Preview Box */
+  .generated-preview-box {
+    background: #ffffff;
+    border: 1.5px solid #cbd5e1;
+    border-radius: 12px;
+    padding: 1rem;
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  }
+
+  .preview-box-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.75rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid #f1f5f9;
+  }
+
+  .preview-header-stats {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .preview-badge-success {
+    background: #dcfce7;
+    color: #166534;
+    font-size: 0.85rem;
+    font-weight: 800;
+    padding: 0.25rem 0.65rem;
+    border-radius: 6px;
+    border: 1px solid #bbf7d0;
+  }
+
+  .preview-sub-text {
+    font-size: 0.8rem;
+    color: #64748b;
+    font-weight: 600;
+  }
+
+  .btn-clear-ghost {
+    background: none;
+    border: 1px solid #e2e8f0;
+    padding: 0.3rem 0.75rem;
+    border-radius: 6px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: #ef4444;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .btn-clear-ghost:hover {
+    background: #fef2f2;
+    border-color: #fca5a5;
+  }
+
+  .preview-units-table-wrap {
+    max-height: 240px;
+    overflow-y: auto;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+  }
+
+  .preview-units-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.82rem;
+    text-align: right;
+  }
+
+  .preview-units-table thead {
+    background: #f8fafc;
+    position: sticky;
+    top: 0;
+    z-index: 2;
+  }
+
+  .preview-units-table th {
+    padding: 0.5rem 0.75rem;
+    font-weight: 800;
+    color: #475569;
+    border-bottom: 1.5px solid #e2e8f0;
+  }
+
+  .preview-units-table td {
+    padding: 0.45rem 0.75rem;
+    border-bottom: 1px solid #f1f5f9;
+    color: #1e293b;
+    font-weight: 600;
+  }
+
+  .preview-units-table tr:hover {
+    background: #f8fafc;
+  }
+
+  .unit-code-badge {
+    display: inline-block;
+    background: #eff6ff;
+    color: #1d4ed8;
+    font-family: monospace;
+    font-weight: 800;
+    font-size: 0.85rem;
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    border: 1px solid #bfdbfe;
+    direction: ltr;
+  }
+
+  .floor-badge {
+    background: #f1f5f9;
+    color: #334155;
+    padding: 0.15rem 0.45rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
+  }
+
+  /* Modal Section Pods (الأقسام المنظمة للوحدة) */
+  .modal-section-pod {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 1rem 1.25rem;
+    margin-bottom: 1rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+  }
+
+  .section-pod-title {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.92rem;
+    font-weight: 800;
+    color: #0f172a;
+    margin-bottom: 0.85rem;
+    padding-bottom: 0.4rem;
+    border-bottom: 1px solid #f1f5f9;
+  }
+
+  .step-num {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    background: #eff6ff;
+    color: #2563eb;
+    border: 1.5px solid #bfdbfe;
+    border-radius: 50%;
+    font-size: 0.78rem;
+    font-weight: 900;
+  }
+
+  /* Bulk Actions Floating Bar (شريط التعديل والتسعير الجماعي) */
+  .bulk-actions-floating-bar {
+    position: sticky;
+    top: 1rem;
+    z-index: 10;
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+    color: #ffffff;
+    border-radius: 14px;
+    padding: 0.85rem 1.5rem;
+    margin-bottom: 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 10px 25px rgba(15, 23, 42, 0.25);
+    animation: slideDown 0.3s ease;
+  }
+
+  @keyframes slideDown {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .bulk-stats-group {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+  }
+
+  .bulk-badge-count {
+    background: #f59e0b;
+    color: #000000;
+    font-weight: 900;
+    font-size: 0.85rem;
+    padding: 0.2rem 0.6rem;
+    border-radius: 9999px;
+  }
+
+  .bulk-lbl-text {
+    font-size: 0.9rem;
+    font-weight: 700;
+  }
+
+  .bulk-buttons-group {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .btn-magic-bulk {
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    color: #ffffff;
+    border: none;
+    border-radius: 8px;
+    padding: 0.55rem 1.1rem;
+    font-family: inherit;
+    font-size: 0.85rem;
+    font-weight: 800;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.35);
+    transition: all 0.2s;
+  }
+
+  .btn-magic-bulk:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(245, 158, 11, 0.45);
+  }
+
+  .btn-ghost-clear {
+    background: rgba(255, 255, 255, 0.12);
+    color: #e2e8f0;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    padding: 0.5rem 0.9rem;
+    font-family: inherit;
+    font-size: 0.8rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .btn-ghost-clear:hover {
+    background: rgba(255, 255, 255, 0.2);
+    color: #ffffff;
+  }
+
+  /* Plan Image Upload & Preview */
+  .plan-upload-container {
+    display: flex;
+    gap: 1rem;
+    align-items: flex-start;
+  }
+
+  .plan-upload-box {
+    flex: 1;
+    border: 2px dashed #93c5fd;
+    background: #f8fafc;
+    border-radius: 12px;
+    padding: 1.25rem;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .plan-upload-box:hover {
+    background: #eff6ff;
+    border-color: #3b82f6;
+  }
+
+  .plan-upload-box p {
+    font-size: 0.8rem;
+    color: #64748b;
+    margin: 0;
+  }
+
+  .plan-preview-card {
+    position: relative;
+    width: 140px;
+    height: 100px;
+    border-radius: 10px;
+    overflow: hidden;
+    border: 1.5px solid #cbd5e1;
+    background: #f1f5f9;
+  }
+
+  .plan-preview-card img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .plan-preview-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(0, 0, 0, 0.65);
+    padding: 0.25rem;
+    text-align: center;
+  }
+
+  .btn-preview-action {
+    background: none;
+    border: none;
+    color: #f87171;
+    font-size: 0.75rem;
+    font-weight: 800;
+    cursor: pointer;
+    font-family: inherit;
+  }
+
+  /* Table Specific Badges */
+  .view-tag-badge {
+    display: inline-block;
+    padding: 0.15rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    background: #f0fdf4;
+    color: #166534;
+    border: 1px solid #bbf7d0;
+  }
+
+  .finishing-tag-badge {
+    display: inline-block;
+    padding: 0.15rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    background: #fefce8;
+    color: #854d0e;
+    border: 1px solid #fef08a;
+  }
+
+  .garden-sub-tag {
+    display: block;
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: #15803d;
+    margin-top: 0.2rem;
+  }
+
+  .btn-plan-view {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.25rem 0.55rem;
+    background: #eff6ff;
+    color: #1d4ed8;
+    border: 1px solid #bfdbfe;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .btn-plan-view:hover {
+    background: #dbeafe;
+  }
+
+  .btn-plan-none {
+    color: #94a3b8;
+    font-size: 0.75rem;
+    cursor: pointer;
+    border: 1px dashed #cbd5e1;
+    padding: 0.2rem 0.45rem;
+    border-radius: 6px;
+    background: none;
+  }
+
+  .unit-row-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+
+  .btn-row-action {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    border: 1px solid #e2e8f0;
+    background: #ffffff;
+    cursor: pointer;
+    transition: all 0.2s;
+    color: #475569;
+  }
+
+  .btn-row-action:hover {
+    background: #f1f5f9;
+    color: #0f172a;
+  }
+
+  .btn-row-action.action-delete:hover {
+    background: #fef2f2;
+    color: #ef4444;
+    border-color: #fca5a5;
+  }
+
+  /* Printable Floor Plan Layout Modal */
+  .plan-printable-content {
+    padding: 1.5rem;
+    background: #ffffff;
+  }
+
+  .plan-print-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid #0284c7;
+    margin-bottom: 1.25rem;
+  }
+
+  .print-brand h2 {
+    margin: 0 0 0.2rem 0;
+    font-size: 1.4rem;
+    color: #0f172a;
+    font-weight: 900;
+  }
+
+  .print-sub-brand {
+    font-size: 0.85rem;
+    color: #64748b;
+  }
+
+  .print-unit-crest {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+  }
+
+  .crest-code {
+    font-size: 1.25rem;
+    font-weight: 900;
+    color: #0284c7;
+    font-family: monospace;
+    direction: ltr;
+  }
+
+  .crest-bld {
+    font-size: 0.85rem;
+    color: #475569;
+    font-weight: 700;
+  }
+
+  .plan-specs-ribbon {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 1rem;
+  }
+
+  .ribbon-box {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .ribbon-box .r-lbl {
+    font-size: 0.72rem;
+    color: #64748b;
+    font-weight: 700;
+  }
+
+  .ribbon-box .r-val {
+    font-size: 0.92rem;
+    color: #0f172a;
+    font-weight: 800;
+  }
+
+  .ribbon-box.highlight-ribbon .r-val {
+    color: #059669;
+    font-size: 1rem;
+  }
+
+  .plan-image-large-wrap {
+    width: 100%;
+    min-height: 380px;
+    max-height: 520px;
+    background: #f8fafc;
+    border: 1.5px solid #cbd5e1;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  .plan-image-large-wrap img {
+    max-width: 100%;
+    max-height: 500px;
+    object-fit: contain;
+  }
+
+  .no-plan-notice {
+    padding: 2rem;
+    text-align: center;
+    color: #94a3b8;
+    font-weight: 700;
+  }
+
+  /* Print Media Query */
+  @media print {
+    body * {
+      visibility: hidden;
+    }
+    #plan-view-modal, #plan-view-modal * {
+      visibility: visible;
+    }
+    #plan-view-modal {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background: #ffffff;
+      padding: 0;
+    }
+    .no-print {
+      display: none !important;
+    }
+    .plan-printable-content {
+      padding: 0;
+    }
+    .modal-card {
+      box-shadow: none;
+      border: none;
+      max-width: 100%;
+    }
+  }
+
+  /* Responsive Adjustments */
+  @media (max-width: 1024px) {
+    .summary-kpi-ribbon {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+
+  @media (max-width: 768px) {
+    .summary-kpi-ribbon {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .form-row,
+    .calc-inputs-row {
+      flex-direction: column;
+    }
+
+    .erp-topbar {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 1rem;
+      padding: 1rem;
+    }
+
+    .project-hero-summary,
+    .units-control-toolbar,
+    .units-display-section {
+      padding: 1rem;
+    }
+  }
+  /* Installments & Contract Styles */
+  .btn-contract-wizard-open {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.35rem 0.75rem;
+    background: #ecfdf5;
+    color: #059669;
+    border: 1.5px solid #a7f3d0;
+    border-radius: 8px;
+    font-size: 0.8rem;
+    font-weight: 800;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+  }
+  .btn-contract-wizard-open:hover {
+    background: #d1fae5;
+    border-color: #34d399;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.2);
+  }
+
+  .btn-statement-open {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.35rem 0.75rem;
+    background: #eff6ff;
+    color: #1d4ed8;
+    border: 1.5px solid #bfdbfe;
+    border-radius: 8px;
+    font-size: 0.8rem;
+    font-weight: 800;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+  }
+  .btn-statement-open:hover {
+    background: #dbeafe;
+    border-color: #60a5fa;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(37, 99, 235, 0.2);
+  }
+
+  .btn-statement-open .badge-pct {
+    background: #1d4ed8;
+    color: #ffffff;
+    font-size: 0.7rem;
+    font-weight: 900;
+    padding: 0.1rem 0.4rem;
+    border-radius: 12px;
+  }
+
+  /* Contract Hero Card */
+  .unit-contract-hero-card {
+    background: #f8fafc;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 14px;
+    padding: 1rem 1.25rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.25rem;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+  .hero-card-col {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+  .hero-card-lbl {
+    font-size: 0.75rem;
+    color: #64748b;
+    font-weight: 700;
+  }
+  .hero-card-val {
+    font-size: 0.95rem;
+    color: #0f172a;
+    font-weight: 800;
+  }
+  .hero-card-col.price-highlight .hero-card-price {
+    font-size: 1.35rem;
+    color: #059669;
+    font-weight: 900;
+  }
+
+  /* Schedule Preview */
+  .schedule-preview-card {
+    background: #ffffff;
+    border: 1.5px solid #cbd5e1;
+    border-radius: 14px;
+    padding: 1rem;
+    margin-top: 1rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  }
+  .schedule-preview-table-wrap {
+    max-height: 240px;
+    overflow-y: auto;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    margin-top: 0.5rem;
+  }
+  .preview-table th {
+    background: #f8fafc;
+    position: sticky;
+    top: 0;
+    z-index: 2;
+  }
+
+  /* Statement KPIs Grid */
+  .statement-kpis-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.65rem;
+    margin-bottom: 0.75rem;
+  }
+  .stmt-kpi-card {
+    background: #ffffff;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 0.55rem 0.85rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+  }
+  .stmt-kpi-card .kpi-lbl {
+    font-size: 0.72rem;
+    color: #64748b;
+    font-weight: 700;
+  }
+  .stmt-kpi-card .kpi-val {
+    font-size: 1.05rem;
+    color: #0f172a;
+    font-weight: 900;
+  }
+  .stmt-kpi-card .kpi-sub {
+    font-size: 0.68rem;
+    color: #94a3b8;
+    font-weight: 600;
+  }
+  .stmt-kpi-card.card-paid {
+    background: #f0fdf4;
+    border-color: #bbf7d0;
+  }
+  .stmt-kpi-card.card-remaining {
+    background: #eff6ff;
+    border-color: #bfdbfe;
+  }
+  .stmt-kpi-card.card-overdue {
+    background: #fef2f2;
+    border-color: #fecaca;
+  }
+
+  /* Progress Bar */
+  .payment-progress-container {
+    background: #ffffff;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 0.5rem 0.9rem;
+    margin-bottom: 0.75rem;
+  }
+  .progress-label-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.35rem;
+  }
+  .prog-txt {
+    font-size: 0.78rem;
+    font-weight: 800;
+    color: #334155;
+  }
+  .prog-pct {
+    font-size: 0.95rem;
+    font-weight: 900;
+    color: #10b981;
+  }
+  .progress-track {
+    width: 100%;
+    height: 9px;
+    background: #e2e8f0;
+    border-radius: 999px;
+    overflow: hidden;
+  }
+  .progress-fill-bar {
+    height: 100%;
+    background: linear-gradient(90deg, #10b981 0%, #059669 100%);
+    border-radius: 999px;
+    transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  /* Filter bar in Statement */
+  .statement-filter-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.75rem;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+  .filter-chips-group {
+    display: flex;
+    gap: 0.4rem;
+  }
+  .stmt-chip {
+    padding: 0.35rem 0.75rem;
+    border-radius: 8px;
+    border: 1.5px solid #e2e8f0;
+    background: #ffffff;
+    font-size: 0.78rem;
+    font-weight: 700;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all 0.2s;
+    color: #475569;
+  }
+  .stmt-chip.active {
+    background: #2563eb;
+    color: #ffffff;
+    border-color: #2563eb;
+  }
+
+  /* Statement Table */
+  .statement-table-wrap {
+    border: 1.5px solid #e2e8f0;
+    border-radius: 12px;
+    overflow-x: auto;
+    background: #ffffff;
+    margin-bottom: 1rem;
+  }
+  .statement-table th {
+    background: #f8fafc;
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    font-size: 0.82rem;
+    color: #475569;
+    font-weight: 800;
+    padding: 0.75rem 1rem;
+    border-bottom: 1.5px solid #e2e8f0;
+  }
+  .statement-table td {
+    padding: 0.85rem 1rem;
+    font-size: 0.86rem;
+    border-bottom: 1px solid #f1f5f9;
+    vertical-align: middle;
+  }
+  .status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.25rem 0.6rem;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 800;
+  }
+  .badge-paid {
+    background: #dcfce7;
+    color: #166534;
+    border: 1px solid #bbf7d0;
+  }
+  .badge-due {
+    background: #fef3c7;
+    color: #92400e;
+    border: 1px solid #fde68a;
+  }
+  .badge-overdue {
+    background: #fee2e2;
+    color: #991b1b;
+    border: 1px solid #fecaca;
+  }
+
+  .stmt-actions-cell {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+  .btn-stmt-pay {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.35rem 0.65rem;
+    background: #10b981;
+    color: #ffffff;
+    border: none;
+    border-radius: 6px;
+    font-size: 0.78rem;
+    font-weight: 800;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .btn-stmt-pay:hover {
+    background: #059669;
+    transform: translateY(-1px);
+  }
+  .btn-whatsapp-remind {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.35rem 0.65rem;
+    background: #25d366;
+    color: #ffffff;
+    border: none;
+    border-radius: 6px;
+    font-size: 0.78rem;
+    font-weight: 800;
+    font-family: inherit;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.2s;
+  }
+  .btn-whatsapp-remind:hover {
+    background: #128c7e;
+    transform: translateY(-1px);
+    color: #ffffff;
+  }
+
+  /* Quick Pay Info Strip */
+  .pay-info-strip {
+    background: #f8fafc;
+    border: 1.5px dashed #cbd5e1;
+    border-radius: 12px;
+    padding: 0.85rem 1.15rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+  .strip-item {
+    font-size: 0.82rem;
+  }
+  .strip-item .strip-lbl {
+    color: #64748b;
+    margin-left: 0.25rem;
+  }
+  .strip-item.price strong {
+    color: #1d4ed8;
+    font-size: 1.15rem;
+  }
+
+  /* Receipt Modal */
+  .modal-receipt {
+    max-width: 600px;
+    width: 95%;
+  }
+  .receipt-card-body {
+    padding: 2rem;
+    background: #ffffff;
+  }
+  .receipt-top-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 1rem;
+    border-bottom: 2px dashed #0284c7;
+    margin-bottom: 1.5rem;
+  }
+  .receipt-company h3 {
+    margin: 0 0 0.2rem 0;
+    font-size: 1.3rem;
+    font-weight: 900;
+    color: #0f172a;
+  }
+  .receipt-company p {
+    margin: 0;
+    font-size: 0.82rem;
+    color: #64748b;
+  }
+  .receipt-number-badge {
+    background: #f0fdf4;
+    border: 1.5px solid #86efac;
+    padding: 0.5rem 0.85rem;
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+  }
+  .receipt-number-badge strong {
+    font-family: monospace;
+    color: #166534;
+    font-size: 1.1rem;
+  }
+  .receipt-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+  }
+  .receipt-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #f1f5f9;
+  }
+  .receipt-row .r-head {
+    color: #64748b;
+    font-size: 0.88rem;
+  }
+  .receipt-row.total-highlight {
+    background: #ecfdf5;
+    padding: 0.85rem 1rem;
+    border-radius: 10px;
+    border: 1px solid #a7f3d0;
+  }
+  .receipt-row.total-highlight .r-head {
+    font-weight: 800;
+    color: #065f46;
+    font-size: 1rem;
+  }
+  .receipt-row.total-highlight .r-data {
+    font-size: 1.5rem;
+    font-weight: 900;
+  }
+  .receipt-signatures {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 2.5rem;
+    padding-top: 1rem;
+    border-top: 1px solid #e2e8f0;
+  }
+  .sig-box {
+    text-align: center;
+  }
+  .sig-box p {
+    font-size: 0.82rem;
+    color: #64748b;
+    margin-bottom: 2rem;
+  }
+
+  /* Printable Statement Styles */
+  .statement-print-header {
+    display: none;
+  }
+  .statement-signatures-row {
+    display: none;
+  }
+
+  @media print {
+    body * {
+      visibility: hidden;
+    }
+    #printable-statement-card, #printable-statement-card *,
+    #printable-receipt-card, #printable-receipt-card * {
+      visibility: visible;
+    }
+    #unit-statement-modal, #receipt-view-modal {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: auto;
+      background: #ffffff;
+      padding: 0;
+    }
+    .statement-print-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 1.25rem;
+      border-bottom: 2px solid #0f172a;
+      margin-bottom: 1.5rem;
+    }
+    .statement-signatures-row {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 3.5rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid #0f172a;
+    }
+    .sig-col {
+      text-align: center;
+      font-size: 0.85rem;
+      font-weight: 700;
+    }
+    .sig-col .sig-line {
+      margin-top: 2.5rem;
+    }
+    .no-print {
+      display: none !important;
+    }
+  }
+</style>
+
+<script>
+  import { checkAuth } from '../../../lib/auth.js';
+
+  let currentProject = null;
+  let allUnits = [];
+  let allBuildings = [];
+  let allProjectsList = [];
+  let generatedUnitsBatch = [];
+  let currentViewMode = 'table'; // 'table' or 'grid'
+
+  // Extract projectId from URL search params
+  const urlParams = new URLSearchParams(window.location.search);
+  const projectId = urlParams.get('id');
+
+  const authLoading = document.getElementById('auth-loading-message');
+  const loginContainer = document.getElementById('admin-login-container');
+  const mainContent = document.getElementById('main-content');
+
+  // Verify Admin Auth
+  (async () => {
+    try {
+      const user = await checkAuth();
+      if (authLoading) authLoading.style.display = 'none';
+
+      if (user && user.role === 'admin') {
+        if (!projectId) {
+          alert('معرف المشروع مفقود');
+          window.location.href = '/crs/development';
+          return;
+        }
+
+        if (mainContent) mainContent.style.display = 'block';
+        await loadProjectDetails(projectId);
+        await loadAllProjectsForBuildingModal();
+      } else {
+        if (loginContainer) loginContainer.style.display = 'block';
+      }
+    } catch (e) {
+      if (authLoading) authLoading.style.display = 'none';
+      if (loginContainer) loginContainer.style.display = 'block';
+    }
+  })();
+
+  // Load all projects for building dropdown
+  async function loadAllProjectsForBuildingModal() {
+    try {
+      const res = await fetch('/api/erp/development?archived=false');
+      const data = await res.json();
+      if (data.success && data.projects) {
+        allProjectsList = data.projects;
+        populateBuildingProjectSelect();
+      }
+    } catch (e) {
+      console.error('Failed to load projects for building select:', e);
+    }
+  }
+
+  function populateBuildingProjectSelect() {
+    const projSelect = document.getElementById('bld-project-select');
+    if (!projSelect) return;
+    projSelect.innerHTML = allProjectsList.map(p => `
+      <option value="${p.id}" ${p.id === projectId ? 'selected' : ''}>
+        ${p.projectName}
+      </option>
+    `).join('');
+  }
+
+  // Fetch Project Details with Buildings and Units
+  async function loadProjectDetails(id) {
+    try {
+      const res = await fetch(`/api/erp/development?projectId=${id}`);
+      const data = await res.json();
+      if (data.success && data.project) {
+        currentProject = data.project;
+        allBuildings = currentProject.buildings || [];
+        allUnits = currentProject.units || [];
+
+        renderProjectHeader();
+        populateBuildingSelects();
+        renderUnits();
+      } else {
+        alert(data.error || 'فشل تحميل بيانات المشروع');
+      }
+    } catch (err) {
+      console.error('Failed to load project details:', err);
+    }
+  }
+
+  // Render Project Identity & KPI Ribbon
+  function renderProjectHeader() {
+    if (!currentProject) return;
+
+    document.getElementById('crumb-project-name').textContent = currentProject.projectName;
+    document.getElementById('hero-project-name').textContent = currentProject.projectName;
+    document.getElementById('hero-project-address').textContent = currentProject.projectAddress || 'الموقع الجغرافي قيد التحديث';
+
+    // Buildings Chips
+    const chipsContainer = document.getElementById('project-buildings-chips');
+    if (chipsContainer) {
+      chipsContainer.innerHTML = allBuildings.map(bld => `
+        <span class="bld-chip-badge">
+          🏢 ${bld.name} (${bld.units ? bld.units.length : 0} وحدة)
+        </span>
+      `).join('');
+    }
+
+    // Calculate Unit KPIs
+    const totalCount = allUnits.length;
+    let availableCount = 0;
+    let reservedCount = 0;
+    let soldCount = 0;
+    let portfolioSum = 0;
+
+    allUnits.forEach(u => {
+      const status = u.status || 'available';
+      if (status === 'available') availableCount++;
+      else if (status === 'reserved') reservedCount++;
+      else if (status === 'sold') soldCount++;
+
+      portfolioSum += (u.totalPrice || 0);
+    });
+
+    document.getElementById('kpi-total-units').textContent = totalCount;
+    document.getElementById('kpi-available-units').textContent = availableCount;
+    document.getElementById('kpi-reserved-units').textContent = reservedCount;
+    document.getElementById('kpi-sold-units').textContent = soldCount;
+    document.getElementById('kpi-total-portfolio-val').textContent = portfolioSum.toLocaleString('ar-EG') + ' ج.م';
+  }
+
+  // Populate Building Dropdowns in Filter & Unit Modal
+  function populateBuildingSelects() {
+    const filterSelect = document.getElementById('filter-building-select');
+    const modalSelect = document.getElementById('unit-bld-select');
+
+    const optionsHtml = allBuildings.map(b => `<option value="${b.id}">${b.name}</option>`).join('');
+
+    if (filterSelect) {
+      filterSelect.innerHTML = `<option value="all">جميع المباني والمكونات</option>` + optionsHtml;
+    }
+
+    if (modalSelect) {
+      modalSelect.innerHTML = allBuildings.length > 0 
+        ? optionsHtml 
+        : `<option value="">-- لا يوجد مباني مسجلة (أضف مبنى أولاً) --</option>`;
+    }
+  }
+
+  // Filter Units based on Controls
+  function getFilteredUnits() {
+    const bldFilter = document.getElementById('filter-building-select')?.value || 'all';
+    const statusFilter = document.getElementById('filter-status-select')?.value || 'all';
+    const typeFilter = document.getElementById('filter-type-select')?.value || 'all';
+    const searchFilter = (document.getElementById('filter-search-input')?.value || '').trim().toLowerCase();
+
+    return allUnits.filter(u => {
+      if (bldFilter !== 'all' && u.buildingId !== bldFilter) return false;
+      if (statusFilter !== 'all' && (u.status || 'available') !== statusFilter) return false;
+      if (typeFilter !== 'all' && u.unitType !== typeFilter) return false;
+      if (searchFilter && !u.unitNumber.toLowerCase().includes(searchFilter)) return false;
+      return true;
+    });
+  }
+
+  // Render Units in Table and Grid
+  function renderUnits() {
+    const filtered = getFilteredUnits();
+    const tableContainer = document.getElementById('units-table-container');
+    const gridContainer = document.getElementById('units-grid-container');
+    const emptyState = document.getElementById('units-empty-state');
+    const tbody = document.getElementById('units-tbody');
+
+    if (filtered.length === 0) {
+      if (tableContainer) tableContainer.style.display = 'none';
+      if (gridContainer) gridContainer.style.display = 'none';
+      if (emptyState) emptyState.style.display = 'block';
+      return;
+    }
+
+    if (emptyState) emptyState.style.display = 'none';
+
+    if (currentViewMode === 'table') {
+      if (tableContainer) tableContainer.style.display = 'block';
+      if (gridContainer) gridContainer.style.display = 'none';
+    } else {
+      if (tableContainer) tableContainer.style.display = 'none';
+      if (gridContainer) gridContainer.style.display = 'grid';
+    }
+
+    // Render Table Body
+    if (tbody) {
+      tbody.innerHTML = filtered.map(u => {
+        const bld = allBuildings.find(b => b.id === u.buildingId);
+        const bldName = bld ? bld.name : 'غير محدد';
+        const status = u.status || 'available';
+        const isChecked = selectedUnitIds.has(u.id);
+
+        let statusTag = '';
+        if (status === 'available') statusTag = `<span class="status-tag tag-available">🟢 متاح</span>`;
+        else if (status === 'reserved') statusTag = `<span class="status-tag tag-reserved">🟡 محجوز</span>`;
+        else if (status === 'sold') statusTag = `<span class="status-tag tag-sold">🔴 مباع</span>`;
+
+        const typeLabels = {
+          residential: 'شقة سكنية',
+          duplex: 'دوبلكس',
+          penthouse: 'بنتهاوس',
+          commercial: 'محل تجاري',
+          administrative: 'مكتب إداري',
+          villa: 'فيلا'
+        };
+
+        const planBtn = u.planImage
+          ? `<button type="button" class="btn-plan-view open-plan-btn" data-unit-id="${u.id}">📐 معاينة وطباعة</button>`
+          : `<button type="button" class="btn-plan-none open-edit-plan-btn" data-unit-id="${u.id}">+ إضافة</button>`;
+
+        const gardenBadge = u.gardenArea && u.gardenArea > 0
+          ? `<span class="garden-sub-tag">🏡 جنينة: ${u.gardenArea} م²</span>`
+          : '';
+
+        const activeRes = u.reservations && u.reservations.length > 0 ? u.reservations[0] : null;
+        let installmentActionBtn = '';
+        if (status === 'available') {
+          installmentActionBtn = `
+            <button type="button" class="btn-contract-wizard-open" data-unit-id="${u.id}" title="حجز الشقة وجدولة الأقساط">
+              💳 حجز وتقسيط
+            </button>
+          `;
+        } else {
+          let paidPct = 0;
+          if (activeRes) {
+            const dp = activeRes.downPayment || 0;
+            const instPaid = (activeRes.scheduledInstallments || []).reduce((sum, i) => sum + (i.paidAmount || (i.status === 'paid' ? i.amount : 0)), 0);
+            const totalPaid = dp + instPaid;
+            paidPct = activeRes.totalPrice > 0 ? Math.round((totalPaid / activeRes.totalPrice) * 100) : 0;
+          }
+          installmentActionBtn = `
+            <button type="button" class="btn-statement-open" data-unit-id="${u.id}" title="كشف حساب الأقساط والتحصيل">
+              📊 كشف الأقساط <span class="badge-pct">${paidPct}%</span>
+            </button>
+          `;
+        }
+
+        return `
+          <tr class="${isChecked ? 'row-selected' : ''}">
+            <td style="text-align: center;">
+              <input type="checkbox" class="unit-row-chk" data-unit-id="${u.id}" ${isChecked ? 'checked' : ''} style="cursor: pointer; width: 17px; height: 17px;" />
+            </td>
+            <td><strong class="unit-code-badge">${u.unitNumber}</strong></td>
+            <td>🏢 ${bldName}</td>
+            <td><span class="unit-type-pill">${typeLabels[u.unitType] || u.unitType}</span></td>
+            <td>الدور ${u.floor === 0 ? 'الأرضي' : u.floor}</td>
+            <td>
+              <span style="font-weight: 700; color: #1e293b;">🛏️ ${u.roomsCount || 1} نوم</span>
+              <span style="color: #64748b; font-size: 0.8rem; margin-right: 0.25rem;">· 🚿 ${u.bathroomsCount || 1} حمام</span>
+            </td>
+            <td>
+              <span class="view-tag-badge">${u.view || 'على جنينة'}</span>
+              <span class="finishing-tag-badge" style="margin-top: 0.2rem; display: block;">${u.finishingType || 'نصف تشطيب'}</span>
+            </td>
+            <td>
+              <strong>${u.area}</strong> م²
+              ${gardenBadge}
+            </td>
+            <td>${(u.pricePerMeter || 0).toLocaleString('ar-EG')} ج.م</td>
+            <td><strong style="color: #059669; font-size: 1rem;">${(u.totalPrice || 0).toLocaleString('ar-EG')} ج.م</strong></td>
+            <td>${planBtn}</td>
+            <td>
+              <select class="status-quick-select" data-unit-id="${u.id}">
+                <option value="available" ${status === 'available' ? 'selected' : ''}>متاح 🟢</option>
+                <option value="reserved" ${status === 'reserved' ? 'selected' : ''}>محجوز 🟡</option>
+                <option value="sold" ${status === 'sold' ? 'selected' : ''}>مباع 🔴</option>
+              </select>
+            </td>
+            <td>
+              ${installmentActionBtn}
+            </td>
+            <td>
+              <div class="unit-row-actions">
+                <button type="button" class="btn-row-action btn-edit-unit" data-unit-id="${u.id}" title="تعديل مواصفات وتسعير الشقة">✏️</button>
+                <button type="button" class="btn-row-action action-delete btn-del-unit" data-unit-id="${u.id}" title="حذف الشقة">🗑️</button>
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    // Render Grid Cards
+    if (gridContainer) {
+      gridContainer.innerHTML = filtered.map(u => {
+        const bld = allBuildings.find(b => b.id === u.buildingId);
+        const bldName = bld ? bld.name : 'البرج';
+        const status = u.status || 'available';
+        const isChecked = selectedUnitIds.has(u.id);
+
+        let statusTag = '';
+        if (status === 'available') statusTag = `<span class="status-tag tag-available">🟢 متاح</span>`;
+        else if (status === 'reserved') statusTag = `<span class="status-tag tag-reserved">🟡 محجوز</span>`;
+        else if (status === 'sold') statusTag = `<span class="status-tag tag-sold">🔴 مباع</span>`;
+
+        const typeLabels = {
+          residential: 'شقة سكنية',
+          duplex: 'دوبلكس',
+          penthouse: 'بنتهاوس',
+          commercial: 'محل تجاري',
+          administrative: 'مكتب إداري',
+          villa: 'فيلا'
+        };
+
+        const planBtn = u.planImage
+          ? `<button type="button" class="btn-plan-view open-plan-btn" data-unit-id="${u.id}">📐 البلان</button>`
+          : `<button type="button" class="btn-plan-none open-edit-plan-btn" data-unit-id="${u.id}">+ رفع بلان</button>`;
+
+        const gardenBadge = u.gardenArea && u.gardenArea > 0
+          ? `<span class="garden-sub-tag">🏡 جنينة ${u.gardenArea} م²</span>`
+          : '';
+
+        const activeRes = u.reservations && u.reservations.length > 0 ? u.reservations[0] : null;
+        let installmentActionBtn = '';
+        if (status === 'available') {
+          installmentActionBtn = `
+            <button type="button" class="btn-contract-wizard-open" data-unit-id="${u.id}" title="حجز الشقة وجدولة الأقساط">
+              💳 حجز وتقسيط
+            </button>
+          `;
+        } else {
+          let paidPct = 0;
+          if (activeRes) {
+            const dp = activeRes.downPayment || 0;
+            const instPaid = (activeRes.scheduledInstallments || []).reduce((sum, i) => sum + (i.paidAmount || (i.status === 'paid' ? i.amount : 0)), 0);
+            const totalPaid = dp + instPaid;
+            paidPct = activeRes.totalPrice > 0 ? Math.round((totalPaid / activeRes.totalPrice) * 100) : 0;
+          }
+          installmentActionBtn = `
+            <button type="button" class="btn-statement-open" data-unit-id="${u.id}" title="كشف حساب الأقساط والتحصيل">
+              📊 الأقساط (${paidPct}%)
+            </button>
+          `;
+        }
+
+        return `
+          <div class="unit-card status-${status} ${isChecked ? 'card-selected' : ''}">
+            <div class="unit-card-header">
+              <div style="display: flex; align-items: center; gap: 0.5rem;">
+                <input type="checkbox" class="unit-row-chk" data-unit-id="${u.id}" ${isChecked ? 'checked' : ''} style="cursor: pointer; width: 17px; height: 17px;" />
+                <div>
+                  <h4 class="card-unit-title">${u.unitNumber}</h4>
+                  <p class="card-bld-name">🏢 ${bldName} · ${typeLabels[u.unitType] || u.unitType}</p>
+                </div>
+              </div>
+              ${statusTag}
+            </div>
+
+            <div class="unit-specs-row">
+              <div class="spec-item">
+                <span class="spec-lbl">المساحة</span>
+                <span class="spec-val">${u.area} م²</span>
+              </div>
+              <div class="spec-item">
+                <span class="spec-lbl">الدور</span>
+                <span class="spec-val">${u.floor === 0 ? 'أرضي' : u.floor}</span>
+              </div>
+              <div class="spec-item">
+                <span class="spec-lbl">التقسيم</span>
+                <span class="spec-val">${u.roomsCount || 3}غ · ${u.bathroomsCount || 2}ح</span>
+              </div>
+            </div>
+
+            <div style="display: flex; gap: 0.4rem; flex-wrap: wrap; margin-bottom: 0.75rem;">
+              <span class="view-tag-badge">${u.view || 'على جنينة'}</span>
+              <span class="finishing-tag-badge">${u.finishingType || 'نصف تشطيب'}</span>
+              ${gardenBadge}
+            </div>
+
+            <div class="unit-card-price-pod">
+              <div class="price-lbl-group">
+                <span class="price-lbl">سعر المتر: ${(u.pricePerMeter || 0).toLocaleString('ar-EG')} ج.م</span>
+                <span class="price-total-str" style="color: #059669;">${(u.totalPrice || 0).toLocaleString('ar-EG')} ج.م</span>
+              </div>
+              <div style="display: flex; align-items: center; gap: 0.4rem; flex-wrap: wrap;">
+                ${installmentActionBtn}
+                ${planBtn}
+                <button type="button" class="btn-row-action btn-edit-unit" data-unit-id="${u.id}" title="تعديل الشقة">✏️</button>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // Attach event listeners for checkboxes
+    document.querySelectorAll('.unit-row-chk').forEach(chk => {
+      chk.addEventListener('change', (e) => {
+        const id = e.target.getAttribute('data-unit-id');
+        if (e.target.checked) {
+          selectedUnitIds.add(id);
+        } else {
+          selectedUnitIds.delete(id);
+        }
+        updateBulkBarState();
+      });
+    });
+
+    // Attach quick status change listeners
+    document.querySelectorAll('.status-quick-select').forEach(sel => {
+      sel.addEventListener('change', async (e) => {
+        const unitId = e.target.getAttribute('data-unit-id');
+        const newStatus = e.target.value;
+        await updateUnitStatus(unitId, newStatus);
+      });
+    });
+
+    // Attach Edit button listeners
+    document.querySelectorAll('.btn-edit-unit, .open-edit-plan-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const id = e.currentTarget.getAttribute('data-unit-id');
+        openUnitModalForEdit(id);
+      });
+    });
+
+    // Attach Delete button listeners
+    document.querySelectorAll('.btn-del-unit').forEach(btn => {
+      btn.addEventListener('click', async (e) => {
+        const id = e.currentTarget.getAttribute('data-unit-id');
+        const unit = allUnits.find(u => u.id === id);
+        const code = unit ? unit.unitNumber : '';
+        if (confirm(`هل أنت متأكد من حذف الشقة [${code}] نهائياً؟`)) {
+          await deleteUnit(id);
+        }
+      });
+    });
+
+    // Attach Plan View Modal listeners
+    document.querySelectorAll('.open-plan-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const id = e.currentTarget.getAttribute('data-unit-id');
+        openPlanViewModal(id);
+      });
+    });
+
+    updateBulkBarState();
+  }
+
+  // ========================================================
+  // BULK SELECTION & BULK UPDATE LOGIC
+  // ========================================================
+  let selectedUnitIds = new Set();
+
+  function updateBulkBarState() {
+    const bar = document.getElementById('bulk-actions-bar');
+    const countBadge = document.getElementById('selected-units-count');
+    const selectAllChk = document.getElementById('select-all-units-chk');
+    const filtered = getFilteredUnits();
+
+    const count = selectedUnitIds.size;
+    if (countBadge) countBadge.textContent = count;
+
+    if (bar) {
+      bar.style.display = count > 0 ? 'flex' : 'none';
+    }
+
+    if (selectAllChk && filtered.length > 0) {
+      selectAllChk.checked = filtered.every(u => selectedUnitIds.has(u.id));
+    }
+  }
+
+  // Select All Checkbox Handler
+  document.getElementById('select-all-units-chk')?.addEventListener('change', (e) => {
+    const isChecked = e.target.checked;
+    const filtered = getFilteredUnits();
+    if (isChecked) {
+      filtered.forEach(u => selectedUnitIds.add(u.id));
+    } else {
+      filtered.forEach(u => selectedUnitIds.delete(u.id));
+    }
+    renderUnits();
+  });
+
+  // Clear Selection
+  document.getElementById('btn-clear-selection')?.addEventListener('click', () => {
+    selectedUnitIds.clear();
+    renderUnits();
+  });
+
+  // Open Bulk Edit Modal
+  const bulkModal = document.getElementById('bulk-edit-modal');
+  document.getElementById('btn-open-bulk-edit')?.addEventListener('click', () => {
+    if (selectedUnitIds.size === 0) return;
+    const countBadge = document.getElementById('bulk-modal-count-badge');
+    if (countBadge) countBadge.textContent = `${selectedUnitIds.size} شقة`;
+    updateBulkAutoCalculatedTotal();
+    if (bulkModal) bulkModal.style.display = 'flex';
+  });
+
+  document.getElementById('close-bulk-modal')?.addEventListener('click', () => {
+    if (bulkModal) bulkModal.style.display = 'none';
+  });
+  document.getElementById('btn-cancel-bulk-edit')?.addEventListener('click', () => {
+    if (bulkModal) bulkModal.style.display = 'none';
+  });
+
+  // Live Auto-calc for Bulk Modal
+  const bulkAreaInput = document.getElementById('bulk-area-input');
+  const bulkPpmInput = document.getElementById('bulk-ppm-input');
+  const bulkAutoTotalText = document.getElementById('bulk-auto-total-text');
+
+  function updateBulkAutoCalculatedTotal() {
+    const area = parseFloat(bulkAreaInput?.value) || 0;
+    const ppm = parseFloat(bulkPpmInput?.value) || 0;
+    const total = area * ppm;
+    if (bulkAutoTotalText) {
+      bulkAutoTotalText.textContent = total.toLocaleString('ar-EG');
+    }
+  }
+
+  bulkAreaInput?.addEventListener('input', updateBulkAutoCalculatedTotal);
+  bulkPpmInput?.addEventListener('input', updateBulkAutoCalculatedTotal);
+
+  // Submit Bulk Edit Form
+  document.getElementById('bulk-edit-form')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btn = document.getElementById('btn-submit-bulk-edit');
+    const originalText = btn ? btn.textContent : '';
+    if (btn) btn.textContent = 'جارٍ تطبيق المواصفات والتسعير على الشقق...';
+
+    const unitIds = Array.from(selectedUnitIds);
+    const area = parseFloat(document.getElementById('bulk-area-input')?.value);
+    const pricePerMeter = parseFloat(document.getElementById('bulk-ppm-input')?.value);
+    const gardenArea = parseFloat(document.getElementById('bulk-garden-input')?.value) || 0;
+    const unitType = document.getElementById('bulk-type-select')?.value;
+    const roomsCount = document.getElementById('bulk-rooms-input')?.value;
+    const bathroomsCount = document.getElementById('bulk-baths-input')?.value;
+    const view = document.getElementById('bulk-view-select')?.value;
+    const finishingType = document.getElementById('bulk-finishing-select')?.value;
+
+    try {
+      const res = await fetch('/api/erp/development', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'bulk_update_units',
+          unitIds,
+          specs: {
+            area,
+            pricePerMeter,
+            gardenArea,
+            unitType,
+            roomsCount,
+            bathroomsCount,
+            view,
+            finishingType
+          }
+        })
+      });
+
+      const data = await res.json();
+      if (data.success) {
+        if (bulkModal) bulkModal.style.display = 'none';
+        selectedUnitIds.clear();
+        alert(data.message || 'تم تحديث مواصفات وتسعير الشقق المحددة بنجاح! ⚡');
+        await loadProjectDetails(projectId);
+      } else {
+        alert(data.error || 'فشل تحديث الشقق');
+      }
+    } catch (err) {
+      console.error('Error in bulk update:', err);
+      alert('حدث خطأ أثناء تطبيق التعديل الجماعي');
+    } finally {
+      if (btn) btn.textContent = originalText;
+    }
+  });
+
+  // ========================================================
+  // FLOOR PLAN PRINT & PREVIEW MODAL
+  // ========================================================
+  const planModal = document.getElementById('plan-view-modal');
+
+  function openPlanViewModal(unitId) {
+    const u = allUnits.find(x => x.id === unitId);
+    if (!u) return;
+
+    const bld = allBuildings.find(b => b.id === u.buildingId);
+    const bldName = bld ? bld.name : 'غير محدد';
+
+    const projNameEl = document.getElementById('plan-modal-proj-name');
+    const unitCodeEl = document.getElementById('plan-modal-unit-code');
+    const bldNameEl = document.getElementById('plan-modal-bld-name');
+    const areaEl = document.getElementById('plan-modal-area');
+    const floorEl = document.getElementById('plan-modal-floor');
+    const roomsEl = document.getElementById('plan-modal-rooms');
+    const viewEl = document.getElementById('plan-modal-view');
+    const finishingEl = document.getElementById('plan-modal-finishing');
+    const priceEl = document.getElementById('plan-modal-price');
+    const imgEl = document.getElementById('plan-modal-img');
+    const noImgEl = document.getElementById('plan-modal-no-img');
+
+    if (projNameEl && currentProject) projNameEl.textContent = currentProject.projectName;
+    if (unitCodeEl) unitCodeEl.textContent = u.unitNumber;
+    if (bldNameEl) bldNameEl.textContent = `عمارة: ${bldName}`;
+    if (areaEl) areaEl.textContent = `${u.area} م²` + (u.gardenArea ? ` (+ ${u.gardenArea} م² جنينة)` : '');
+    if (floorEl) floorEl.textContent = u.floor === 0 ? 'الدور الأرضي' : `الدور ${u.floor}`;
+    if (roomsEl) roomsEl.textContent = `${u.roomsCount || 3} غرف + ${u.bathroomsCount || 2} حمام`;
+    if (viewEl) viewEl.textContent = u.view || 'فيو مفتوح';
+    if (finishingEl) finishingEl.textContent = u.finishingType || 'نصف تشطيب';
+    if (priceEl) priceEl.textContent = `${(u.totalPrice || 0).toLocaleString('ar-EG')} ج.م`;
+
+    if (u.planImage) {
+      if (imgEl) {
+        imgEl.src = u.planImage;
+        imgEl.style.display = 'block';
+      }
+      if (noImgEl) noImgEl.style.display = 'none';
+    } else {
+      if (imgEl) imgEl.style.display = 'none';
+      if (noImgEl) noImgEl.style.display = 'block';
+    }
+
+    if (planModal) planModal.style.display = 'flex';
+  }
+
+  document.getElementById('close-plan-modal')?.addEventListener('click', () => {
+    if (planModal) planModal.style.display = 'none';
+  });
+  document.getElementById('btn-close-plan')?.addEventListener('click', () => {
+    if (planModal) planModal.style.display = 'none';
+  });
+
+  document.getElementById('btn-print-plan')?.addEventListener('click', () => {
+    window.print();
+  });
+
+  // ========================================================
+  // SINGLE UNIT MODAL (ADD & EDIT)
+  // ========================================================
+  const unitModal = document.getElementById('unit-modal');
+  const unitFileInp = document.getElementById('unit-plan-file-input');
+  const planDataInp = document.getElementById('unit-plan-data');
+  const planPreviewWrap = document.getElementById('plan-preview-wrapper');
+  const planPreviewImg = document.getElementById('unit-plan-preview-img');
+  const btnRemovePlan = document.getElementById('btn-remove-plan');
+
+  // Trigger file upload dialog
+  document.getElementById('btn-trigger-plan-upload')?.addEventListener('click', () => {
+    unitFileInp?.click();
+  });
+  document.getElementById('plan-drop-zone')?.addEventListener('click', (e) => {
+    if (e.target.id !== 'btn-trigger-plan-upload') {
+      unitFileInp?.click();
+    }
+  });
+
+  // Read uploaded file as Data URL
+  unitFileInp?.addEventListener('change', (e) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (loadEvt) => {
+        const base64 = loadEvt.target.result;
+        if (planDataInp) planDataInp.value = base64;
+        if (planPreviewImg) planPreviewImg.src = base64;
+        if (planPreviewWrap) planPreviewWrap.style.display = 'block';
+      };
+      reader.readAsDataURL(file);
+    }
+  });
+
+  // Remove plan image
+  btnRemovePlan?.addEventListener('click', () => {
+    if (planDataInp) planDataInp.value = '';
+    if (planPreviewImg) planPreviewImg.src = '';
+    if (planPreviewWrap) planPreviewWrap.style.display = 'none';
+    if (unitFileInp) unitFileInp.value = '';
+  });
+
+  // Open Unit Modal for Adding New Unit
+  document.getElementById('open-new-unit-btn')?.addEventListener('click', () => {
+    if (allBuildings.length === 0) {
+      alert('يرجى إضافة مبنى أو مكون أولاً قبل إضافة الوحدات');
+      if (bldModal) bldModal.style.display = 'flex';
+      return;
+    }
+    document.getElementById('new-unit-form')?.reset();
+    document.getElementById('unit-id-input').value = '';
+    document.getElementById('unit-modal-heading').textContent = 'إضافة وحدة جديدة وتسعيرها';
+    document.getElementById('unit-modal-subheading').textContent = 'حساب السعر الإجمالي تلقائياً (المساحة × سعر المتر)';
+    document.getElementById('save-unit-btn-text').textContent = 'تأكيد وإضافة الوحدة';
+
+    if (planDataInp) planDataInp.value = '';
+    if (planPreviewWrap) planPreviewWrap.style.display = 'none';
+
+    document.getElementById('unit-area-input').value = '150';
+    document.getElementById('unit-ppm-input').value = '20000';
+    document.getElementById('unit-garden-input').value = '0';
+    updateAutoCalculatedTotal();
+
+    if (unitModal) unitModal.style.display = 'flex';
+  });
+
+  // Open Unit Modal for Editing
+  function openUnitModalForEdit(unitId) {
+    const u = allUnits.find(x => x.id === unitId);
+    if (!u) return;
+
+    document.getElementById('unit-id-input').value = u.id;
+    document.getElementById('unit-modal-heading').textContent = `تعديل مواصفات وتسعير الشقة [${u.unitNumber}]`;
+    document.getElementById('unit-modal-subheading').textContent = 'تعديل الفيو ونوع التشطيب والمساحات وسعر المتر';
+    document.getElementById('save-unit-btn-text').textContent = 'حفظ التعديلات على الشقة 💾';
+
+    document.getElementById('unit-bld-select').value = u.buildingId || '';
+    document.getElementById('unit-num-input').value = u.unitNumber;
+    document.getElementById('unit-floor-input').value = u.floor;
+    document.getElementById('unit-status-select').value = u.status || 'available';
+
+    document.getElementById('unit-type-select').value = u.unitType || 'residential';
+    document.getElementById('unit-rooms-input').value = u.roomsCount || 3;
+    document.getElementById('unit-baths-input').value = u.bathroomsCount || 2;
+    document.getElementById('unit-view-select').value = u.view || 'على جنينة';
+    document.getElementById('unit-finishing-select').value = u.finishingType || 'نص تشطيب';
+
+    document.getElementById('unit-area-input').value = u.area || 150;
+    document.getElementById('unit-ppm-input').value = u.pricePerMeter || 20000;
+    document.getElementById('unit-garden-input').value = u.gardenArea || 0;
+    document.getElementById('unit-notes-input').value = u.notes || '';
+
+    if (u.planImage) {
+      if (planDataInp) planDataInp.value = u.planImage;
+      if (planPreviewImg) planPreviewImg.src = u.planImage;
+      if (planPreviewWrap) planPreviewWrap.style.display = 'block';
+    } else {
+      if (planDataInp) planDataInp.value = '';
+      if (planPreviewWrap) planPreviewWrap.style.display = 'none';
+    }
+
+    updateAutoCalculatedTotal();
+    if (unitModal) unitModal.style.display = 'flex';
+  }
+
+  // Close Unit Modal
+  document.getElementById('close-unit-modal')?.addEventListener('click', () => {
+    if (unitModal) unitModal.style.display = 'none';
+  });
+  document.getElementById('cancel-unit-btn')?.addEventListener('click', () => {
+    if (unitModal) unitModal.style.display = 'none';
+  });
+
+  // Auto Calculation for Unit Modal
+  const areaInput = document.getElementById('unit-area-input');
+  const ppmInput = document.getElementById('unit-ppm-input');
+  const autoTotalText = document.getElementById('auto-total-price-text');
+
+  function updateAutoCalculatedTotal() {
+    const area = parseFloat(areaInput?.value) || 0;
+    const ppm = parseFloat(ppmInput?.value) || 0;
+    const total = area * ppm;
+
+    if (autoTotalText) {
+      autoTotalText.textContent = total.toLocaleString('ar-EG');
+    }
+  }
+
+  areaInput?.addEventListener('input', updateAutoCalculatedTotal);
+  ppmInput?.addEventListener('input', updateAutoCalculatedTotal);
+
+  // Submit Unit Form (Add or Edit)
+  document.getElementById('new-unit-form')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const saveBtn = document.getElementById('save-unit-btn');
+    const originalText = saveBtn ? saveBtn.innerHTML : '';
+    if (saveBtn) saveBtn.textContent = 'جارٍ الحفظ...';
+
+    const unitId = document.getElementById('unit-id-input')?.value;
+    const isEditing = Boolean(unitId);
+
+    const buildingId = document.getElementById('unit-bld-select').value;
+    const unitType = document.getElementById('unit-type-select').value;
+    const unitNumber = document.getElementById('unit-num-input').value;
+    const floor = document.getElementById('unit-floor-input').value;
+    const roomsCount = document.getElementById('unit-rooms-input').value;
+    const bathroomsCount = document.getElementById('unit-baths-input').value;
+    const view = document.getElementById('unit-view-select').value;
+    const finishingType = document.getElementById('unit-finishing-select').value;
+    const area = document.getElementById('unit-area-input').value;
+    const gardenArea = document.getElementById('unit-garden-input').value;
+    const pricePerMeter = document.getElementById('unit-ppm-input').value;
+    const status = document.getElementById('unit-status-select').value;
+    const notes = document.getElementById('unit-notes-input').value;
+    const planImage = document.getElementById('unit-plan-data')?.value || null;
+
+    const parsedArea = parseFloat(area) || 0;
+    const parsedPpm = parseFloat(pricePerMeter) || 0;
+    const totalPrice = parsedArea * parsedPpm;
+
+    try {
+      const res = await fetch('/api/erp/development', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: isEditing ? 'update_unit' : 'add_unit',
+          unitId: isEditing ? unitId : undefined,
+          projectId,
+          buildingId,
+          unitType,
+          unitNumber,
+          floor,
+          roomsCount,
+          bathroomsCount,
+          view,
+          finishingType,
+          area: parsedArea,
+          gardenArea,
+          pricePerMeter: parsedPpm,
+          totalPrice,
+          planImage,
+          status,
+          notes
+        })
+      });
+
+      const data = await res.json();
+      if (data.success) {
+        if (unitModal) unitModal.style.display = 'none';
+        document.getElementById('new-unit-form').reset();
+        await loadProjectDetails(projectId);
+      } else {
+        alert(data.error || 'فشل حفظ بيانات الشقة');
+      }
+    } catch (err) {
+      console.error('Error saving unit:', err);
+      alert('حدث خطأ أثناء حفظ الشقة');
+    } finally {
+      if (saveBtn) saveBtn.innerHTML = originalText;
+    }
+  });
+
+  // Delete Unit API Call
+  async function deleteUnit(unitId) {
+    try {
+      const res = await fetch('/api/erp/development', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'delete_unit',
+          unitId
+        })
+      });
+      const data = await res.json();
+      if (data.success) {
+        selectedUnitIds.delete(unitId);
+        await loadProjectDetails(projectId);
+      } else {
+        alert(data.error || 'فشل حذف الشقة');
+      }
+    } catch (err) {
+      console.error('Error deleting unit:', err);
+    }
+  }
+
+  // Update Unit Status API call
+  async function updateUnitStatus(unitId, status) {
+    try {
+      const res = await fetch('/api/erp/development', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'update_unit_status',
+          unitId,
+          status
+        })
+      });
+
+      const data = await res.json();
+      if (data.success) {
+        const u = allUnits.find(x => x.id === unitId);
+        if (u) u.status = status;
+        renderProjectHeader();
+        renderUnits();
+      } else {
+        alert(data.error || 'فشل تحديث حالة الوحدة');
+      }
+    } catch (err) {
+      console.error('Failed to update status:', err);
+    }
+  }
+
+  // Filter Listeners
+  document.getElementById('filter-building-select')?.addEventListener('change', renderUnits);
+  document.getElementById('filter-status-select')?.addEventListener('change', renderUnits);
+  document.getElementById('filter-type-select')?.addEventListener('change', renderUnits);
+  document.getElementById('filter-search-input')?.addEventListener('input', renderUnits);
+
+  // View Mode Switcher
+  const btnTable = document.getElementById('view-mode-table');
+  const btnGrid = document.getElementById('view-mode-grid');
+
+  btnTable?.addEventListener('click', () => {
+    currentViewMode = 'table';
+    btnTable.classList.add('active');
+    btnGrid?.classList.remove('active');
+    renderUnits();
+  });
+
+  btnGrid?.addEventListener('click', () => {
+    currentViewMode = 'grid';
+    btnGrid.classList.add('active');
+    btnTable?.classList.remove('active');
+    renderUnits();
+  });
+
+  // Modal toggles for building
+  const bldModal = document.getElementById('building-modal');
+
+  // Open Building Modal
+  document.getElementById('open-new-building-btn')?.addEventListener('click', () => {
+    populateBuildingProjectSelect();
+    if (bldModal) bldModal.style.display = 'flex';
+  });
+
+  // Close Building Modal
+  document.getElementById('close-bld-modal')?.addEventListener('click', () => {
+    if (bldModal) bldModal.style.display = 'none';
+  });
+  document.getElementById('cancel-bld-btn')?.addEventListener('click', () => {
+    if (bldModal) bldModal.style.display = 'none';
+  });
+
+  // ========================================================
+  // SMART BUILDING & UNITS GENERATOR LOGIC
+  // ========================================================
+  function getProjectCodePrefix(selectedProj) {
+    if (selectedProj?.projectCode && selectedProj.projectCode.trim()) {
+      return selectedProj.projectCode.trim().toUpperCase().replace(/[^A-Z0-9]/g, '');
+    }
+    const name = (selectedProj?.projectName || '').trim();
+    if (name.includes('النخيل') || name.includes('نخيل')) return 'NKH';
+    if (name.includes('الياسمين') || name.includes('ياسمين')) return 'YAS';
+    if (name.includes('الزهور') || name.includes('زهور')) return 'ZHR';
+    if (name.includes('الشروق') || name.includes('شروق')) return 'SHR';
+    if (name.includes('الصفوة') || name.includes('صفوة')) return 'SAF';
+
+    // Fallback: extract english or derive PRJ code
+    const latinMatch = name.match(/[a-zA-Z]+/g);
+    if (latinMatch && latinMatch.length > 0) {
+      return latinMatch.join('').slice(0, 4).toUpperCase();
+    }
+    return 'PRJ';
+  }
+
+  function getBuildingCodePrefix(name) {
+    if (!name) return 'B1';
+    const trimmed = name.trim();
+    const alphaNumMatch = trimmed.match(/[a-zA-Z]+-?[0-9]*/);
+    if (alphaNumMatch) {
+      return alphaNumMatch[0].toUpperCase().replace('-', '');
+    }
+    const numMatch = trimmed.match(/[0-9]+/);
+    if (numMatch) {
+      return 'B' + numMatch[0];
+    }
+    return 'B1';
+  }
+
+  // Smart Units Auto Generator Click Handler (زرار "اعمل الشقق لوحدك")
+  document.getElementById('btn-smart-generate-units')?.addEventListener('click', () => {
+    const selectedProjId = document.getElementById('bld-project-select')?.value || projectId;
+    const selectedProj = allProjectsList.find(p => p.id === selectedProjId) || currentProject;
+    const bldName = document.getElementById('bld-name-input')?.value?.trim();
+
+    if (!bldName) {
+      alert('يرجى كتابة اسم أو رقم العمارة أولاً (مثال: عمارة B1)');
+      document.getElementById('bld-name-input')?.focus();
+      return;
+    }
+
+    const floorsCount = parseInt(document.getElementById('bld-floors-input')?.value) || 0;
+    const aptsPerFloor = parseInt(document.getElementById('bld-apts-per-floor-input')?.value) || 0;
+    const defArea = parseFloat(document.getElementById('bld-def-area')?.value) || 150;
+    const defPpm = parseFloat(document.getElementById('bld-def-ppm')?.value) || 20000;
+
+    if (floorsCount <= 0 || aptsPerFloor <= 0) {
+      alert('يرجى تحديد عدد الأدوار وعدد الشقق لكل دور بشكل صحيح');
+      return;
+    }
+
+    const projPrefix = getProjectCodePrefix(selectedProj);
+    const bldPrefix = getBuildingCodePrefix(bldName);
+
+    generatedUnitsBatch = [];
+
+    // Loop through Ground Floor (floor = 0) and Repeated Floors (1 to floorsCount)
+    for (let floor = 0; floor <= floorsCount; floor++) {
+      const isGround = floor === 0;
+      const floorLabel = isGround ? 'الدور الأرضي' : `الدور ${floor}`;
+
+      for (let apt = 1; apt <= aptsPerFloor; apt++) {
+        const aptPadded = apt < 10 ? `0${apt}` : `${apt}`;
+        const unitCode = isGround
+          ? `${projPrefix}-${bldPrefix}-G${aptPadded}`
+          : `${projPrefix}-${bldPrefix}-${floor}${aptPadded}`;
+
+        generatedUnitsBatch.push({
+          unitNumber: unitCode,
+          unitType: 'residential',
+          floor: floor,
+          floorLabel: floorLabel,
+          roomsCount: 3,
+          bathroomsCount: 2,
+          view: 'على جنينة',
+          finishingType: 'نص تشطيب',
+          area: defArea,
+          gardenArea: isGround ? 40 : 0,
+          pricePerMeter: defPpm,
+          totalPrice: defArea * defPpm,
+          status: 'available'
+        });
+      }
+    }
+
+    // Render Live Preview
+    const previewBox = document.getElementById('generated-units-preview-box');
+    const tbody = document.getElementById('generated-units-tbody');
+    const statsBadge = document.getElementById('gen-stats-badge');
+    const statsText = document.getElementById('gen-stats-text');
+    const saveBtnText = document.getElementById('save-bld-btn-text');
+
+    if (previewBox) previewBox.style.display = 'block';
+    if (statsBadge) statsBadge.textContent = `${generatedUnitsBatch.length} شقة جاهزة ⚡`;
+    if (statsText) {
+      statsText.textContent = `(أرضي + ${floorsCount} أدوار متكررة × ${aptsPerFloor} شقق)`;
+    }
+
+    if (tbody) {
+      tbody.innerHTML = generatedUnitsBatch.map((u, idx) => `
+        <tr>
+          <td>${idx + 1}</td>
+          <td><span class="unit-code-badge">${u.unitNumber}</span></td>
+          <td><span class="floor-badge">${u.floorLabel}</span></td>
+          <td>شقة سكنية</td>
+          <td>${u.area} م²</td>
+          <td>${u.pricePerMeter.toLocaleString('ar-EG')} ج.م</td>
+          <td style="color: #059669; font-weight: 800;">${u.totalPrice.toLocaleString('ar-EG')} ج.م</td>
+        </tr>
+      `).join('');
+    }
+
+    if (saveBtnText) {
+      saveBtnText.textContent = `حفظ المبنى وتوليد الـ ${generatedUnitsBatch.length} شقة فوراً 🚀`;
+    }
+  });
+
+  // Reset / Clear Generated Units Preview
+  document.getElementById('btn-clear-generated')?.addEventListener('click', () => {
+    generatedUnitsBatch = [];
+    const previewBox = document.getElementById('generated-units-preview-box');
+    if (previewBox) previewBox.style.display = 'none';
+    const saveBtnText = document.getElementById('save-bld-btn-text');
+    if (saveBtnText) saveBtnText.textContent = 'حفظ المبنى والمتابعة';
+  });
+
+  // Submit Building Form
+  document.getElementById('new-building-form')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const saveBtn = document.getElementById('save-bld-btn');
+    const originalText = saveBtn ? saveBtn.innerHTML : '';
+    if (saveBtn) saveBtn.textContent = 'جارٍ إنشاء العمارة وتوليد الشقق...';
+
+    const targetProjectId = document.getElementById('bld-project-select')?.value || projectId;
+    const name = document.getElementById('bld-name-input')?.value?.trim();
+    const floorsCount = document.getElementById('bld-floors-input')?.value;
+
+    try {
+      const res = await fetch('/api/erp/development', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'add_building',
+          projectId: targetProjectId,
+          name,
+          buildingType: 'residential',
+          floorsCount: parseInt(floorsCount) || 5,
+          autoGeneratedUnits: generatedUnitsBatch
+        })
+      });
+
+      const data = await res.json();
+      if (data.success) {
+        if (bldModal) bldModal.style.display = 'none';
+        document.getElementById('new-building-form').reset();
+        generatedUnitsBatch = [];
+        const previewBox = document.getElementById('generated-units-preview-box');
+        if (previewBox) previewBox.style.display = 'none';
+        const saveBtnText = document.getElementById('save-bld-btn-text');
+        if (saveBtnText) saveBtnText.textContent = 'حفظ المبنى والمتابعة';
+
+        alert(data.message || 'تمت إضافة المبنى والشقق بنجاح! 🏢✨');
+
+        if (targetProjectId === projectId) {
+          await loadProjectDetails(projectId);
+        } else {
+          window.location.href = `/crs/development/project?id=${targetProjectId}`;
+        }
+      } else {
+        alert(data.error || 'فشل إضافة المبنى');
+      }
+    } catch (err) {
+      console.error('Error adding building:', err);
+      alert('حدث خطأ أثناء الاتصال بالخادم');
+    } finally {
+      if (saveBtn) saveBtn.innerHTML = originalText;
+    }
+  });
+
+  // ========================================================
+  // 💳 نظام الأقساط والتعاقد والمتابعة المالية (Installments & Collection)
+  // ========================================================
+
+  let activeContractUnit = null;
+  let currentGeneratedSchedule = [];
+  let currentStatementData = null;
+  let statementActiveFilter = 'all';
+
+  const contractModal = document.getElementById('unit-contract-modal');
+  const statementModal = document.getElementById('unit-statement-modal');
+  const quickPayModal = document.getElementById('quick-pay-modal');
+  const receiptModal = document.getElementById('receipt-view-modal');
+
+  // Modal Closers
+  document.getElementById('close-contract-modal')?.addEventListener('click', () => {
+    if (contractModal) contractModal.style.display = 'none';
+  });
+  document.getElementById('btn-close-contract-modal')?.addEventListener('click', () => {
+    if (contractModal) contractModal.style.display = 'none';
+  });
+
+  document.getElementById('close-statement-modal')?.addEventListener('click', () => {
+    if (statementModal) statementModal.style.display = 'none';
+  });
+  document.getElementById('btn-close-statement')?.addEventListener('click', () => {
+    if (statementModal) statementModal.style.display = 'none';
+  });
+
+  document.getElementById('close-quick-pay-modal')?.addEventListener('click', () => {
+    if (quickPayModal) quickPayModal.style.display = 'none';
+  });
+  document.getElementById('btn-cancel-quick-pay')?.addEventListener('click', () => {
+    if (quickPayModal) quickPayModal.style.display = 'none';
+  });
+
+  document.getElementById('btn-close-receipt')?.addEventListener('click', () => {
+    if (receiptModal) receiptModal.style.display = 'none';
+  });
+
+  // Print Handlers
+  document.getElementById('btn-print-statement')?.addEventListener('click', () => window.print());
+  document.getElementById('btn-print-statement-top')?.addEventListener('click', () => window.print());
+  document.getElementById('btn-print-receipt')?.addEventListener('click', () => window.print());
+
+  // 1. Delegate Click for Opening Contract Wizard or Statement
+  document.addEventListener('click', (e) => {
+    const contractBtn = e.target.closest('.btn-contract-wizard-open');
+    if (contractBtn) {
+      const uId = contractBtn.getAttribute('data-unit-id');
+      openContractWizard(uId);
+      return;
+    }
+
+    const statementBtn = e.target.closest('.btn-statement-open');
+    if (statementBtn) {
+      const uId = statementBtn.getAttribute('data-unit-id');
+      openUnitStatement(uId);
+      return;
+    }
+  });
+
+  // Open Contract Wizard Modal
+  function openContractWizard(unitId) {
+    const unit = allUnits.find(u => u.id === unitId);
+    if (!unit) {
+      alert('تعذر العثور على بيانات الوحدة');
+      return;
+    }
+
+    activeContractUnit = unit;
+    const bld = allBuildings.find(b => b.id === unit.buildingId);
+    const bldName = bld ? bld.name : 'غير محدد';
+
+    // Populate Unit Summary
+    document.getElementById('contract-unit-id').value = unit.id;
+    document.getElementById('contract-project-id').value = projectId;
+    document.getElementById('contract-unit-code-bld').textContent = `${unit.unitNumber} (${bldName})`;
+    document.getElementById('contract-unit-specs').textContent = `${unit.area} م² · الدور ${unit.floor === 0 ? 'الأرضي' : unit.floor} · ${unit.roomsCount || 3} غرف`;
+    document.getElementById('contract-unit-price').textContent = `${(unit.totalPrice || 0).toLocaleString('ar-EG')} ج.م`;
+
+    // Reset Client Fields
+    document.getElementById('contract-client-name').value = '';
+    document.getElementById('contract-client-phone').value = '';
+    document.getElementById('contract-client-nid').value = '';
+
+    // Populate Payment Plans Dropdown
+    const planSelect = document.getElementById('contract-plan-select');
+    const projectPlans = currentProject?.paymentPlans || [];
+    planSelect.innerHTML = `<option value="custom">⚙️ خطة مخصصة (حدد المقدم والسنوات)</option>` +
+      projectPlans.map(p => `
+        <option value="${p.id}" data-dp="${p.downPaymentPercent}" data-years="${p.installmentYears}" data-freq="${p.installmentFrequency}" data-maint="${p.maintenancePercent || 0}">
+          ${p.name} (${p.downPaymentPercent}% مقدم - ${p.installmentYears} سنوات)
+        </option>
+      `).join('');
+
+    // Populate Treasuries Dropdown
+    const treasurySelect = document.getElementById('contract-treasury-select');
+    const projectTreasuries = currentProject?.treasuries || [];
+    if (projectTreasuries.length > 0) {
+      treasurySelect.innerHTML = projectTreasuries.map(tr => `
+        <option value="${tr.id}">خزينة المشروع (${(tr.balance || 0).toLocaleString('ar-EG')} ج.م رصيد)</option>
+      `).join('');
+    } else {
+      treasurySelect.innerHTML = `<option value="">الخزينة الرئيسية للمركز المالي</option>`;
+    }
+
+    // Default 10% Down Payment
+    document.getElementById('contract-dp-percent').value = 10;
+    const initialDp = Math.round((unit.totalPrice * 0.10) * 100) / 100;
+    document.getElementById('contract-dp-amount').value = initialDp;
+    document.getElementById('contract-years-select').value = '3';
+    document.getElementById('contract-freq-select').value = 'quarterly';
+    document.getElementById('contract-maint-percent').value = 5;
+
+    // Default start date to 1 month from today
+    const nextMonth = new Date();
+    nextMonth.setMonth(nextMonth.getMonth() + 1);
+    document.getElementById('contract-start-date').value = nextMonth.toISOString().slice(0, 10);
+
+    // Initial Live Preview
+    fetchAndRenderSchedulePreview();
+
+    if (contractModal) contractModal.style.display = 'flex';
+  }
+
+  // Handle Payment Plan Change
+  document.getElementById('contract-plan-select')?.addEventListener('change', (e) => {
+    const selectedOpt = e.target.selectedOptions[0];
+    if (e.target.value !== 'custom' && selectedOpt) {
+      const dp = selectedOpt.getAttribute('data-dp');
+      const years = selectedOpt.getAttribute('data-years');
+      const freq = selectedOpt.getAttribute('data-freq');
+      const maint = selectedOpt.getAttribute('data-maint');
+
+      if (dp) document.getElementById('contract-dp-percent').value = dp;
+      if (years) document.getElementById('contract-years-select').value = years;
+      if (freq) document.getElementById('contract-freq-select').value = freq;
+      if (maint) document.getElementById('contract-maint-percent').value = maint;
+
+      if (activeContractUnit && dp) {
+        const dpAmt = Math.round((activeContractUnit.totalPrice * (parseFloat(dp) / 100)) * 100) / 100;
+        document.getElementById('contract-dp-amount').value = dpAmt;
+      }
+    }
+    fetchAndRenderSchedulePreview();
+  });
+
+  // Down Payment % and Amount Sync
+  document.getElementById('contract-dp-percent')?.addEventListener('input', () => {
+    if (!activeContractUnit) return;
+    const pct = parseFloat(document.getElementById('contract-dp-percent').value) || 0;
+    const amt = Math.round((activeContractUnit.totalPrice * (pct / 100)) * 100) / 100;
+    document.getElementById('contract-dp-amount').value = amt;
+    fetchAndRenderSchedulePreview();
+  });
+
+  document.getElementById('contract-dp-amount')?.addEventListener('input', () => {
+    if (!activeContractUnit || !activeContractUnit.totalPrice) return;
+    const amt = parseFloat(document.getElementById('contract-dp-amount').value) || 0;
+    const pct = Math.round(((amt / activeContractUnit.totalPrice) * 100) * 10) / 10;
+    document.getElementById('contract-dp-percent').value = pct;
+    fetchAndRenderSchedulePreview();
+  });
+
+  // Re-generate preview on parameter changes
+  ['contract-years-select', 'contract-freq-select', 'contract-maint-percent', 'contract-start-date'].forEach(id => {
+    document.getElementById(id)?.addEventListener('change', fetchAndRenderSchedulePreview);
+  });
+
+  document.getElementById('btn-generate-schedule-preview')?.addEventListener('click', fetchAndRenderSchedulePreview);
+
+  // Fetch & Render Schedule Preview
+  async function fetchAndRenderSchedulePreview() {
+    if (!activeContractUnit) return;
+
+    const totalPrice = activeContractUnit.totalPrice || 0;
+    const downPaymentAmount = document.getElementById('contract-dp-amount')?.value;
+    const installmentYears = document.getElementById('contract-years-select')?.value;
+    const frequency = document.getElementById('contract-freq-select')?.value;
+    const maintenancePercent = document.getElementById('contract-maint-percent')?.value;
+    const startDate = document.getElementById('contract-start-date')?.value;
+
+    try {
+      const res = await fetch('/api/erp/collection', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'preview_schedule',
+          totalPrice,
+          downPaymentAmount,
+          installmentYears,
+          frequency,
+          startDate,
+          maintenancePercent
+        })
+      });
+
+      const data = await res.json();
+      if (data.success) {
+        currentGeneratedSchedule = data.schedule;
+        const summary = data.summary;
+
+        const previewBox = document.getElementById('contract-schedule-preview-box');
+        if (previewBox) previewBox.style.display = 'block';
+
+        const countBadge = document.getElementById('prev-installments-count-badge');
+        if (countBadge) countBadge.textContent = `${summary.totalInstallmentsCount} قسط (${summary.frequency === 'monthly' ? 'شهري' : summary.frequency === 'quarterly' ? 'ربع سنوي' : summary.frequency === 'semi_annual' ? 'نصف سنوي' : 'سنوي'})`;
+
+        const amountText = document.getElementById('prev-installment-amount-text');
+        if (amountText) amountText.textContent = `قيمة القسط: ${summary.perInstallmentAmount.toLocaleString('ar-EG')} ج.م`;
+
+        const maintTag = document.getElementById('prev-maintenance-tag');
+        if (maintTag) {
+          maintTag.textContent = summary.maintenanceAmount > 0
+            ? `وديعة الصيانة: ${summary.maintenanceAmount.toLocaleString('ar-EG')} ج.م`
+            : '';
+        }
+
+        const tbody = document.getElementById('contract-schedule-tbody');
+        if (tbody) {
+          tbody.innerHTML = currentGeneratedSchedule.map(s => `
+            <tr>
+              <td><strong>${s.installmentNumber}</strong></td>
+              <td>${s.title}</td>
+              <td><span style="font-family: monospace; font-weight: 700;">${new Date(s.dueDate).toLocaleDateString('ar-EG')}</span></td>
+              <td><strong class="text-primary">${s.amount.toLocaleString('ar-EG')} ج.م</strong></td>
+              <td>
+                <span class="view-tag-badge" style="${s.type === 'maintenance' ? 'background: #eff6ff; color: #1e40af; border-color: #bfdbfe;' : ''}">
+                  ${s.type === 'maintenance' ? 'وديعة صيانة' : 'قسط دوري'}
+                </span>
+              </td>
+            </tr>
+          `).join('');
+        }
+      }
+    } catch (err) {
+      console.error('Error generating preview:', err);
+    }
+  }
+
+  // Submit Contract & Generate Installments
+  document.getElementById('unit-contract-form')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    if (!activeContractUnit) return;
+
+    const saveBtn = document.getElementById('btn-confirm-contract-save');
+    const originalContent = saveBtn ? saveBtn.innerHTML : '';
+    if (saveBtn) saveBtn.textContent = 'جارٍ تسجيل العقد وجدولة الأقساط وتوريد الخزينة...';
+
+    const unitId = activeContractUnit.id;
+    const clientName = document.getElementById('contract-client-name')?.value?.trim();
+    const clientPhone = document.getElementById('contract-client-phone')?.value?.trim();
+    const clientNationalId = document.getElementById('contract-client-nid')?.value?.trim();
+    const totalPrice = activeContractUnit.totalPrice;
+    const downPayment = document.getElementById('contract-dp-amount')?.value;
+    const planId = document.getElementById('contract-plan-select')?.value;
+    const treasuryId = document.getElementById('contract-treasury-select')?.value;
+
+    try {
+      const res = await fetch('/api/erp/collection', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'contract_unit_with_schedule',
+          unitId,
+          projectId,
+          clientName,
+          clientPhone,
+          clientNationalId,
+          totalPrice,
+          downPayment,
+          paymentPlanId: planId !== 'custom' ? planId : null,
+          schedule: currentGeneratedSchedule,
+          treasuryId: treasuryId || null
+        })
+      });
+
+      const data = await res.json();
+      if (data.success) {
+        if (contractModal) contractModal.style.display = 'none';
+        document.getElementById('unit-contract-form').reset();
+        activeContractUnit = null;
+        currentGeneratedSchedule = [];
+
+        alert(`تم التعاقد على الوحدة بنجاح! 🎉\n- عدد الأقساط المجدولة: ${data.installmentsCount} قسط.\n- رقم إيصال توريد المقدم: ${data.receiptNumber || 'تم التوريد للخزينة'}`);
+
+        await loadProjectDetails(projectId);
+      } else {
+        alert(data.error || 'فشل حفظ التعاقد');
+      }
+    } catch (err) {
+      console.error('Error submitting contract:', err);
+      alert('حدث خطأ أثناء حفظ التعاقد');
+    } finally {
+      if (saveBtn) saveBtn.innerHTML = originalContent;
+    }
+  });
+
+  // ========================================================
+  // 📊 كشف الحساب والمتابعة المالية الشاملة للوحدة
+  // ========================================================
+
+  async function openUnitStatement(unitId) {
+    try {
+      const res = await fetch(`/api/erp/collection?unitId=${unitId}`);
+      const data = await res.json();
+
+      if (!data.success || !data.hasReservation) {
+        alert(data.error || 'لا يوجد تعاقد نشط مسجل لهذه الوحدة بعد. يمكنك النقر على "حجز وتقسيط" لإنشاء عقد وجدول أقساط.');
+        return;
+      }
+
+      currentStatementData = data;
+      renderStatementModal();
+      if (statementModal) statementModal.style.display = 'flex';
+    } catch (err) {
+      console.error('Error fetching statement:', err);
+      alert('فشل تحميل كشف حساب الوحدة');
+    }
+  }
+
+  function renderStatementModal() {
+    if (!currentStatementData) return;
+
+    const { unit, reservation, installments, summary, treasuries } = currentStatementData;
+    const bld = allBuildings.find(b => b.id === unit.buildingId);
+    const bldName = bld ? bld.name : 'العمارة';
+
+    // Header info
+    document.getElementById('stmt-unit-title').textContent = `${unit.unitNumber} (${bldName})`;
+    document.getElementById('stmt-client-name').textContent = reservation.clientName || 'عميل كريم';
+    document.getElementById('stmt-client-phone').textContent = reservation.clientPhone || '--';
+
+    // Print header info
+    document.getElementById('stmt-print-date').textContent = new Date().toLocaleDateString('ar-EG');
+    document.getElementById('stmt-print-unit').textContent = `${unit.unitNumber} - ${bldName}`;
+    document.getElementById('stmt-print-project').textContent = currentProject?.projectName || 'مشروع سكني';
+
+    // KPIs
+    document.getElementById('stmt-total-price').textContent = `${(summary.totalPrice || 0).toLocaleString('ar-EG')} ج.م`;
+    document.getElementById('stmt-down-payment-sub').textContent = `المقدم: ${(summary.downPayment || 0).toLocaleString('ar-EG')} ج.م`;
+
+    document.getElementById('stmt-total-paid').textContent = `${(summary.totalPaid || 0).toLocaleString('ar-EG')} ج.م`;
+    document.getElementById('stmt-paid-count-sub').textContent = `${summary.paidCount || 0} أقساط مسددة بالكامل`;
+
+    document.getElementById('stmt-total-remaining').textContent = `${(summary.totalRemaining || 0).toLocaleString('ar-EG')} ج.م`;
+    document.getElementById('stmt-pending-count-sub').textContent = `${summary.pendingCount || 0} أقساط متبقية`;
+
+    // Overdue Indicator
+    const overdueCard = document.getElementById('stmt-overdue-card');
+    const statusIndicator = document.getElementById('stmt-status-indicator');
+    const overdueSub = document.getElementById('stmt-overdue-sub');
+
+    if (summary.overdueCount > 0) {
+      overdueCard.className = 'stmt-kpi-card card-overdue';
+      statusIndicator.textContent = 'متأخر في السداد 🔴';
+      statusIndicator.className = 'kpi-val text-danger';
+      overdueSub.textContent = `${summary.overdueCount} قسط متأخر بقيمة ${summary.overdueAmount.toLocaleString('ar-EG')} ج.م`;
+    } else {
+      overdueCard.className = 'stmt-kpi-card card-paid';
+      statusIndicator.textContent = 'ملتزم بالسداد 🟢';
+      statusIndicator.className = 'kpi-val text-success';
+      overdueSub.textContent = 'لا توجد أقساط متأخرة حالياً';
+    }
+
+    // Progress Bar
+    const pct = summary.paidPercentage || 0;
+    document.getElementById('stmt-progress-pct-text').textContent = `${pct}%`;
+    const fillBar = document.getElementById('stmt-progress-bar');
+    if (fillBar) fillBar.style.width = `${pct}%`;
+
+    // Counts for filter chips
+    document.getElementById('count-all-inst').textContent = installments.length;
+    document.getElementById('count-pending-inst').textContent = installments.filter(i => i.status !== 'paid').length;
+    document.getElementById('count-paid-inst').textContent = installments.filter(i => i.status === 'paid').length;
+    document.getElementById('count-overdue-inst').textContent = summary.overdueCount || 0;
+
+    renderStatementTable();
+  }
+
+  function renderStatementTable() {
+    if (!currentStatementData) return;
+    const { installments, reservation, unit } = currentStatementData;
+    const tbody = document.getElementById('statement-tbody');
+    if (!tbody) return;
+
+    let filtered = installments;
+    if (statementActiveFilter === 'pending') {
+      filtered = installments.filter(i => i.status !== 'paid');
+    } else if (statementActiveFilter === 'paid') {
+      filtered = installments.filter(i => i.status === 'paid');
+    } else if (statementActiveFilter === 'overdue') {
+      filtered = installments.filter(i => i.isOverdue);
+    }
+
+    if (filtered.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; padding: 2rem; color: #94a3b8;">لا توجد أقساط مطابقة لهذا الفلتر</td></tr>`;
+      return;
+    }
+
+    const cleanPhone = (reservation.clientPhone || '').replace(/\D/g, '').replace(/^0/, '');
+    const projectName = currentProject?.projectName || 'مشروعنا';
+
+    tbody.innerHTML = filtered.map(inst => {
+      const isPaid = inst.status === 'paid';
+      const isPartiallyPaid = inst.status === 'partially_paid';
+      const isOverdue = inst.isOverdue;
+      const isDueThisMonth = inst.isDueThisMonth;
+
+      let statusBadge = '';
+      if (isPaid) {
+        statusBadge = `<span class="status-badge badge-paid">🟢 مسدد بالكامل</span>`;
+      } else if (isOverdue) {
+        statusBadge = `<span class="status-badge badge-overdue">🔴 متأخر ⚠️</span>`;
+      } else if (isDueThisMonth) {
+        statusBadge = `<span class="status-badge badge-due">🟡 مستحق هذا الشهر</span>`;
+      } else {
+        statusBadge = `<span class="status-badge" style="background: #f1f5f9; color: #475569;">مستحق</span>`;
+      }
+
+      const dueFormatted = new Date(inst.dueDate).toLocaleDateString('ar-EG');
+      const paidFormatted = inst.paidDate ? new Date(inst.paidDate).toLocaleDateString('ar-EG') : '';
+
+      // Compose Polite Arabic WhatsApp Reminder
+      const waMessage = `عزيزنا العميل/ ${reservation.clientName}،
+تحية طيبة من شركة إنجاز للتطوير العقاري.
+نود تذكير سيادتكم باستحقاق (${inst.title}) الخاص بالوحدة رقم (${unit.unitNumber}) بمشروع (${projectName}).
+المبلغ المطلوب: ${inst.amount.toLocaleString('ar-EG')} جنيه مصري
+تاريخ الاستحقاق: ${dueFormatted}
+شاكرين لسيادتكم حسن تعاونكم والالتزام بمواعيد السداد.
+للاستفسار أو تأكيد التحويل نرجو التواصل معنا على هذا الرقم.`;
+
+      const waUrl = `https://wa.me/20${cleanPhone}?text=${encodeURIComponent(waMessage)}`;
+
+      return `
+        <tr style="${isOverdue ? 'background: #fffbfa;' : ''}">
+          <td><strong>${inst.installmentNumber}</strong></td>
+          <td><strong>${inst.title}</strong></td>
+          <td><span style="font-family: monospace; font-weight: 700;">${dueFormatted}</span></td>
+          <td><strong style="color: #059669; font-size: 0.95rem;">${inst.amount.toLocaleString('ar-EG')} ج.م</strong></td>
+          <td>
+            ${isPaid || isPartiallyPaid ? `
+              <div>
+                <strong style="color: #15803d;">${(inst.paidAmount || inst.amount).toLocaleString('ar-EG')} ج.م</strong>
+                <div style="font-size: 0.72rem; color: #64748b;">بتاريخ ${paidFormatted} (${inst.receiptNumber || 'إيصال'})</div>
+              </div>
+            ` : `<span style="color: #94a3b8;">لم يسدد</span>`}
+          </td>
+          <td>${statusBadge}</td>
+          <td class="no-print">
+            <div class="stmt-actions-cell">
+              ${!isPaid ? `
+                <button type="button" class="btn-stmt-pay btn-open-quick-pay" data-inst-id="${inst.id}">
+                  سداد القسط 💳
+                </button>
+                <a href="${waUrl}" target="_blank" class="btn-whatsapp-remind" title="إرسال رسالة تذكير عبر واتساب للعميل">
+                  💬 تذكير واتساب
+                </a>
+              ` : `
+                <button type="button" class="btn-plan-view btn-show-receipt" data-inst-id="${inst.id}" title="عرض إيصال السداد">
+                  🧾 الإيصال
+                </button>
+              `}
+            </div>
+          </td>
+        </tr>
+      `;
+    }).join('');
+  }
+
+  // Filter Chips in Statement
+  document.querySelectorAll('.stmt-chip').forEach(chip => {
+    chip.addEventListener('click', (e) => {
+      document.querySelectorAll('.stmt-chip').forEach(c => c.classList.remove('active'));
+      e.currentTarget.classList.add('active');
+      statementActiveFilter = e.currentTarget.getAttribute('data-filter');
+      renderStatementTable();
+    });
+  });
+
+  // Delegate Statement Actions (Open Quick Pay or Show Receipt)
+  document.addEventListener('click', (e) => {
+    const payBtn = e.target.closest('.btn-open-quick-pay');
+    if (payBtn) {
+      const instId = payBtn.getAttribute('data-inst-id');
+      openQuickPayModal(instId);
+      return;
+    }
+
+    const receiptBtn = e.target.closest('.btn-show-receipt');
+    if (receiptBtn) {
+      const instId = receiptBtn.getAttribute('data-inst-id');
+      showReceiptModal(instId);
+      return;
+    }
+  });
+
+  // Open Quick Pay Modal
+  function openQuickPayModal(installmentId) {
+    if (!currentStatementData) return;
+    const inst = currentStatementData.installments.find(i => i.id === installmentId);
+    if (!inst) return;
+
+    const { reservation, unit, treasuries } = currentStatementData;
+
+    document.getElementById('quick-pay-installment-id').value = inst.id;
+    document.getElementById('quick-pay-inst-title').textContent = inst.title;
+    document.getElementById('quick-pay-unit-code').textContent = unit.unitNumber;
+    document.getElementById('quick-pay-client-name').textContent = reservation.clientName;
+
+    const remainingDue = Math.max(0, inst.amount - (inst.paidAmount || 0));
+    document.getElementById('quick-pay-due-amount').textContent = `${remainingDue.toLocaleString('ar-EG')} ج.م`;
+    document.getElementById('quick-pay-actual-amount').value = remainingDue;
+    document.getElementById('quick-pay-penalty').value = 0;
+    document.getElementById('quick-pay-notes').value = '';
+
+    // Populate Treasuries
+    const treasurySelect = document.getElementById('quick-pay-treasury-select');
+    if (treasuries && treasuries.length > 0) {
+      treasurySelect.innerHTML = treasuries.map(tr => `
+        <option value="${tr.id}">خزينة المشروع (${(tr.balance || 0).toLocaleString('ar-EG')} ج.م)</option>
+      `).join('');
+    } else {
+      treasurySelect.innerHTML = `<option value="">الخزينة الرئيسية للمركز المالي</option>`;
+    }
+
+    if (quickPayModal) quickPayModal.style.display = 'flex';
+  }
+
+  // Submit Quick Pay Form
+  document.getElementById('quick-pay-form')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const saveBtn = document.getElementById('btn-confirm-pay');
+    const originalContent = saveBtn ? saveBtn.innerHTML : '';
+    if (saveBtn) saveBtn.textContent = 'جارٍ تسجيل السداد وإصدار الإيصال...';
+
+    const installmentId = document.getElementById('quick-pay-installment-id')?.value;
+    const paidAmount = document.getElementById('quick-pay-actual-amount')?.value;
+    const latePenalty = document.getElementById('quick-pay-penalty')?.value;
+    const paymentMethod = document.getElementById('quick-pay-method')?.value;
+    const treasuryId = document.getElementById('quick-pay-treasury-select')?.value;
+    const notes = document.getElementById('quick-pay-notes')?.value;
+
+    try {
+      const res = await fetch('/api/erp/collection', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'pay_installment',
+          installmentId,
+          paidAmount,
+          latePenalty,
+          paymentMethod,
+          treasuryId: treasuryId || null,
+          notes
+        })
+      });
+
+      const data = await res.json();
+      if (data.success) {
+        if (quickPayModal) quickPayModal.style.display = 'none';
+
+        // Refresh Statement in background
+        if (currentStatementData?.unit?.id) {
+          const stmtRes = await fetch(`/api/erp/collection?unitId=${currentStatementData.unit.id}`);
+          const stmtData = await stmtRes.json();
+          if (stmtData.success) {
+            currentStatementData = stmtData;
+            renderStatementModal();
+          }
+        }
+
+        // Show Printable Receipt
+        if (data.receipt) {
+          displayReceiptData(data.receipt);
+        }
+
+        // Refresh project list KPIs
+        await loadProjectDetails(projectId);
+      } else {
+        alert(data.error || 'فشل تسجيل السداد');
+      }
+    } catch (err) {
+      console.error('Error submitting payment:', err);
+      alert('حدث خطأ أثناء الاتصال بالخادم');
+    } finally {
+      if (saveBtn) saveBtn.innerHTML = originalContent;
+    }
+  });
+
+  // Show Printable Receipt Data
+  function displayReceiptData(rc) {
+    document.getElementById('receipt-modal-num').textContent = rc.receiptNumber || 'REC-000000';
+    document.getElementById('receipt-modal-client').textContent = rc.clientName || 'العميل';
+    document.getElementById('receipt-modal-phone').textContent = rc.clientPhone || '--';
+    document.getElementById('receipt-modal-unit-project').textContent = `وحدة ${rc.unitNumber} - ${rc.projectName}`;
+    document.getElementById('receipt-modal-title').textContent = rc.title || 'سداد قسط';
+
+    const methodLabels = {
+      cash: 'نقداً في مقر الشركة',
+      bank_transfer: 'تحويل بنكي',
+      vodafone_cash: 'محفظة إلكترونية (فودافون كاش)',
+      cheque: 'شيك بنكي مقبول الدفع',
+      online_card: 'بطاقة بنكية'
+    };
+    document.getElementById('receipt-modal-method').textContent = methodLabels[rc.paymentMethod] || rc.paymentMethod || 'نقداً';
+    document.getElementById('receipt-modal-amount').textContent = `${(rc.amount || rc.actualAmount || 0).toLocaleString('ar-EG')} ج.م`;
+    document.getElementById('receipt-modal-date').textContent = new Date(rc.date || Date.now()).toLocaleString('ar-EG');
+
+    if (receiptModal) receiptModal.style.display = 'flex';
+  }
+
+  // Show existing receipt from statement table
+  function showReceiptModal(installmentId) {
+    if (!currentStatementData) return;
+    const inst = currentStatementData.installments.find(i => i.id === installmentId);
+    if (!inst) return;
+
+    displayReceiptData({
+      receiptNumber: inst.receiptNumber,
+      clientName: currentStatementData.reservation?.clientName,
+      clientPhone: currentStatementData.reservation?.clientPhone,
+      unitNumber: currentStatementData.unit?.unitNumber,
+      projectName: currentProject?.projectName,
+      title: inst.title,
+      paymentMethod: inst.paymentMethod,
+      amount: inst.paidAmount || inst.amount,
+      date: inst.paidDate
+    });
+  }
+</script>

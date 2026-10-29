@@ -1,0 +1,29 @@
+---
+import Layout from '../layouts/Layout.astro';
+import TopBar from '../components/TopBar.astro';
+import Header from '../components/Header.astro';
+import Services from '../components/Services.astro';
+import OurApproach from '../components/OurApproach.astro';
+import Footer from '../components/Footer.astro';
+import FloatingButton from '../components/FloatingButton.astro';
+---
+
+<Layout title="خدماتنا - للاستثمار والتطوير العقاري">
+  <TopBar />
+  <Header showMenu={true} />
+  
+  <main class="services-page">
+    <Services />
+    <OurApproach />
+  </main>
+
+  <Footer />
+  <FloatingButton />
+</Layout>
+
+<style>
+  .services-page {
+    width: 100%;
+    overflow-x: hidden;
+  }
+</style>

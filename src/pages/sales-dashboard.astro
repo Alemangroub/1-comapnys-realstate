@@ -1,0 +1,1922 @@
+---
+import Layout from '../layouts/Layout.astro';
+import AdminLogin from '../components/AdminLogin.astro';
+---
+
+<Layout title="لوحة تحكم مسؤول المبيعات | منظومة التطوير العقاري">
+  <div id="auth-loading-message" class="auth-loading-screen">
+    <div class="auth-spinner"></div>
+    <p>جارٍ التحقق من صلاحيات المبيعات...</p>
+  </div>
+
+  <div id="admin-login-container" class="auth-container" style="display: none;">
+    <AdminLogin />
+  </div>
+
+  <main id="main-content" class="portal-main-page" style="display: none;">
+    
+    <!-- Top Executive Header -->
+    <header class="role-top-header">
+      <div class="header-inner">
+        <div class="user-profile-badge">
+          <div class="avatar-pod pod-emerald" id="user-avatar-initial">S</div>
+          <div>
+            <span class="role-pill pill-emerald">مسؤول مبيعات معتمد</span>
+            <h1 id="user-display-name" class="user-title">مسؤول المبيعات</h1>
+          </div>
+        </div>
+
+        <div class="header-controls">
+          <button id="open-quotation-top-btn" class="btn-ctrl btn-quotation" title="إنشاء وحساب عرض سعر فوري">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+            <span>⚡ عرض سعر فوري</span>
+          </button>
+          <button id="refresh-data-btn" class="btn-ctrl btn-refresh" title="تحديث البيانات">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+            <span>تحديث</span>
+          </button>
+          <a href="/portal" target="_blank" class="btn-ctrl btn-client-portal" title="فتح بوابة العميل للمعاينة">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+            <span>بوابة العميل</span>
+          </a>
+          <button id="logout-button" class="btn-ctrl btn-logout">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+            <span>تسجيل الخروج</span>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <div class="content-wrapper">
+      
+      <!-- ITEM 4: Target & Commission Live Progress Card -->
+      <section class="target-tracker-card">
+        <div class="tracker-header">
+          <div class="tracker-meta">
+            <div class="target-icon">🎯</div>
+            <div>
+              <h3>مستهدف المبيعات والعمولات الشهري (Sales Target Tracker)</h3>
+              <p>رصد فوري لنسبة تحقيق التارجت البيعي والعمولات المكتسبة لشهر العمل الحالي</p>
+            </div>
+          </div>
+          <div class="target-numbers-grp">
+            <div class="target-stat-item">
+              <span class="lbl">التارجت الشهري:</span>
+              <strong id="target-monthly-val">3,000,000 ج.م</strong>
+              <button type="button" id="edit-target-btn" class="edit-target-link" title="تعديل قيمة التارجت">⚙️ تعديل</button>
+            </div>
+            <div class="target-stat-item">
+              <span class="lbl">المبيعات المحققة:</span>
+              <strong class="text-emerald" id="target-achieved-val">0 ج.م</strong>
+            </div>
+            <div class="target-stat-item">
+              <span class="lbl">المتبقي للإنجاز:</span>
+              <strong class="text-amber" id="target-remaining-val">3,000,000 ج.م</strong>
+            </div>
+            <div class="target-stat-item">
+              <span class="lbl">عمولاتي المستحقة:</span>
+              <strong class="text-purple" id="target-commission-val">0 ج.م</strong>
+            </div>
+          </div>
+        </div>
+
+        <div class="target-progress-wrap">
+          <div class="progress-bar-rail">
+            <div id="target-progress-bar" class="progress-bar-fill" style="width: 0%;"></div>
+          </div>
+          <span class="progress-pct-badge" id="target-pct-badge">0% من التارجت</span>
+        </div>
+      </section>
+
+      <!-- Metrics Ribbon -->
+      <section class="metrics-ribbon">
+        <div class="metric-card">
+          <div class="metric-icon-box box-emerald">
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><line x1="19" y1="8" x2="19" y2="14"></line><line x1="22" y1="11" x2="16" y2="11"></line></svg>
+          </div>
+          <div class="metric-info">
+            <span class="m-label">إجمالي العملاء (Leads)</span>
+            <h3 id="stat-leads-count">0</h3>
+            <span class="m-sub">عملاء مسندين لك</span>
+          </div>
+        </div>
+
+        <div class="metric-card">
+          <div class="metric-icon-box box-blue">
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+          </div>
+          <div class="metric-info">
+            <span class="m-label">الوحدات المحجوزة والتعاقدات</span>
+            <h3 id="stat-reservations-count">0</h3>
+            <span class="m-sub">عقود معتمدة تمت بواسطتك</span>
+          </div>
+        </div>
+
+        <div class="metric-card">
+          <div class="metric-icon-box box-amber">
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+          </div>
+          <div class="metric-info">
+            <span class="m-label">متابعات اليوم العاجلة</span>
+            <h3 id="stat-today-followups">0</h3>
+            <span class="m-sub" id="stat-overdue-followups">0 متأخرة</span>
+          </div>
+        </div>
+
+        <div class="metric-card">
+          <div class="metric-icon-box box-purple">
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+          </div>
+          <div class="metric-info">
+            <span class="m-label">الوحدات المتاحة للبيع</span>
+            <h3 id="stat-available-units">0</h3>
+            <span class="m-sub">في المشاريع المخصصة لك</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Main Navigation Tabs -->
+      <div class="tabs-nav-bar">
+        <button type="button" class="tab-btn active" data-tab="tab-leads">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle></svg>
+          <span>قمع العملاء والمتابعات (Pipeline & Leads)</span>
+        </button>
+        <button type="button" class="tab-btn" data-tab="tab-inventory">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg>
+          <span>المخزون والوحدات المتاحة</span>
+        </button>
+        <button type="button" class="tab-btn" data-tab="tab-reservations">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+          <span>عقود الحجز والعمولات</span>
+        </button>
+      </div>
+
+      <!-- Tab 1: Leads Pipeline & Interaction Hub -->
+      <section id="tab-leads" class="tab-panel active">
+        <div class="panel-action-bar">
+          <div>
+            <h2>متابعة العملاء وقمع المبيعات (Sales Pipeline)</h2>
+            <p>إدارة دورة حياة العميل وتسجيل المكالمات والتواصل المباشر عبر الواتساب</p>
+          </div>
+
+          <div class="pipeline-actions-group">
+            <div class="view-toggle-bar">
+              <button type="button" id="toggle-kanban-btn" class="view-toggle-btn active">📊 لوحة القمع (Kanban)</button>
+              <button type="button" id="toggle-table-btn" class="view-toggle-btn">📋 عرض الجدول (Table)</button>
+            </div>
+            <button id="open-lead-modal-btn" class="btn-primary-luxury">
+              <span>+ تسجيل عميل جديد</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- ITEM 1: Visual Kanban Sales Pipeline View -->
+        <div id="leads-kanban-container" class="kanban-pipeline-wrapper">
+          <!-- Column 1: New Leads -->
+          <div class="kanban-col col-new" data-stage="new">
+            <div class="kanban-col-header">
+              <span class="col-dot dot-new"></span>
+              <h4>عملاء جدد</h4>
+              <span class="col-count-badge" id="count-stage-new">0</span>
+            </div>
+            <div class="kanban-cards-list" id="cards-stage-new"></div>
+          </div>
+
+          <!-- Column 2: Contacted -->
+          <div class="kanban-col col-contacted" data-stage="contacted">
+            <div class="kanban-col-header">
+              <span class="col-dot dot-contacted"></span>
+              <h4>تم التواصل</h4>
+              <span class="col-count-badge" id="count-stage-contacted">0</span>
+            </div>
+            <div class="kanban-cards-list" id="cards-stage-contacted"></div>
+          </div>
+
+          <!-- Column 3: Meetings & Visits -->
+          <div class="kanban-col col-meeting" data-stage="meeting">
+            <div class="kanban-col-header">
+              <span class="col-dot dot-meeting"></span>
+              <h4>معاينات ومقابلات</h4>
+              <span class="col-count-badge" id="count-stage-meeting">0</span>
+            </div>
+            <div class="kanban-cards-list" id="cards-stage-meeting"></div>
+          </div>
+
+          <!-- Column 4: Proposals & Negotiation -->
+          <div class="kanban-col col-proposal" data-stage="proposal">
+            <div class="kanban-col-header">
+              <span class="col-dot dot-proposal"></span>
+              <h4>عروض أسعار وتفاوض</h4>
+              <span class="col-count-badge" id="count-stage-proposal">0</span>
+            </div>
+            <div class="kanban-cards-list" id="cards-stage-proposal"></div>
+          </div>
+
+          <!-- Column 5: Closed Won -->
+          <div class="kanban-col col-won" data-stage="won">
+            <div class="kanban-col-header">
+              <span class="col-dot dot-won"></span>
+              <h4>تم التعاقد والبيع 🏆</h4>
+              <span class="col-count-badge" id="count-stage-won">0</span>
+            </div>
+            <div class="kanban-cards-list" id="cards-stage-won"></div>
+          </div>
+
+          <!-- Column 6: Closed Lost -->
+          <div class="kanban-col col-lost" data-stage="lost">
+            <div class="kanban-col-header">
+              <span class="col-dot dot-lost"></span>
+              <h4>صفقات ملغاة ❌</h4>
+              <span class="col-count-badge" id="count-stage-lost">0</span>
+            </div>
+            <div class="kanban-cards-list" id="cards-stage-lost"></div>
+          </div>
+        </div>
+
+        <!-- Table View Alternative -->
+        <div id="leads-table-container" class="leads-table-container" style="display: none;">
+          <table class="luxury-table">
+            <thead>
+              <tr>
+                <th>اسم العميل</th>
+                <th>الهاتف والواتساب</th>
+                <th>المشروع المستهدف</th>
+                <th>المرحلة الحالية</th>
+                <th>المتابعة القادمة</th>
+                <th>الميزانية المتوقعة</th>
+                <th>الإجراء والمتابعة</th>
+              </tr>
+            </thead>
+            <tbody id="leads-tbody">
+              <tr><td colspan="7" class="table-loading">جارٍ جلب بيانات العملاء...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Tab 2: Inventory & Available Units -->
+      <section id="tab-inventory" class="tab-panel">
+        <div class="panel-action-bar">
+          <div>
+            <h2>مخزون الوحدات المتاحة للبيع</h2>
+            <p>تصفح الوحدات المتاحة، حساب عروض الأسعار، وإتمام الحجوزات</p>
+          </div>
+          <div class="filter-box">
+            <select id="inventory-project-filter">
+              <option value="all">جميع المشاريع المسندة</option>
+            </select>
+          </div>
+        </div>
+
+        <div id="units-grid" class="units-cards-grid">
+          <!-- Rendered via JS -->
+        </div>
+      </section>
+
+      <!-- Tab 3: Contracts & Reservations -->
+      <section id="tab-reservations" class="tab-panel">
+        <div class="panel-action-bar">
+          <div>
+            <h2>سجل تعاقداتك وحجوزات الوحدات</h2>
+            <p>تفاصيل الوحدات المحجوزة والعمولات المترتبة عليها وجداول الأقساط</p>
+          </div>
+        </div>
+
+        <div class="leads-table-container">
+          <table class="luxury-table">
+            <thead>
+              <tr>
+                <th>رقم الوحدة</th>
+                <th>المشروع</th>
+                <th>العميل المتعاقد</th>
+                <th>إجمالي السعر</th>
+                <th>المقدم المحصل</th>
+                <th>عمولتك المستحقة</th>
+                <th>تاريخ التعاقد</th>
+              </tr>
+            </thead>
+            <tbody id="reservations-tbody">
+              <tr><td colspan="7" class="table-loading">لم يتم تسجيل أي تعاقدات بعد.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+    </div>
+
+    <!-- ========================================================
+         MODALS
+         ======================================================== -->
+
+    <!-- Modal 1: Add New Lead -->
+    <div id="new-lead-modal" class="modal-backdrop" style="display: none;">
+      <div class="modal-card">
+        <div class="modal-card-header">
+          <div>
+            <h3>تسجيل عميل محتمل جديد (Lead)</h3>
+            <p>إدخال بيانات عميل مهتم بأحد مشاريع الشركة</p>
+          </div>
+          <button type="button" class="close-modal-x" id="close-lead-x">&times;</button>
+        </div>
+        <form id="lead-form" class="modal-card-body">
+          <div class="field-wrap">
+            <label>اسم العميل بالكامل *</label>
+            <input type="text" id="m-lead-name" placeholder="مثال: أستاذ حسام حسن" required />
+          </div>
+          <div class="field-row">
+            <div class="field-wrap">
+              <label>رقم الهاتف *</label>
+              <input type="text" id="m-lead-phone" placeholder="01xxxxxxxxx" required />
+            </div>
+            <div class="field-wrap">
+              <label>البريد الإلكتروني</label>
+              <input type="email" id="m-lead-email" placeholder="client@domain.com" />
+            </div>
+          </div>
+          <div class="field-row">
+            <div class="field-wrap">
+              <label>المشروع المستهدف *</label>
+              <select id="m-lead-project" required></select>
+            </div>
+            <div class="field-wrap">
+              <label>الميزانية التقريبية (ج.م)</label>
+              <input type="number" id="m-lead-budget" placeholder="1500000" />
+            </div>
+          </div>
+          <div class="field-row">
+            <div class="field-wrap">
+              <label>المرحلة الأولية</label>
+              <select id="m-lead-stage">
+                <option value="new" selected>عميل جديد (New)</option>
+                <option value="contacted">تم التواصل (Contacted)</option>
+                <option value="meeting">معاينة ومقابلة (Meeting)</option>
+              </select>
+            </div>
+            <div class="field-wrap">
+              <label>موعد أول اتصال أو متابعة</label>
+              <input type="datetime-local" id="m-lead-followup" />
+            </div>
+          </div>
+          <div class="field-wrap">
+            <label>ملاحظات واحتياجات العميل</label>
+            <textarea id="m-lead-notes" rows="2" placeholder="مساحة مطلوبة، طريقة سداد مفضلة..."></textarea>
+          </div>
+          <div class="modal-footer-btns">
+            <button type="button" class="btn-cancel" id="cancel-lead-btn">إلغاء</button>
+            <button type="submit" class="btn-save" id="save-lead-btn">حفظ وتسكين في القمع</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- ITEM 2: Interaction Hub & Call Log Modal -->
+    <div id="lead-activity-modal" class="modal-backdrop" style="display: none;">
+      <div class="modal-card modal-lg">
+        <div class="modal-card-header">
+          <div>
+            <h3 id="act-modal-client-name">سجل المتابعة والتواصل مع العميل</h3>
+            <p id="act-modal-client-phone" class="text-muted">-</p>
+          </div>
+          <div style="display:flex; gap:0.5rem; align-items:center;">
+            <a id="act-modal-wa-btn" href="#" target="_blank" class="btn-whatsapp-sm">💬 واتساب مباشر</a>
+            <button type="button" class="close-modal-x" id="close-act-x">&times;</button>
+          </div>
+        </div>
+
+        <div class="activity-modal-layout">
+          <!-- Left/Top: Add New Activity Form -->
+          <div class="add-act-box">
+            <h4>+ تسجيل نشاط أو مكالمة جديدة:</h4>
+            <form id="new-activity-form">
+              <input type="hidden" id="act-lead-id" />
+              
+              <div class="field-row">
+                <div class="field-wrap">
+                  <label>نوع التواصل *</label>
+                  <select id="act-type" required>
+                    <option value="call">📞 مكالمة هاتفية</option>
+                    <option value="whatsapp">💬 محادثة واتساب</option>
+                    <option value="meeting">🏢 معاينة ميدانية / مقابلة</option>
+                    <option value="proposal">📑 تقديم عرض سعر رسمي</option>
+                    <option value="note">📝 ملاحظة وتحديث بيانات</option>
+                  </select>
+                </div>
+                <div class="field-wrap">
+                  <label>تحديث مرحلة العميل</label>
+                  <select id="act-stage">
+                    <option value="new">عملاء جدد</option>
+                    <option value="contacted">تم التواصل</option>
+                    <option value="meeting">معاينات ومقابلات</option>
+                    <option value="proposal">عروض أسعار وتفاوض</option>
+                    <option value="won">تم التعاقد والبيع 🏆</option>
+                    <option value="lost">صفقة ملغاة ❌</option>
+                  </select>
+                </div>
+              </div>
+
+              <!-- Lost Reason field (shows only if lost) -->
+              <div class="field-wrap" id="lost-reason-field" style="display: none;">
+                <label style="color:#b91c1c;">سبب إلغاء الصفقة أو فقدان العميل *</label>
+                <select id="act-lost-reason">
+                  <option value="السعر أعلى من الميزانية">السعر أعلى من الميزانية المتاحة</option>
+                  <option value="اشترى من مطور أو كمبوند منافس">اشترى من مطور أو مشروع منافس</option>
+                  <option value="الموقع أو المساحات غير مناسبة">الموقع أو المساحات غير مناسبة لطلبه</option>
+                  <option value="تأجيل قرار الشراء لوقت لاحق">تأجيل قرار الشراء لوقت لاحق</option>
+                  <option value="تعذر التواصل وعدم الرد">تعذر التواصل وعدم الرد المتكرر</option>
+                  <option value="أخرى">أخرى (مذكورة في التفاصيل)...</option>
+                </select>
+              </div>
+
+              <div class="field-wrap">
+                <label>ملخص المكالمة أو الإجراء المتخذ *</label>
+                <input type="text" id="act-summary" placeholder="مثال: تم الاتصال، العميل مهتم بالشقة 140م وطلب زيارة الموقع الأحد" required />
+              </div>
+
+              <div class="field-row">
+                <div class="field-wrap">
+                  <label>موعد المتابعة القادمة (Next Follow-up)</label>
+                  <input type="datetime-local" id="act-next-followup" />
+                </div>
+                <div class="field-wrap">
+                  <label>ملاحظات إضافية وتفاصيل</label>
+                  <input type="text" id="act-details" placeholder="ملاحظات هامة إضافية..." />
+                </div>
+              </div>
+
+              <button type="submit" class="btn-save btn-emerald" style="width:100%; margin-top:0.6rem;">حفظ النشاط وتحديث المتابعة</button>
+            </form>
+          </div>
+
+          <!-- Right/Bottom: Historical Timeline -->
+          <div class="act-timeline-box">
+            <h4>سجل المكالمات والتواصل السابق:</h4>
+            <div id="act-timeline-list" class="timeline-items">
+              <!-- Rendered via JS -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ITEM 3: Instant Official Quotation Generator Modal -->
+    <div id="quotation-modal" class="modal-backdrop" style="display: none;">
+      <div class="modal-card modal-lg quotation-modal-window">
+        <div class="modal-card-header no-print">
+          <div>
+            <h3>⚡ حاسبة ومولد عروض الأسعار الرسمية (Quotation Generator)</h3>
+            <p>توليد جدول سداد مفصل وعرض سعر معتمد للعميل للطباعة والمشاركة الفورية</p>
+          </div>
+          <button type="button" class="close-modal-x" id="close-quotation-x">&times;</button>
+        </div>
+
+        <div class="quotation-body">
+          <!-- Setup Form (Hidden on Print) -->
+          <form id="quotation-calc-form" class="quotation-inputs-panel no-print">
+            <div class="field-row">
+              <div class="field-wrap">
+                <label>اختر الوحدة من المخزون *</label>
+                <select id="q-unit-select" required></select>
+              </div>
+              <div class="field-wrap">
+                <label>اسم العميل</label>
+                <input type="text" id="q-client-name" placeholder="الاسم ثلاثي" />
+              </div>
+            </div>
+
+            <div class="field-row">
+              <div class="field-wrap">
+                <label>نسبة المقدم المدفوع (%) *</label>
+                <input type="number" id="q-dp-pct" value="15" min="0" max="90" step="1" required />
+              </div>
+              <div class="field-wrap">
+                <label>مدة التقسيط (سنوات) *</label>
+                <select id="q-years-select" required>
+                  <option value="1">سنة واحدة</option>
+                  <option value="2">سنتان (2)</option>
+                  <option value="3">3 سنوات</option>
+                  <option value="4">4 سنوات</option>
+                  <option value="5" selected>5 سنوات</option>
+                  <option value="6">6 سنوات</option>
+                  <option value="7">7 سنوات</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="field-row">
+              <div class="field-wrap">
+                <label>دورية الأقساط *</label>
+                <select id="q-freq-select" required>
+                  <option value="quarterly" selected>أقساط ربع سنوية (كل 3 شهور)</option>
+                  <option value="monthly">أقساط شهرية (كل شهر)</option>
+                  <option value="semi_annual">أقساط نصف سنوية (كل 6 شهور)</option>
+                  <option value="annual">أقساط سنوية (كل سنة)</option>
+                </select>
+              </div>
+              <div class="field-wrap">
+                <label>خصم كاش / خصم خاص (%)</label>
+                <input type="number" id="q-discount-pct" value="0" min="0" max="50" step="0.5" />
+              </div>
+            </div>
+
+            <div class="field-row">
+              <div class="field-wrap">
+                <label>نسبة وديعة الصيانة (%)</label>
+                <input type="number" id="q-maint-pct" value="5" min="0" max="15" step="0.5" />
+              </div>
+              <div class="field-wrap" style="align-self:flex-end;">
+                <button type="submit" class="btn-save btn-emerald" style="width:100%;">⚡ حساب وتوليد العرض</button>
+              </div>
+            </div>
+          </form>
+
+          <!-- Official Printable Sheet -->
+          <div id="quotation-sheet-preview" class="quotation-official-sheet">
+            <div class="quotation-print-header">
+              <div class="q-brand-meta">
+                <h2>شركة الاستثمار والتطوير العقاري</h2>
+                <p>إدارة المبيعات والتعاقدات الرسمية</p>
+              </div>
+              <div class="q-doc-badge">
+                <span class="badge-title">عرض سعر رسمي مبدئي</span>
+                <span class="badge-date" id="q-out-date">التاريخ: --</span>
+              </div>
+            </div>
+
+            <!-- Client & Unit Banner -->
+            <div class="q-client-unit-grid">
+              <div class="q-box">
+                <span class="q-lbl">العميل المحترم:</span>
+                <strong id="q-out-client">--</strong>
+              </div>
+              <div class="q-box">
+                <span class="q-lbl">المشروع العقاري:</span>
+                <strong id="q-out-project">--</strong>
+              </div>
+              <div class="q-box">
+                <span class="q-lbl">رقم الوحدة ونوعها:</span>
+                <strong id="q-out-unit">--</strong>
+              </div>
+              <div class="q-box">
+                <span class="q-lbl">المساحة والدور:</span>
+                <strong id="q-out-area">--</strong>
+              </div>
+            </div>
+
+            <!-- Financial Summary Cards -->
+            <div class="q-financials-ribbon">
+              <div class="q-fin-card">
+                <span>سعر الوحدة الإجمالي</span>
+                <h4 id="q-out-price">0 ج.م</h4>
+              </div>
+              <div class="q-fin-card fin-highlight">
+                <span>المقدم المطلوب</span>
+                <h4 id="q-out-dp">0 ج.م</h4>
+              </div>
+              <div class="q-fin-card">
+                <span>قيمة القسط الدوري</span>
+                <h4 id="q-out-inst-amt">0 ج.م</h4>
+              </div>
+              <div class="q-fin-card">
+                <span>وديعة الصيانة</span>
+                <h4 id="q-out-maint">0 ج.م</h4>
+              </div>
+            </div>
+
+            <!-- Schedule Table Preview -->
+            <div class="q-schedule-wrap">
+              <h5>جدول استحقاقات الأقساط المقترح:</h5>
+              <div class="q-table-scroll">
+                <table class="q-table">
+                  <thead>
+                    <tr>
+                      <th>#</th>
+                      <th>البيان</th>
+                      <th>تاريخ الاستحقاق</th>
+                      <th>القيمة المستحقة</th>
+                    </tr>
+                  </thead>
+                  <tbody id="q-schedule-tbody">
+                    <tr><td colspan="4" style="text-align:center; padding:1.5rem; color:#94a3b8;">اضغط على "حساب وتوليد العرض" لعرض جدول الأقساط</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <div class="quotation-print-footer">
+              <div class="q-terms">
+                <p>• هذا العرض سارٍ لمدة 48 ساعة فقط من تاريخ إصداره، والوحدة لا تعتبر محجوزة نهائياً إلا بسداد دفعة الحجز الرسمية.</p>
+                <p>• يتم تسليم الوحدة وفقاً للمواصفات ونوع التشطيب الموضح في العقد النهائي للشركة.</p>
+              </div>
+              <div class="q-signature-box">
+                <span>مسؤول المبيعات المعتمد:</span>
+                <strong id="q-out-rep">--</strong>
+              </div>
+            </div>
+
+            <!-- Print Actions Bar (Hidden when printing) -->
+            <div class="q-print-actions-bar no-print">
+              <button type="button" id="print-quotation-btn" class="btn-ctrl btn-emerald" style="background:#059669;color:#fff;">
+                🖨️ طباعة عرض السعر / حفظ PDF
+              </button>
+              <button type="button" id="share-wa-quotation-btn" class="btn-ctrl btn-whatsapp" style="background:#25D366;color:#fff;">
+                💬 إرسال ملخص العرض عبر واتساب للعميل
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal: Contract & Reserve Unit -->
+    <div id="reserve-unit-modal" class="modal-backdrop" style="display: none;">
+      <div class="modal-card modal-lg">
+        <div class="modal-card-header">
+          <div>
+            <h3>حجز وتعاقد وحدة جديدة</h3>
+            <p id="modal-unit-subtitle">سيتم ترحيل المقدم تلقائياً للخزينة وجدولة الأقساط</p>
+          </div>
+          <button type="button" class="close-modal-x" id="close-res-x">&times;</button>
+        </div>
+        <form id="reserve-form" class="modal-card-body">
+          <input type="hidden" id="res-unit-id" />
+          <input type="hidden" id="res-project-id" />
+
+          <div class="unit-highlight-banner" id="res-unit-banner"></div>
+
+          <div class="field-row">
+            <div class="field-wrap">
+              <label>اسم العميل المتعاقد *</label>
+              <input type="text" id="res-client-name" placeholder="الاسم رباعي" required />
+            </div>
+            <div class="field-wrap">
+              <label>رقم هاتف العميل *</label>
+              <input type="text" id="res-client-phone" placeholder="01xxxxxxxxx" required />
+            </div>
+          </div>
+
+          <div class="field-row">
+            <div class="field-wrap">
+              <label>الرقم القومي للعميل</label>
+              <input type="text" id="res-client-natid" placeholder="14 رقم" />
+            </div>
+            <div class="field-wrap">
+              <label>نظام وسنوات السداد *</label>
+              <select id="res-plan-select" required></select>
+            </div>
+          </div>
+
+          <div class="field-row">
+            <div class="field-wrap">
+              <label>المقدم المدفوع الآن (ج.م) *</label>
+              <input type="number" id="res-down-payment" required />
+            </div>
+            <div class="field-wrap">
+              <label>نسبة عمولتك %</label>
+              <input type="number" id="res-commission-pct" value="1.0" step="0.1" />
+            </div>
+          </div>
+
+          <div class="modal-footer-btns">
+            <button type="button" class="btn-cancel" id="cancel-res-btn">إلغاء</button>
+            <button type="submit" class="btn-save btn-emerald" id="save-res-btn">إتمام التعاقد وجدولة الأقساط فوراً</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Edit Monthly Target Modal -->
+    <div id="target-modal" class="modal-backdrop" style="display: none;">
+      <div class="modal-card">
+        <div class="modal-card-header">
+          <div>
+            <h3>تحديد مستهدف المبيعات والعمولة</h3>
+            <p>تحديث التارجت الشهري ونسبة العمولة لمسؤول المبيعات</p>
+          </div>
+          <button type="button" class="close-modal-x" id="close-target-x">&times;</button>
+        </div>
+        <form id="target-form" class="modal-card-body">
+          <div class="field-wrap">
+            <label>قيمة التارجت الشهري المطلوب (ج.م) *</label>
+            <input type="number" id="t-monthly-val" min="100000" step="50000" required />
+          </div>
+          <div class="field-wrap">
+            <label>نسبة العمولة الافتراضية (%)</label>
+            <input type="number" id="t-rate-val" min="0.1" max="10" step="0.1" required />
+          </div>
+          <div class="modal-footer-btns">
+            <button type="button" class="btn-cancel" id="cancel-target-btn">إلغاء</button>
+            <button type="submit" class="btn-save">حفظ التارجت</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+  </main>
+</Layout>
+
+<style is:global>
+  * { box-sizing: border-box; }
+  .portal-main-page {
+    direction: rtl;
+    font-family: 'Cairo', system-ui, sans-serif;
+    background: #f8fafc;
+    min-height: 100vh;
+    padding-bottom: 4rem;
+    color: #0f172a;
+  }
+  .auth-loading-screen {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    min-height: 100vh; font-family: 'Cairo', sans-serif; color: #475569; gap: 1rem; direction: rtl;
+  }
+  .auth-spinner {
+    width: 44px; height: 44px; border: 4px solid #e2e8f0; border-top-color: #059669; border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .role-top-header {
+    background: #ffffff; border-bottom: 1px solid #e2e8f0; position: sticky; top: 0; z-index: 40;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.03);
+  }
+  .header-inner {
+    max-width: 1600px; margin: 0 auto; padding: 0.9rem 2rem;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .user-profile-badge { display: flex; align-items: center; gap: 0.85rem; }
+  .avatar-pod {
+    width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center;
+    font-size: 1.25rem; font-weight: 900; color: #fff;
+  }
+  .pod-emerald { background: linear-gradient(135deg, #059669, #10b981); }
+  .role-pill {
+    font-size: 0.72rem; font-weight: 800; padding: 0.15rem 0.55rem; border-radius: 12px; display: inline-block;
+  }
+  .pill-emerald { background: #d1fae5; color: #047857; }
+  .user-title { margin: 0; font-size: 1.15rem; font-weight: 800; color: #0f172a; }
+
+  .header-controls { display: flex; align-items: center; gap: 0.65rem; }
+  .btn-ctrl {
+    display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.55rem 1rem; border-radius: 10px;
+    font-weight: 700; font-size: 0.86rem; cursor: pointer; text-decoration: none; border: none; transition: all 0.2s;
+  }
+  .btn-quotation { background: #059669; color: #ffffff; }
+  .btn-quotation:hover { background: #047857; }
+  .btn-refresh { background: #f1f5f9; color: #334155; }
+  .btn-refresh:hover { background: #e2e8f0; }
+  .btn-client-portal { background: #e0f2fe; color: #0369a1; }
+  .btn-client-portal:hover { background: #bae6fd; }
+  .btn-logout { background: #fee2e2; color: #dc2626; }
+  .btn-logout:hover { background: #fecaca; }
+
+  .content-wrapper { max-width: 1600px; margin: 1.6rem auto 0; padding: 0 2rem; display: flex; flex-direction: column; gap: 1.5rem; }
+
+  /* Target Tracker Card */
+  .target-tracker-card {
+    background: #ffffff; border-radius: 18px; border: 1.5px solid #e2e8f0; padding: 1.4rem 1.6rem;
+    box-shadow: 0 3px 12px rgba(0, 0, 0, 0.03); display: flex; flex-direction: column; gap: 1rem;
+  }
+  .tracker-header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1.5rem; }
+  .tracker-meta { display: flex; align-items: center; gap: 0.85rem; }
+  .target-icon { font-size: 2.2rem; }
+  .tracker-meta h3 { margin: 0 0 0.15rem 0; font-size: 1.15rem; font-weight: 900; color: #0f172a; }
+  .tracker-meta p { margin: 0; font-size: 0.78rem; color: #64748b; }
+
+  .target-numbers-grp { display: flex; align-items: center; gap: 1.5rem; flex-wrap: wrap; }
+  .target-stat-item { display: flex; flex-direction: column; position: relative; }
+  .target-stat-item .lbl { font-size: 0.75rem; color: #64748b; font-weight: 700; }
+  .target-stat-item strong { font-size: 1.15rem; font-weight: 900; color: #0f172a; }
+  .edit-target-link {
+    background: none; border: none; font-size: 0.7rem; color: #0284c7; cursor: pointer; padding: 0; font-weight: 700;
+  }
+  .text-emerald { color: #059669 !important; }
+  .text-amber { color: #d97706 !important; }
+  .text-purple { color: #7c3aed !important; }
+
+  .target-progress-wrap { display: flex; align-items: center; gap: 1rem; }
+  .progress-bar-rail {
+    flex: 1; height: 12px; background: #f1f5f9; border-radius: 20px; overflow: hidden; position: relative;
+  }
+  .progress-bar-fill {
+    height: 100%; background: linear-gradient(90deg, #10b981, #059669); border-radius: 20px;
+    transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .progress-pct-badge {
+    background: #ecfdf5; color: #059669; font-weight: 900; font-size: 0.82rem; padding: 0.2rem 0.65rem; border-radius: 12px;
+  }
+
+  .metrics-ribbon { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.25rem; }
+  .metric-card {
+    background: #ffffff; border-radius: 16px; padding: 1.25rem 1.4rem; border: 1px solid #e2e8f0;
+    display: flex; align-items: center; gap: 1rem; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+  }
+  .metric-icon-box {
+    width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .box-emerald { background: #d1fae5; color: #059669; }
+  .box-blue { background: #dbeafe; color: #2563eb; }
+  .box-amber { background: #fef3c7; color: #d97706; }
+  .box-purple { background: #ede9fe; color: #7c3aed; }
+  .metric-info { display: flex; flex-direction: column; min-width: 0; }
+  .m-label { font-size: 0.78rem; font-weight: 700; color: #64748b; }
+  .metric-info h3 { margin: 0.15rem 0; font-size: 1.55rem; font-weight: 900; color: #0f172a; }
+  .m-sub { font-size: 0.72rem; color: #94a3b8; font-weight: 600; }
+
+  .tabs-nav-bar {
+    display: flex; gap: 0.5rem; background: #ffffff; padding: 0.4rem; border-radius: 14px; border: 1px solid #e2e8f0;
+  }
+  .tab-btn {
+    display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.65rem 1.4rem; border-radius: 10px;
+    border: none; background: transparent; color: #64748b; font-weight: 800; font-size: 0.9rem; cursor: pointer;
+    transition: all 0.2s;
+  }
+  .tab-btn:hover { background: #f8fafc; color: #0f172a; }
+  .tab-btn.active { background: #059669; color: #ffffff; box-shadow: 0 4px 12px rgba(5, 150, 105, 0.25); }
+
+  .tab-panel { display: none; flex-direction: column; gap: 1.25rem; }
+  .tab-panel.active { display: flex; }
+
+  .panel-action-bar {
+    background: #ffffff; border-radius: 16px; padding: 1.25rem 1.6rem; border: 1px solid #e2e8f0;
+    display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;
+  }
+  .panel-action-bar h2 { margin: 0 0 0.15rem 0; font-size: 1.2rem; font-weight: 800; color: #0f172a; }
+  .panel-action-bar p { margin: 0; font-size: 0.82rem; color: #64748b; }
+
+  .pipeline-actions-group { display: flex; align-items: center; gap: 0.85rem; }
+  .view-toggle-bar {
+    display: flex; background: #f1f5f9; padding: 0.25rem; border-radius: 10px; border: 1px solid #e2e8f0;
+  }
+  .view-toggle-btn {
+    border: none; background: transparent; font-size: 0.82rem; font-weight: 700; padding: 0.4rem 0.8rem;
+    border-radius: 8px; cursor: pointer; color: #475569; transition: all 0.2s;
+  }
+  .view-toggle-btn.active { background: #ffffff; color: #059669; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
+
+  .btn-primary-luxury {
+    background: linear-gradient(135deg, #059669, #047857); color: #fff; border: none; padding: 0.65rem 1.3rem;
+    border-radius: 10px; font-weight: 800; font-size: 0.9rem; cursor: pointer; box-shadow: 0 4px 12px rgba(5, 150, 105, 0.25);
+    transition: all 0.2s;
+  }
+
+  /* Kanban Board Styles */
+  .kanban-pipeline-wrapper {
+    display: grid; grid-template-columns: repeat(6, 1fr); gap: 1rem; overflow-x: auto; padding-bottom: 1rem;
+  }
+  .kanban-col {
+    background: #f1f5f9; border-radius: 14px; padding: 0.85rem; display: flex; flex-direction: column;
+    gap: 0.75rem; min-width: 250px; border: 1px solid #e2e8f0; max-height: 800px; overflow-y: auto;
+  }
+  .kanban-col-header {
+    display: flex; align-items: center; justify-content: space-between; padding-bottom: 0.6rem;
+    border-bottom: 1.5px solid #e2e8f0; font-size: 0.84rem; font-weight: 800;
+  }
+  .kanban-col-header h4 { margin: 0; font-size: 0.86rem; color: #1e293b; display: flex; align-items: center; gap: 0.4rem; }
+  .col-dot { width: 10px; height: 10px; border-radius: 50%; }
+  .dot-new { background: #3b82f6; }
+  .dot-contacted { background: #06b6d4; }
+  .dot-meeting { background: #8b5cf6; }
+  .dot-proposal { background: #f59e0b; }
+  .dot-won { background: #10b981; }
+  .dot-lost { background: #ef4444; }
+  .col-count-badge {
+    background: #ffffff; padding: 0.15rem 0.5rem; border-radius: 12px; font-size: 0.75rem; font-weight: 800; color: #475569;
+  }
+
+  .kanban-cards-list { display: flex; flex-direction: column; gap: 0.75rem; min-height: 120px; }
+  .kanban-lead-card {
+    background: #ffffff; border-radius: 12px; padding: 0.85rem 0.95rem; border: 1px solid #e2e8f0;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02); display: flex; flex-direction: column; gap: 0.65rem;
+    transition: transform 0.15s, box-shadow 0.15s;
+  }
+  .kanban-lead-card:hover { transform: translateY(-2px); box-shadow: 0 6px 14px rgba(0, 0, 0, 0.06); }
+  .k-card-top { display: flex; justify-content: space-between; align-items: flex-start; }
+  .k-card-name { font-weight: 900; font-size: 0.92rem; color: #0f172a; margin: 0; }
+  .k-card-proj { font-size: 0.72rem; color: #64748b; font-weight: 700; margin-top: 0.15rem; }
+  .k-budget-tag { font-size: 0.72rem; font-weight: 800; background: #f0fdf4; color: #15803d; padding: 0.15rem 0.45rem; border-radius: 6px; }
+
+  .k-contact-actions { display: flex; align-items: center; gap: 0.4rem; }
+  .btn-wa-pill {
+    background: #25D366; color: #ffffff; text-decoration: none; font-size: 0.74rem; font-weight: 800;
+    padding: 0.25rem 0.55rem; border-radius: 6px; display: inline-flex; align-items: center; gap: 0.25rem;
+  }
+  .btn-tel-pill {
+    background: #f1f5f9; color: #334155; text-decoration: none; font-size: 0.74rem; font-weight: 700;
+    padding: 0.25rem 0.5rem; border-radius: 6px;
+  }
+
+  .k-followup-badge {
+    font-size: 0.72rem; font-weight: 700; padding: 0.25rem 0.5rem; border-radius: 6px; display: flex; align-items: center; gap: 0.3rem;
+  }
+  .fu-urgent { background: #fee2e2; color: #dc2626; }
+  .fu-upcoming { background: #fef3c7; color: #b45309; }
+  .fu-normal { background: #f1f5f9; color: #475569; }
+
+  .k-card-footer {
+    display: flex; justify-content: space-between; align-items: center; padding-top: 0.5rem; border-top: 1px dashed #f1f5f9;
+  }
+  .btn-open-log {
+    background: none; border: none; color: #0284c7; font-size: 0.76rem; font-weight: 800; cursor: pointer; padding: 0;
+  }
+  .k-quick-stage-sel {
+    font-size: 0.72rem; padding: 0.2rem 0.35rem; border-radius: 6px; border: 1px solid #cbd5e1; font-family: inherit;
+  }
+
+  /* Table View */
+  .leads-table-container {
+    background: #ffffff; border-radius: 16px; border: 1px solid #e2e8f0; overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+  }
+  .luxury-table { width: 100%; border-collapse: collapse; text-align: right; }
+  .luxury-table th { background: #f8fafc; padding: 0.9rem 1.2rem; font-size: 0.82rem; font-weight: 800; color: #475569; border-bottom: 1px solid #e2e8f0; }
+  .luxury-table td { padding: 0.9rem 1.2rem; font-size: 0.88rem; border-bottom: 1px solid #f1f5f9; color: #1e293b; }
+  .luxury-table tr:hover td { background: #fcfdfe; }
+  .table-loading { text-align: center; color: #94a3b8; padding: 2.5rem !important; }
+
+  /* Activity Modal Styles */
+  .activity-modal-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-top: 0.5rem; }
+  .add-act-box { background: #f8fafc; padding: 1.2rem; border-radius: 14px; border: 1px solid #e2e8f0; }
+  .add-act-box h4 { margin: 0 0 0.85rem 0; font-size: 0.96rem; font-weight: 800; color: #0f172a; }
+  .act-timeline-box { max-height: 480px; overflow-y: auto; padding-left: 0.5rem; }
+  .act-timeline-box h4 { margin: 0 0 0.85rem 0; font-size: 0.96rem; font-weight: 800; color: #0f172a; }
+  .timeline-items { display: flex; flex-direction: column; gap: 0.85rem; }
+  .timeline-card {
+    background: #ffffff; border-radius: 10px; border: 1px solid #e2e8f0; padding: 0.75rem 0.9rem;
+    display: flex; flex-direction: column; gap: 0.35rem; font-size: 0.82rem;
+  }
+  .t-card-head { display: flex; justify-content: space-between; align-items: center; }
+  .t-type-tag { font-weight: 800; font-size: 0.74rem; padding: 0.15rem 0.45rem; border-radius: 4px; }
+  .tag-call { background: #eff6ff; color: #1d4ed8; }
+  .tag-meeting { background: #ede9fe; color: #6d28d9; }
+  .tag-whatsapp { background: #dcfce7; color: #15803d; }
+  .tag-proposal { background: #fef3c7; color: #b45309; }
+  .tag-note { background: #f1f5f9; color: #475569; }
+  .t-date { color: #94a3b8; font-size: 0.72rem; }
+
+  /* Quotation Sheet Styles */
+  .quotation-modal-window { max-width: 820px; }
+  .quotation-official-sheet {
+    background: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 1.6rem;
+    display: flex; flex-direction: column; gap: 1.2rem; margin-top: 1rem;
+  }
+  .quotation-print-header {
+    display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid #0f172a; padding-bottom: 0.85rem;
+  }
+  .q-brand-meta h2 { margin: 0 0 0.2rem 0; font-size: 1.35rem; font-weight: 900; color: #0f172a; }
+  .q-brand-meta p { margin: 0; font-size: 0.8rem; color: #64748b; font-weight: 700; }
+  .q-doc-badge { text-align: left; }
+  .badge-title { display: block; font-weight: 900; font-size: 1.05rem; color: #059669; }
+  .badge-date { font-size: 0.76rem; color: #64748b; font-weight: 700; }
+
+  .q-client-unit-grid {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.85rem; background: #f8fafc; padding: 0.9rem;
+    border-radius: 10px; border: 1px solid #e2e8f0; font-size: 0.84rem;
+  }
+  .q-box { display: flex; flex-direction: column; }
+  .q-lbl { font-size: 0.72rem; color: #64748b; font-weight: 700; }
+
+  .q-financials-ribbon { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.85rem; }
+  .q-fin-card {
+    background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 0.85rem; text-align: center;
+  }
+  .fin-highlight { background: #ecfdf5; border-color: #a7f3d0; }
+  .fin-highlight h4 { color: #059669 !important; }
+  .q-fin-card span { font-size: 0.72rem; color: #64748b; font-weight: 700; display: block; }
+  .q-fin-card h4 { margin: 0.25rem 0 0 0; font-size: 1.15rem; font-weight: 900; color: #0f172a; }
+
+  .q-table-scroll { max-height: 220px; overflow-y: auto; border: 1px solid #e2e8f0; border-radius: 8px; }
+  .q-table { width: 100%; border-collapse: collapse; text-align: right; font-size: 0.8rem; }
+  .q-table th { background: #f1f5f9; padding: 0.6rem 0.85rem; font-weight: 800; color: #334155; }
+  .q-table td { padding: 0.55rem 0.85rem; border-bottom: 1px solid #f1f5f9; }
+
+  .quotation-print-footer {
+    display: flex; justify-content: space-between; align-items: flex-end; padding-top: 0.85rem; border-top: 1px solid #e2e8f0;
+  }
+  .q-terms { max-width: 60%; font-size: 0.72rem; color: #64748b; line-height: 1.5; }
+  .q-terms p { margin: 0 0 0.2rem 0; }
+  .q-signature-box { text-align: center; font-size: 0.8rem; }
+  .q-signature-box strong { display: block; margin-top: 0.3rem; font-size: 0.95rem; }
+
+  .q-print-actions-bar {
+    display: flex; justify-content: flex-end; gap: 0.75rem; padding-top: 1rem; border-top: 1px solid #e2e8f0;
+  }
+
+  /* Units Grid */
+  .units-cards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1.25rem; }
+  .unit-card-lux {
+    background: #ffffff; border-radius: 16px; border: 1px solid #e2e8f0; padding: 1.3rem;
+    display: flex; flex-direction: column; justify-content: space-between; gap: 1rem;
+    transition: all 0.2s; box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+  }
+  .unit-card-lux:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(0,0,0,0.06); border-color: #cbd5e1; }
+  .unit-head-row { display: flex; justify-content: space-between; align-items: flex-start; }
+  .unit-head-row h4 { margin: 0; font-size: 1.15rem; font-weight: 900; color: #0f172a; }
+  .unit-proj-name { font-size: 0.78rem; color: #64748b; font-weight: 700; margin-top: 0.2rem; }
+  .u-status-tag { font-size: 0.74rem; font-weight: 800; padding: 0.25rem 0.65rem; border-radius: 20px; }
+  .tag-available { background: #d1fae5; color: #047857; }
+  .tag-reserved { background: #fef3c7; color: #b45309; }
+  .tag-sold { background: #fee2e2; color: #b91c1c; }
+
+  .unit-props-list { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; background: #f8fafc; padding: 0.75rem; border-radius: 10px; font-size: 0.82rem; }
+  .prop-item { display: flex; flex-direction: column; }
+  .prop-item span { color: #64748b; font-size: 0.72rem; }
+  .prop-item strong { color: #0f172a; font-weight: 800; }
+
+  .unit-card-actions { display: flex; gap: 0.5rem; }
+  .btn-calc-unit {
+    flex: 1; background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; padding: 0.65rem; border-radius: 10px;
+    font-weight: 800; font-size: 0.84rem; cursor: pointer; transition: all 0.2s;
+  }
+  .btn-calc-unit:hover { background: #dbeafe; }
+  .btn-reserve-unit {
+    flex: 1.4; background: #059669; color: #fff; border: none; padding: 0.65rem; border-radius: 10px;
+    font-weight: 800; font-size: 0.88rem; cursor: pointer; transition: background 0.2s;
+  }
+  .btn-reserve-unit:hover { background: #047857; }
+
+  /* Modals Base */
+  .modal-backdrop {
+    position: fixed; inset: 0; background: rgba(15, 23, 42, 0.55); backdrop-filter: blur(6px);
+    display: flex; align-items: center; justify-content: center; z-index: 100; padding: 1.5rem;
+  }
+  .modal-card {
+    background: #ffffff; border-radius: 20px; width: 100%; max-width: 540px; padding: 1.8rem;
+    box-shadow: 0 20px 45px rgba(0,0,0,0.2); border: 1px solid #e2e8f0; max-height: 90vh; overflow-y: auto;
+  }
+  .modal-lg { max-width: 760px; }
+  .modal-card-header {
+    display: flex; justify-content: space-between; align-items: flex-start; padding-bottom: 1rem;
+    border-bottom: 1px solid #f1f5f9; margin-bottom: 1.25rem;
+  }
+  .modal-card-header h3 { margin: 0 0 0.2rem 0; font-size: 1.2rem; font-weight: 800; color: #0f172a; }
+  .modal-card-header p { margin: 0; font-size: 0.78rem; color: #64748b; }
+  .close-modal-x { background: transparent; border: none; font-size: 1.5rem; color: #94a3b8; cursor: pointer; }
+  .close-modal-x:hover { color: #0f172a; }
+
+  .modal-card-body { display: flex; flex-direction: column; gap: 1rem; }
+  .field-wrap { display: flex; flex-direction: column; gap: 0.35rem; }
+  .field-wrap label { font-size: 0.82rem; font-weight: 700; color: #334155; }
+  .field-wrap input, .field-wrap select, .field-wrap textarea {
+    width: 100%; padding: 0.65rem 0.9rem; border: 1.5px solid #cbd5e1; border-radius: 10px;
+    font-size: 0.9rem; font-family: inherit; color: #0f172a;
+  }
+  .field-wrap input:focus, .field-wrap select:focus, .field-wrap textarea:focus {
+    outline: none; border-color: #059669; box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.15);
+  }
+  .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+
+  .unit-highlight-banner {
+    background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 12px; padding: 0.85rem 1rem;
+    font-size: 0.85rem; color: #065f46; display: flex; justify-content: space-between; align-items: center;
+  }
+
+  .modal-footer-btns { display: flex; justify-content: flex-end; gap: 0.65rem; margin-top: 0.5rem; }
+  .btn-save, .btn-cancel {
+    padding: 0.65rem 1.3rem; border-radius: 10px; font-weight: 800; font-size: 0.88rem; cursor: pointer; border: none;
+  }
+  .btn-save { background: #059669; color: #fff; }
+  .btn-save:hover { background: #047857; }
+  .btn-cancel { background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; }
+  .btn-cancel:hover { background: #e2e8f0; }
+
+  .btn-whatsapp-sm {
+    background: #25D366; color: #fff; font-size: 0.75rem; font-weight: 800; text-decoration: none;
+    padding: 0.35rem 0.75rem; border-radius: 8px; display: inline-flex; align-items: center; gap: 0.3rem;
+  }
+
+  /* Print specific style */
+  @media print {
+    body * { visibility: hidden; }
+    #quotation-sheet-preview, #quotation-sheet-preview * { visibility: visible; }
+    #quotation-sheet-preview {
+      position: absolute; left: 0; top: 0; width: 100%; border: none !important; box-shadow: none !important;
+    }
+    .no-print { display: none !important; }
+  }
+
+  @media (max-width: 1200px) {
+    .kanban-pipeline-wrapper { grid-template-columns: repeat(3, 1fr); }
+  }
+  @media (max-width: 960px) {
+    .metrics-ribbon { grid-template-columns: repeat(2, 1fr); }
+    .activity-modal-layout { grid-template-columns: 1fr; }
+    .q-client-unit-grid { grid-template-columns: repeat(2, 1fr); }
+    .q-financials-ribbon { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (max-width: 600px) {
+    .metrics-ribbon { grid-template-columns: 1fr; }
+    .kanban-pipeline-wrapper { grid-template-columns: 1fr; }
+  }
+</style>
+
+<script>
+  import { checkAuth, logout } from '../lib/auth.js';
+
+  let currentSalesUser = null;
+  let salesData = null;
+  let currentActiveLead = null;
+  let currentActiveQuotation = null;
+
+  document.addEventListener('DOMContentLoaded', async () => {
+    const authLoading = document.getElementById('auth-loading-message');
+    const loginContainer = document.getElementById('admin-login-container');
+    const mainContent = document.getElementById('main-content');
+    const logoutBtn = document.getElementById('logout-button');
+
+    try {
+      const user = await checkAuth();
+      if (authLoading) authLoading.style.display = 'none';
+
+      if (user && (user.role === 'sales' || user.role === 'admin')) {
+        currentSalesUser = user;
+        if (mainContent) mainContent.style.display = 'block';
+
+        const nameElem = document.getElementById('user-display-name');
+        const initialElem = document.getElementById('user-avatar-initial');
+        if (nameElem && user.name) nameElem.textContent = user.name;
+        if (initialElem && user.name) initialElem.textContent = user.name.charAt(0).toUpperCase();
+
+        if (logoutBtn) {
+          logoutBtn.addEventListener('click', async () => {
+            await logout();
+            window.location.href = '/crs';
+          });
+        }
+
+        initializeSalesDashboard();
+      } else {
+        window.location.href = '/crs';
+      }
+    } catch (e) {
+      if (authLoading) authLoading.style.display = 'none';
+      if (loginContainer) loginContainer.style.display = 'block';
+    }
+  });
+
+  async function fetchSalesData() {
+    try {
+      const res = await fetch('/api/erp/sales');
+      const data = await res.json();
+      if (data.success) {
+        salesData = data;
+        renderTargetTracker();
+        renderMetrics();
+        renderPipelineKanban();
+        renderLeadsTable();
+        renderInventory();
+        renderReservations();
+        populateModals();
+      }
+    } catch (err) {
+      console.error('Error fetching sales data:', err);
+    }
+  }
+
+  // ITEM 4: Target & Commission Live Progress Tracker
+  function renderTargetTracker() {
+    if (!salesData || !salesData.targetMetrics) return;
+    const m = salesData.targetMetrics;
+
+    const monthlyTarget = m.monthlyTarget || 3000000;
+    const achievedSales = m.totalAchievedSales || 0;
+    const remaining = m.remainingTarget || Math.max(0, monthlyTarget - achievedSales);
+    const progressPct = m.targetProgressPercent || Math.min(100, Math.round((achievedSales / monthlyTarget) * 100));
+
+    document.getElementById('target-monthly-val').textContent = monthlyTarget.toLocaleString('ar-EG') + ' ج.م';
+    document.getElementById('target-achieved-val').textContent = achievedSales.toLocaleString('ar-EG') + ' ج.م';
+    document.getElementById('target-remaining-val').textContent = remaining.toLocaleString('ar-EG') + ' ج.م';
+    document.getElementById('target-commission-val').textContent = (salesData.totalCommissions || 0).toLocaleString('ar-EG') + ' ج.م';
+
+    const bar = document.getElementById('target-progress-bar');
+    const badge = document.getElementById('target-pct-badge');
+    if (bar) bar.style.width = progressPct + '%';
+    if (badge) badge.textContent = progressPct + '% من التارجت';
+
+    // Populate Target Modal inputs
+    const tInput = document.getElementById('t-monthly-val');
+    const rInput = document.getElementById('t-rate-val');
+    if (tInput) tInput.value = monthlyTarget;
+    if (rInput) rInput.value = m.commissionRate || 1.0;
+  }
+
+  function renderMetrics() {
+    if (!salesData) return;
+    document.getElementById('stat-leads-count').textContent = salesData.leads?.length || 0;
+    document.getElementById('stat-reservations-count').textContent = salesData.reservations?.length || 0;
+
+    // Follow-ups today & overdue
+    let todayCount = 0;
+    let overdueCount = 0;
+    const now = new Date();
+    const todayStr = now.toISOString().split('T')[0];
+
+    salesData.leads?.forEach(l => {
+      if (l.nextFollowUp && l.status !== 'won' && l.status !== 'lost') {
+        const fDate = new Date(l.nextFollowUp);
+        const fDateStr = fDate.toISOString().split('T')[0];
+        if (fDateStr === todayStr) todayCount++;
+        else if (fDate < now) overdueCount++;
+      }
+    });
+
+    document.getElementById('stat-today-followups').textContent = todayCount;
+    document.getElementById('stat-overdue-followups').textContent = overdueCount + ' متابعة متأخرة';
+
+    let availCount = 0;
+    salesData.projects?.forEach(p => {
+      p.units?.forEach(u => {
+        if (u.status === 'available') availCount++;
+      });
+    });
+    document.getElementById('stat-available-units').textContent = availCount;
+  }
+
+  // ITEM 5: 1-Click WhatsApp Helper
+  function getWhatsAppUrl(phone, clientName) {
+    if (!phone) return '#';
+    let clean = phone.replace(/[^0-9]/g, '');
+    if (clean.startsWith('0')) clean = '2' + clean; // Egyptian standard +20
+    else if (!clean.startsWith('2') && clean.length === 10) clean = '20' + clean;
+
+    const repName = currentSalesUser?.name || 'مسؤول المبيعات';
+    const msg = `السلام عليكم أستاذ ${clientName || ''}، معك ${repName} بخصوص اهتمامكم بمشروعاتنا العقارية. يسعدني تقديم المساعدة وتفاصيل الوحدات المتاحة لحضرتك.`;
+    return `https://wa.me/${clean}?text=${encodeURIComponent(msg)}`;
+  }
+
+  // ITEM 1: Visual Kanban Pipeline
+  function renderPipelineKanban() {
+    if (!salesData) return;
+
+    const stages = ['new', 'contacted', 'meeting', 'proposal', 'won', 'lost'];
+    const buckets = { new: [], contacted: [], meeting: [], proposal: [], won: [], lost: [] };
+
+    salesData.leads?.forEach(lead => {
+      const st = lead.status || 'new';
+      if (buckets[st]) buckets[st].push(lead);
+      else buckets['new'].push(lead);
+    });
+
+    stages.forEach(st => {
+      const colEl = document.getElementById(`cards-stage-${st}`);
+      const countEl = document.getElementById(`count-stage-${st}`);
+      if (countEl) countEl.textContent = buckets[st].length;
+
+      if (!colEl) return;
+      if (buckets[st].length === 0) {
+        colEl.innerHTML = `<div style="text-align:center; padding:1.2rem; color:#94a3b8; font-size:0.75rem;">لا يوجد عملاء هنا</div>`;
+        return;
+      }
+
+      colEl.innerHTML = buckets[st].map(lead => {
+        const clientName = lead.fullName || lead.name || 'عميل محتمل';
+        const phone = lead.phone || '-';
+        const projName = lead.project?.projectName || 'مشروع عام';
+        const budget = lead.budget ? lead.budget.toLocaleString('ar-EG') + ' ج.م' : 'ميزانية غير محددة';
+        const waUrl = getWhatsAppUrl(phone, clientName);
+
+        // Follow-up status
+        let fuHtml = '';
+        if (lead.nextFollowUp) {
+          const fuDate = new Date(lead.nextFollowUp);
+          const isPast = fuDate < new Date();
+          const fuFormatted = fuDate.toLocaleDateString('ar-EG', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+          fuHtml = `<div class="k-followup-badge ${isPast ? 'fu-urgent' : 'fu-upcoming'}">⏰ متابعة: ${fuFormatted}</div>`;
+        } else if (st !== 'won' && st !== 'lost') {
+          fuHtml = `<div class="k-followup-badge fu-normal">⚠️ لا يوجد موعد متابعة</div>`;
+        }
+
+        // Lost reason banner
+        let lostHtml = '';
+        if (st === 'lost' && lead.lostReason) {
+          lostHtml = `<div style="font-size:0.7rem; color:#b91c1c; background:#fee2e2; padding:0.2rem 0.4rem; border-radius:4px;">سبب الإلغاء: ${lead.lostReason}</div>`;
+        }
+
+        return `
+          <div class="kanban-lead-card" data-lead-id="${lead.id}">
+            <div class="k-card-top">
+              <div>
+                <h5 class="k-card-name">${clientName}</h5>
+                <div class="k-card-proj">${projName}</div>
+              </div>
+              <span class="k-budget-tag">${budget}</span>
+            </div>
+
+            <div class="k-contact-actions">
+              <a href="tel:${phone}" class="btn-tel-pill">📞 ${phone}</a>
+              <a href="${waUrl}" target="_blank" class="btn-wa-pill" title="محادثة فورية">💬 واتساب</a>
+            </div>
+
+            ${fuHtml}
+            ${lostHtml}
+
+            <div class="k-card-footer">
+              <button type="button" class="btn-open-log open-act-modal-btn" data-lead='${JSON.stringify(lead)}'>
+                📝 سجل المتابعة (${lead.activities?.length || 0})
+              </button>
+              <select class="k-quick-stage-sel stage-changer-dropdown" data-lead-id="${lead.id}">
+                <option value="new" ${st === 'new' ? 'selected' : ''}>جديد</option>
+                <option value="contacted" ${st === 'contacted' ? 'selected' : ''}>تم التواصل</option>
+                <option value="meeting" ${st === 'meeting' ? 'selected' : ''}>معاينة</option>
+                <option value="proposal" ${st === 'proposal' ? 'selected' : ''}>عرض سعر</option>
+                <option value="won" ${st === 'won' ? 'selected' : ''}>تعاقد 🏆</option>
+                <option value="lost" ${st === 'lost' ? 'selected' : ''}>ملغي ❌</option>
+              </select>
+            </div>
+          </div>
+        `;
+      }).join('');
+    });
+
+    attachKanbanListeners();
+  }
+
+  function renderLeadsTable() {
+    const tbody = document.getElementById('leads-tbody');
+    if (!salesData || !salesData.leads || salesData.leads.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="7" class="table-loading">لا يوجد عملاء محتملين مسجلين بعد. ابدأ بإضافة عميل جديد!</td></tr>`;
+      return;
+    }
+
+    const stagesMap = {
+      new: 'عميل جديد',
+      contacted: 'تم التواصل',
+      meeting: 'معاينة ومقابلة',
+      proposal: 'عرض سعر وتفاوض',
+      won: 'تم التعاقد والبيع',
+      lost: 'صفقة ملغاة'
+    };
+
+    tbody.innerHTML = salesData.leads.map(lead => {
+      const clientName = lead.fullName || lead.name || 'عميل محتمل';
+      const phone = lead.phone || '-';
+      const waUrl = getWhatsAppUrl(phone, clientName);
+
+      let fuBadge = '-';
+      if (lead.nextFollowUp) {
+        const d = new Date(lead.nextFollowUp);
+        const isPast = d < new Date();
+        fuBadge = `<span class="k-followup-badge ${isPast ? 'fu-urgent' : 'fu-upcoming'}">${d.toLocaleDateString('ar-EG', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>`;
+      }
+
+      return `
+        <tr>
+          <td><strong>${clientName}</strong></td>
+          <td>
+            <div style="display:flex; align-items:center; gap:0.4rem;">
+              <a href="tel:${phone}" style="color:#0f172a; font-weight:700; text-decoration:none;">${phone}</a>
+              <a href="${waUrl}" target="_blank" class="btn-wa-pill">💬 واتساب</a>
+            </div>
+          </td>
+          <td>${lead.project?.projectName || 'مشروع عام'}</td>
+          <td><span class="role-pill pill-emerald">${stagesMap[lead.status] || lead.status}</span></td>
+          <td>${fuBadge}</td>
+          <td>${lead.budget ? lead.budget.toLocaleString('ar-EG') + ' ج.م' : '-'}</td>
+          <td>
+            <button type="button" class="btn-ctrl btn-refresh open-act-modal-btn" data-lead='${JSON.stringify(lead)}' style="padding:0.3rem 0.6rem; font-size:0.75rem;">
+              📝 المتابعات (${lead.activities?.length || 0})
+            </button>
+          </td>
+        </tr>
+      `;
+    }).join('');
+
+    attachTableListeners();
+  }
+
+  function attachKanbanListeners() {
+    // Stage dropdown quick changer
+    document.querySelectorAll('.stage-changer-dropdown').forEach(sel => {
+      sel.addEventListener('change', async (e) => {
+        const leadId = e.target.dataset.leadId;
+        const stage = e.target.value;
+
+        if (stage === 'lost') {
+          // Open activity modal to enter lost reason
+          const lead = salesData.leads.find(l => l.id === leadId);
+          if (lead) openActivityModal(lead, 'lost');
+          return;
+        }
+
+        try {
+          await fetch('/api/erp/sales', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'update_lead_stage', leadId, stage })
+          });
+          fetchSalesData();
+        } catch (err) { alert('خطأ في تحديث المرحلة'); }
+      });
+    });
+
+    // Open activity modal
+    document.querySelectorAll('.open-act-modal-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const lead = JSON.parse(btn.dataset.lead);
+        openActivityModal(lead);
+      });
+    });
+  }
+
+  function attachTableListeners() {
+    document.querySelectorAll('#leads-tbody .open-act-modal-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const lead = JSON.parse(btn.dataset.lead);
+        openActivityModal(lead);
+      });
+    });
+  }
+
+  // ITEM 2: Interaction Hub & Call Log Modal
+  function openActivityModal(lead, forceStage = null) {
+    currentActiveLead = lead;
+    const modal = document.getElementById('lead-activity-modal');
+    const clientName = lead.fullName || lead.name || 'العميل';
+    document.getElementById('act-modal-client-name').textContent = 'سجل متابعة: ' + clientName;
+    document.getElementById('act-modal-client-phone').textContent = 'رقم الهاتف: ' + (lead.phone || '-');
+    document.getElementById('act-lead-id').value = lead.id;
+
+    // WhatsApp link
+    const waBtn = document.getElementById('act-modal-wa-btn');
+    if (waBtn) waBtn.href = getWhatsAppUrl(lead.phone, clientName);
+
+    // Stage dropdown
+    const stageSel = document.getElementById('act-stage');
+    if (stageSel) {
+      stageSel.value = forceStage || lead.status || 'new';
+      handleLostFieldVisibility(stageSel.value);
+    }
+
+    // Populate timeline
+    renderActivitiesTimeline(lead.activities || []);
+
+    modal.style.display = 'flex';
+  }
+
+  function handleLostFieldVisibility(stage) {
+    const lostField = document.getElementById('lost-reason-field');
+    if (lostField) {
+      lostField.style.display = stage === 'lost' ? 'flex' : 'none';
+    }
+  }
+
+  function renderActivitiesTimeline(acts) {
+    const list = document.getElementById('act-timeline-list');
+    if (!acts || acts.length === 0) {
+      list.innerHTML = `<div style="text-align:center; padding:1.5rem; color:#94a3b8; font-size:0.8rem;">لا توجد مكالمات أو أنشطة مسجلة مسبقاً.</div>`;
+      return;
+    }
+
+    const typeTags = {
+      call: '<span class="t-type-tag tag-call">📞 مكالمة</span>',
+      meeting: '<span class="t-type-tag tag-meeting">🏢 معاينة ميدانية</span>',
+      whatsapp: '<span class="t-type-tag tag-whatsapp">💬 واتساب</span>',
+      proposal: '<span class="t-type-tag tag-proposal">📑 عرض سعر</span>',
+      note: '<span class="t-type-tag tag-note">📝 ملاحظة</span>'
+    };
+
+    list.innerHTML = acts.map(a => `
+      <div class="timeline-card">
+        <div class="t-card-head">
+          ${typeTags[a.type] || '<span class="t-type-tag tag-note">تواصل</span>'}
+          <span class="t-date">${new Date(a.createdAt).toLocaleDateString('ar-EG', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>
+        </div>
+        <strong style="color:#0f172a;">${a.summary}</strong>
+        ${a.details ? `<p style="margin:0.2rem 0 0 0; color:#64748b; font-size:0.78rem;">${a.details}</p>` : ''}
+        <div style="font-size:0.7rem; color:#94a3b8; margin-top:0.2rem;">بواسطة: ${a.performedBy || 'مسؤول المبيعات'}</div>
+      </div>
+    `).join('');
+  }
+
+  // ITEM 3: Instant Quotation Modal & Calculator
+  function openQuotationModal(preselectedUnitId = null) {
+    const modal = document.getElementById('quotation-modal');
+    const uSelect = document.getElementById('q-unit-select');
+
+    // Populate units
+    let unitOptions = '<option value="">اختر الوحدة من المشروعات...</option>';
+    salesData?.projects?.forEach(p => {
+      p.units?.forEach(u => {
+        const isSelected = preselectedUnitId && u.id === preselectedUnitId;
+        unitOptions += `<option value="${u.id}" ${isSelected ? 'selected' : ''}>وحدة ${u.unitNumber} (${u.unitType} - ${u.area}م²) - ${p.projectName} [${u.totalPrice?.toLocaleString('ar-EG')} ج.م]</option>`;
+      });
+    });
+    if (uSelect) uSelect.innerHTML = unitOptions;
+
+    // Date
+    document.getElementById('q-out-date').textContent = 'التاريخ: ' + new Date().toLocaleDateString('ar-EG');
+    document.getElementById('q-out-rep').textContent = currentSalesUser?.name || 'مسؤول المبيعات';
+
+    modal.style.display = 'flex';
+  }
+
+  async function calculateQuotation() {
+    const unitId = document.getElementById('q-unit-select').value;
+    if (!unitId) return alert('يرجى اختيار الوحدة لحساب العرض');
+
+    const payload = {
+      action: 'calculate_quotation',
+      unitId,
+      clientName: document.getElementById('q-client-name').value || 'عميل محترم',
+      downPaymentPercent: parseFloat(document.getElementById('q-dp-pct').value) || 15,
+      installmentYears: parseInt(document.getElementById('q-years-select').value) || 5,
+      installmentFrequency: document.getElementById('q-freq-select').value || 'quarterly',
+      discountPercent: parseFloat(document.getElementById('q-discount-pct').value) || 0,
+      maintenancePercent: parseFloat(document.getElementById('q-maint-pct').value) || 5
+    };
+
+    try {
+      const res = await fetch('/api/erp/sales', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      const data = await res.json();
+      if (data.success && data.quotation) {
+        currentActiveQuotation = data.quotation;
+        renderQuotationSheet(data.quotation);
+      } else {
+        alert(data.error || 'فشل حساب عرض السعر');
+      }
+    } catch (e) {
+      alert('خطأ في الاتصال بالخادم');
+    }
+  }
+
+  function renderQuotationSheet(q) {
+    document.getElementById('q-out-client').textContent = q.clientName;
+    document.getElementById('q-out-project').textContent = q.unit.projectName || '-';
+    document.getElementById('q-out-unit').textContent = `وحدة ${q.unit.unitNumber} (${q.unit.unitType})`;
+    document.getElementById('q-out-area').textContent = `${q.unit.area} م² (الدور ${q.unit.floor})`;
+
+    document.getElementById('q-out-price').textContent = q.pricing.netPrice.toLocaleString('ar-EG') + ' ج.م';
+    document.getElementById('q-out-dp').textContent = q.pricing.downPaymentAmount.toLocaleString('ar-EG') + ' ج.م';
+    document.getElementById('q-out-inst-amt').textContent = q.pricing.installmentAmount.toLocaleString('ar-EG') + ' ج.م';
+    document.getElementById('q-out-maint').textContent = q.pricing.maintenanceAmount.toLocaleString('ar-EG') + ' ج.م';
+
+    const tbody = document.getElementById('q-schedule-tbody');
+    if (q.schedule && q.schedule.length > 0) {
+      tbody.innerHTML = q.schedule.map(s => `
+        <tr>
+          <td><strong>${s.num}</strong></td>
+          <td>${s.title}</td>
+          <td>${s.dueDate}</td>
+          <td style="color:#059669; font-weight:800;">${s.amount.toLocaleString('ar-EG')} ج.م</td>
+        </tr>
+      `).join('');
+    }
+  }
+
+  function renderInventory() {
+    const grid = document.getElementById('units-grid');
+    const filterVal = document.getElementById('inventory-project-filter').value;
+    let allUnits = [];
+
+    salesData?.projects?.forEach(p => {
+      if (filterVal === 'all' || p.id === filterVal) {
+        p.units?.forEach(u => {
+          allUnits.push({ ...u, projectName: p.projectName, paymentPlans: p.paymentPlans });
+        });
+      }
+    });
+
+    if (allUnits.length === 0) {
+      grid.innerHTML = `<div style="grid-column: 1/-1; text-align: center; padding: 3rem; background: #fff; border-radius: 16px; color: #94a3b8;">لا توجد وحدات متاحة في هذا المشروع حالياً.</div>`;
+      return;
+    }
+
+    grid.innerHTML = allUnits.map(unit => {
+      const statusClass = unit.status === 'available' ? 'tag-available' : unit.status === 'reserved' ? 'tag-reserved' : 'tag-sold';
+      const statusText = unit.status === 'available' ? 'متاحة للبيع' : unit.status === 'reserved' ? 'محجوزة' : 'تم البيع';
+
+      return `
+        <div class="unit-card-lux">
+          <div>
+            <div class="unit-head-row">
+              <div>
+                <h4>وحدة رقم ${unit.unitNumber}</h4>
+                <div class="unit-proj-name">${unit.projectName} · ${unit.building?.name || 'مبنى'}</div>
+              </div>
+              <span class="u-status-tag ${statusClass}">${statusText}</span>
+            </div>
+
+            <div class="unit-props-list" style="margin-top: 1rem;">
+              <div class="prop-item"><span>النوع / الدور</span><strong>${unit.unitType} (دور ${unit.floor})</strong></div>
+              <div class="prop-item"><span>المساحة</span><strong>${unit.area} م²</strong></div>
+              <div class="prop-item"><span>سعر المتر</span><strong>${unit.pricePerMeter?.toLocaleString('ar-EG')} ج.م</strong></div>
+              <div class="prop-item"><span>السعر الإجمالي</span><strong style="color:#059669;">${unit.totalPrice?.toLocaleString('ar-EG')} ج.م</strong></div>
+            </div>
+          </div>
+
+          <div class="unit-card-actions">
+            <button class="btn-calc-unit calc-unit-btn" data-unit-id="${unit.id}">
+              ⚡ عرض سعر
+            </button>
+            ${unit.status === 'available' ? `
+              <button class="btn-reserve-unit open-res-btn" data-unit='${JSON.stringify(unit)}'>
+                حجز وتعاقد ←
+              </button>
+            ` : `
+              <button class="btn-reserve-unit" disabled style="background:#e2e8f0; color:#94a3b8; cursor:not-allowed;">
+                غير متاحة
+              </button>
+            `}
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    // Attach handlers
+    document.querySelectorAll('.open-res-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const unit = JSON.parse(btn.dataset.unit);
+        openReserveModal(unit);
+      });
+    });
+
+    document.querySelectorAll('.calc-unit-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        openQuotationModal(btn.dataset.unitId);
+      });
+    });
+  }
+
+  function renderReservations() {
+    const tbody = document.getElementById('reservations-tbody');
+    if (!salesData || !salesData.reservations || salesData.reservations.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="7" class="table-loading">لم يتم تسجيل أي تعاقدات بعد.</td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = salesData.reservations.map(res => `
+      <tr>
+        <td><strong>وحدة ${res.unit?.unitNumber}</strong></td>
+        <td>${res.project?.projectName}</td>
+        <td>${res.clientName}</td>
+        <td>${res.totalPrice?.toLocaleString('ar-EG')} ج.م</td>
+        <td style="color:#059669; font-weight:800;">${res.downPayment?.toLocaleString('ar-EG')} ج.م</td>
+        <td style="color:#d97706; font-weight:800;">${res.commissionAmount?.toLocaleString('ar-EG')} ج.م</td>
+        <td>${new Date(res.contractDate).toLocaleDateString('ar-EG')}</td>
+      </tr>
+    `).join('');
+  }
+
+  function populateModals() {
+    const pSelect = document.getElementById('m-lead-project');
+    const filterSelect = document.getElementById('inventory-project-filter');
+    if (!salesData || !salesData.projects) return;
+
+    const options = salesData.projects.map(p => `<option value="${p.id}">${p.projectName}</option>`).join('');
+    if (pSelect) pSelect.innerHTML = options;
+    if (filterSelect) filterSelect.innerHTML = `<option value="all">جميع المشاريع المسندة</option>` + options;
+  }
+
+  function openReserveModal(unit) {
+    const modal = document.getElementById('reserve-unit-modal');
+    document.getElementById('res-unit-id').value = unit.id;
+    document.getElementById('res-project-id').value = unit.projectId || '';
+
+    const banner = document.getElementById('res-unit-banner');
+    banner.innerHTML = `
+      <div><strong>وحدة ${unit.unitNumber} (${unit.unitType})</strong> - مشروع ${unit.projectName}</div>
+      <div>الإجمالي: <strong>${unit.totalPrice?.toLocaleString('ar-EG')} ج.م</strong></div>
+    `;
+
+    const planSelect = document.getElementById('res-plan-select');
+    if (unit.paymentPlans && unit.paymentPlans.length > 0) {
+      planSelect.innerHTML = unit.paymentPlans.map(pl => `
+        <option value="${pl.id}" data-dp="${pl.downPaymentPercent}">
+          ${pl.name} (مقدم ${pl.downPaymentPercent}% · تقسيط ${pl.installmentYears} سنوات)
+        </option>
+      `).join('');
+
+      const initialDpPct = unit.paymentPlans[0].downPaymentPercent;
+      document.getElementById('res-down-payment').value = Math.round((unit.totalPrice * initialDpPct) / 100);
+    } else {
+      planSelect.innerHTML = `<option value="">نظام سداد افتراضي</option>`;
+      document.getElementById('res-down-payment').value = Math.round(unit.totalPrice * 0.15);
+    }
+
+    modal.style.display = 'flex';
+  }
+
+  function initializeSalesDashboard() {
+    fetchSalesData();
+
+    // Tab switcher
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById(btn.dataset.tab)?.classList.add('active');
+      });
+    });
+
+    // View Toggle (Kanban vs Table)
+    const kanbanBtn = document.getElementById('toggle-kanban-btn');
+    const tableBtn = document.getElementById('toggle-table-btn');
+    const kanbanBox = document.getElementById('leads-kanban-container');
+    const tableBox = document.getElementById('leads-table-container');
+
+    kanbanBtn?.addEventListener('click', () => {
+      kanbanBtn.classList.add('active');
+      tableBtn.classList.remove('active');
+      if (kanbanBox) kanbanBox.style.display = 'grid';
+      if (tableBox) tableBox.style.display = 'none';
+    });
+
+    tableBtn?.addEventListener('click', () => {
+      tableBtn.classList.add('active');
+      kanbanBtn.classList.remove('active');
+      if (kanbanBox) kanbanBox.style.display = 'none';
+      if (tableBox) tableBox.style.display = 'block';
+    });
+
+    // Top Quotation Button
+    document.getElementById('open-quotation-top-btn')?.addEventListener('click', () => {
+      openQuotationModal();
+    });
+
+    // Refresh btn
+    document.getElementById('refresh-data-btn')?.addEventListener('click', () => {
+      fetchSalesData();
+    });
+
+    // Target Edit Modal
+    const targetModal = document.getElementById('target-modal');
+    document.getElementById('edit-target-btn')?.addEventListener('click', () => {
+      targetModal.style.display = 'flex';
+    });
+    document.getElementById('close-target-x')?.addEventListener('click', () => { targetModal.style.display = 'none'; });
+    document.getElementById('cancel-target-btn')?.addEventListener('click', () => { targetModal.style.display = 'none'; });
+
+    document.getElementById('target-form')?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const monthlyTarget = parseFloat(document.getElementById('t-monthly-val').value) || 3000000;
+      const commissionRate = parseFloat(document.getElementById('t-rate-val').value) || 1.0;
+
+      try {
+        await fetch('/api/erp/sales', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'update_sales_target', monthlyTarget, commissionRate })
+        });
+        targetModal.style.display = 'none';
+        fetchSalesData();
+      } catch (err) { alert('خطأ في تحديث التارجت'); }
+    });
+
+    // Project filter
+    document.getElementById('inventory-project-filter')?.addEventListener('change', () => {
+      renderInventory();
+    });
+
+    // Lead Modal Triggers
+    const leadModal = document.getElementById('new-lead-modal');
+    document.getElementById('open-lead-modal-btn')?.addEventListener('click', () => {
+      leadModal.style.display = 'flex';
+    });
+    document.getElementById('close-lead-x')?.addEventListener('click', () => { leadModal.style.display = 'none'; });
+    document.getElementById('cancel-lead-btn')?.addEventListener('click', () => { leadModal.style.display = 'none'; });
+
+    // Submit Lead Form
+    document.getElementById('lead-form')?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const saveBtn = document.getElementById('save-lead-btn');
+      saveBtn.disabled = true;
+
+      const payload = {
+        action: 'create_lead',
+        fullName: document.getElementById('m-lead-name').value,
+        phone: document.getElementById('m-lead-phone').value,
+        email: document.getElementById('m-lead-email').value,
+        projectId: document.getElementById('m-lead-project').value,
+        budget: parseFloat(document.getElementById('m-lead-budget').value) || null,
+        interestType: 'residential',
+        notes: document.getElementById('m-lead-notes').value
+      };
+
+      try {
+        const res = await fetch('/api/erp/sales', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        if (res.ok) {
+          leadModal.style.display = 'none';
+          document.getElementById('lead-form').reset();
+          fetchSalesData();
+        } else {
+          alert('فشل تسجيل العميل المحتمل');
+        }
+      } catch (err) { alert('خطأ في الاتصال'); }
+      finally { saveBtn.disabled = false; }
+    });
+
+    // Activity Modal Handlers
+    const actModal = document.getElementById('lead-activity-modal');
+    document.getElementById('close-act-x')?.addEventListener('click', () => { actModal.style.display = 'none'; });
+
+    document.getElementById('act-stage')?.addEventListener('change', (e) => {
+      handleLostFieldVisibility(e.target.value);
+    });
+
+    document.getElementById('new-activity-form')?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const leadId = document.getElementById('act-lead-id').value;
+      const type = document.getElementById('act-type').value;
+      const stage = document.getElementById('act-stage').value;
+      const summary = document.getElementById('act-summary').value;
+      const details = document.getElementById('act-details').value;
+      const nextFollowUp = document.getElementById('act-next-followup').value || null;
+      const lostReason = stage === 'lost' ? document.getElementById('act-lost-reason').value : null;
+
+      try {
+        // 1. Log activity
+        const aRes = await fetch('/api/erp/sales', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'add_lead_activity', leadId, type, summary, details, nextFollowUp })
+        });
+
+        // 2. Update stage if changed
+        if (stage) {
+          await fetch('/api/erp/sales', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'update_lead_stage', leadId, stage, lostReason, nextFollowUp })
+          });
+        }
+
+        if (aRes.ok) {
+          actModal.style.display = 'none';
+          document.getElementById('new-activity-form').reset();
+          fetchSalesData();
+        } else {
+          alert('فشل تسجيل النشاط');
+        }
+      } catch (err) { alert('خطأ في الاتصال بالخادم'); }
+    });
+
+    // Quotation Modal Handlers
+    const qModal = document.getElementById('quotation-modal');
+    document.getElementById('close-quotation-x')?.addEventListener('click', () => { qModal.style.display = 'none'; });
+
+    document.getElementById('quotation-calc-form')?.addEventListener('submit', (e) => {
+      e.preventDefault();
+      calculateQuotation();
+    });
+
+    document.getElementById('print-quotation-btn')?.addEventListener('click', () => {
+      window.print();
+    });
+
+    document.getElementById('share-wa-quotation-btn')?.addEventListener('click', () => {
+      if (!currentActiveQuotation) return alert('يرجى حساب وتوليد العرض أولاً');
+      const q = currentActiveQuotation;
+      const text = `عزيزنا العميل ${q.clientName}،\nيسعدنا تقديم عرض السعر الرسمي لمشروع ${q.unit.projectName}:\nالوحدة: ${q.unit.unitNumber} (${q.unit.unitType} - ${q.unit.area}م²)\nالسعر الإجمالي: ${q.pricing.netPrice.toLocaleString('ar-EG')} ج.م\nالمقدم المطلوب: ${q.pricing.downPaymentAmount.toLocaleString('ar-EG')} ج.م\nالقسط الدوري: ${q.pricing.installmentAmount.toLocaleString('ar-EG')} ج.م على مدار ${q.pricing.installmentYears} سنوات.\nمع تحيات: ${q.salesRep}.`;
+      window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
+    });
+
+    // Reserve Modal Triggers
+    const resModal = document.getElementById('reserve-unit-modal');
+    document.getElementById('close-res-x')?.addEventListener('click', () => { resModal.style.display = 'none'; });
+    document.getElementById('cancel-res-btn')?.addEventListener('click', () => { resModal.style.display = 'none'; });
+
+    // Submit Reserve Form
+    document.getElementById('reserve-form')?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const saveBtn = document.getElementById('save-res-btn');
+      saveBtn.disabled = true;
+
+      const payload = {
+        action: 'create_reservation',
+        projectId: document.getElementById('res-project-id').value,
+        unitId: document.getElementById('res-unit-id').value,
+        clientName: document.getElementById('res-client-name').value,
+        clientPhone: document.getElementById('res-client-phone').value,
+        clientNationalId: document.getElementById('res-client-natid').value,
+        paymentPlanId: document.getElementById('res-plan-select').value,
+        downPayment: parseFloat(document.getElementById('res-down-payment').value) || 0,
+        commissionPercent: parseFloat(document.getElementById('res-commission-pct').value) || 1.0
+      };
+
+      try {
+        const res = await fetch('/api/erp/sales', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const result = await res.json();
+        if (res.ok && result.success) {
+          alert('✓ تم إتمام الحجز والتعاقد بنجاح وجدولة الأقساط وترحيل المقدم إلى الخزينة!');
+          resModal.style.display = 'none';
+          document.getElementById('reserve-form').reset();
+          fetchSalesData();
+        } else {
+          alert('فشل التعاقد: ' + (result.error || 'خطأ غير متوقع'));
+        }
+      } catch (err) { alert('خطأ في الاتصال بالخادم'); }
+      finally { saveBtn.disabled = false; }
+    });
+  }
+</script>

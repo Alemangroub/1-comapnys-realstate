@@ -1,0 +1,3329 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import AdminLogin from '../../components/AdminLogin.astro';
+---
+
+<Layout title="إدارة الإنشاءات والمقاولات | منظومة التطوير العقاري ERP">
+  <div class="construction-app-root">
+    
+    <!-- Auth Loading State -->
+    <div id="auth-loading-message" class="loading-state">
+      <div class="spinner"></div>
+      <p>جارٍ التحقق من صلاحيات إدارة المشروعات والمواقع...</p>
+    </div>
+
+    <!-- Auth Login Container -->
+    <div id="admin-login-container" style="display: none;">
+      <AdminLogin />
+    </div>
+
+    <!-- Main Container -->
+    <main id="main-content" class="erp-container" style="display: none;">
+      
+      <!-- Top Navigation Header -->
+      <header class="erp-topbar">
+        <div class="brand-crumb">
+          <a href="/crs" class="back-link">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+            الرئيسية
+          </a>
+          <span class="sep">/</span>
+          <span class="active-crumb">الإنشاءات، المقاولين، والمخازن</span>
+        </div>
+
+        <div class="topbar-actions">
+          <button id="quick-expense-req-btn" class="btn btn-warning">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+            + طلب صرف نقدية للخزنة
+          </button>
+        </div>
+      </header>
+
+      <!-- Subsystem Executive Banner -->
+      <section class="construction-hero-banner">
+        <div class="hero-text-wrap">
+          <div class="hero-badge-pill">المتابعة الميدانية والمواقع 🏗️</div>
+          <h1>إدارة الإنشاءات، المقاولين، والمخازن</h1>
+          <p>متابعة نسب التنفيذ الدقيقة لمراحل البناء، إدارة مستخلصات المقاولين والموردين، رقابة مخزون الحديد والأسمنت اللحظي، وربط طلبات الصرف المالي بالخزينة المركزية.</p>
+        </div>
+      </section>
+
+      <!-- ========================================================
+           القسم العلوي: اختيار المشروع + شريط إجمالي نسبة الإنجاز
+           ======================================================== -->
+      <section class="project-summary-strip">
+        <div class="strip-grid">
+          
+          <!-- قائمة اختيار المشروع -->
+          <div class="project-picker-box">
+            <label for="project-select" class="picker-label">
+              <span>🏢 المشروع النشط للمتابعة:</span>
+            </label>
+            <div class="select-wrapper">
+              <select id="project-select" class="erp-main-select">
+                <option value="">جارٍ تحميل المشاريع...</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- شريط إجمالي نسبة إنجاز المشروع الكلية -->
+          <div class="total-progress-box">
+            <div class="progress-info-row">
+              <span class="prog-title">إجمالي نسبة إنجاز المشروع الكلية:</span>
+              <strong class="prog-val" id="total-progress-text">0%</strong>
+            </div>
+            <div class="progress-bar-track">
+              <div class="progress-bar-fill" id="total-progress-bar" style="width: 0%;"></div>
+            </div>
+            <span class="prog-subtitle">متوسط نسب الإنجاز المئوية لجميع مراحل التنفيذ المعتمدة</span>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- ========================================================
+           أقسام الإنشاءات: 4 تبويبات رئيسية
+           ======================================================== -->
+      <section class="construction-tabs-section">
+        
+        <!-- شريط أزرار التبويبات -->
+        <div class="construction-tabs-nav">
+          <button class="c-tab-btn active" id="tab-btn-phases" data-pane="pane-phases">
+            <span class="tab-icon">🏗️</span>
+            <span>مراحل البناء والتحديثات</span>
+            <span class="tab-badge" id="phases-count-badge">0</span>
+          </button>
+          
+          <button class="c-tab-btn" id="tab-btn-contractors" data-pane="pane-contractors">
+            <span class="tab-icon">👷‍♂️</span>
+            <span>المقاولين والعقود</span>
+            <span class="tab-badge" id="contractors-count-badge">0</span>
+          </button>
+
+          <button class="c-tab-btn" id="tab-btn-boq" data-pane="pane-boq">
+            <span class="tab-icon">📐</span>
+            <span>مقايسة الكميات (BOQ)</span>
+            <span class="tab-badge" id="boq-count-badge">0</span>
+          </button>
+
+          <button class="c-tab-btn" id="tab-btn-invoices" data-pane="pane-invoices">
+            <span class="tab-icon">📑</span>
+            <span>المستخلصات والاستقطاعات</span>
+            <span class="tab-badge" id="invoices-count-badge">0</span>
+          </button>
+
+          <button class="c-tab-btn" id="tab-btn-inventory" data-pane="pane-inventory">
+            <span class="tab-icon">📦</span>
+            <span>المخازن والخامات</span>
+            <span class="tab-badge" id="materials-count-badge">0</span>
+          </button>
+
+          <button class="c-tab-btn" id="tab-btn-inspections" data-pane="pane-inspections">
+            <span class="tab-icon">🔑</span>
+            <span>الفحص والتسليم (Snagging)</span>
+            <span class="tab-badge" id="inspections-count-badge">0</span>
+          </button>
+          
+          <button class="c-tab-btn" id="tab-btn-expenses" data-pane="pane-expenses">
+            <span class="tab-icon">💵</span>
+            <span>طلب صرف نقدية للخزنة</span>
+          </button>
+        </div>
+
+        <!-- ========================================================
+             تبويب 1: مراحل البناء والتحديثات (Phases)
+             ======================================================== -->
+        <div id="pane-phases" class="construction-pane active">
+          <div class="pane-action-bar">
+            <div>
+              <h3>مراحل تنفيذ المشروع ونسب الإنجاز الفعلية</h3>
+              <p>قم بسحب شريط النسبة (Slider) للمرحلة وتحديث صورتها الميدانية لتوثيق تقدم البناء</p>
+            </div>
+            <button id="open-add-phase-btn" class="btn btn-primary">
+              + إضافة مرحلة بناء جديدة
+            </button>
+          </div>
+
+          <div class="phases-cards-grid" id="phases-container">
+            <!-- Rendered dynamically via JavaScript -->
+          </div>
+
+          <div id="phases-empty-state" class="empty-notice-box" style="display: none;">
+            <p>لا توجد مراحل بناء مسجلة لهذا المشروع بعد. اضغط على "+ إضافة مرحلة بناء جديدة" للبدء.</p>
+          </div>
+        </div>
+
+        <!-- ========================================================
+             تبويب 2: المقاولين والمستخلصات (Contractors)
+             ======================================================== -->
+        <div id="pane-contractors" class="construction-pane" style="display: none;">
+          <div class="pane-action-bar">
+            <div>
+              <h3>دليل المقاولين والموردين ومستخلصاتهم</h3>
+              <p>متابعة التزامات العقود والمبالغ المدفوعة والمتبقية لكل مقاول بالمشروع</p>
+            </div>
+            <button id="open-add-contractor-btn" class="btn btn-primary">
+              + إضافة مقاول جديد
+            </button>
+          </div>
+
+          <div class="table-card">
+            <div class="table-responsive">
+              <table class="erp-table">
+                <thead>
+                  <tr>
+                    <th>اسم المقاول / الشركة</th>
+                    <th>التخصص</th>
+                    <th>رقم الهاتف</th>
+                    <th>إجمالي قيمة العقد</th>
+                    <th>المدفوع حتى الآن</th>
+                    <th>المتبقي المستحق</th>
+                    <th>إجراءات</th>
+                  </tr>
+                </thead>
+                <tbody id="contractors-table-body">
+                  <!-- Rendered dynamically via JavaScript -->
+                </tbody>
+              </table>
+            </div>
+
+            <div id="contractors-empty-state" class="empty-notice-box" style="display: none;">
+              <p>لا يوجد مقاولين مسجلين لهذا المشروع بعد.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- ========================================================
+             تبويب 3: المخازن والخامات (Inventory)
+             ======================================================== -->
+        <div id="pane-inventory" class="construction-pane" style="display: none;">
+          
+          <div class="pane-action-bar">
+            <div>
+              <h3>أرصدة الخامات ومواد البناء بالموقع</h3>
+              <p>جرد كميات الحديد والأسمنت والرمال والطوب المسجلة وحركات الوارد والمنصرف</p>
+            </div>
+            <div class="action-buttons-wrap">
+              <button id="open-material-in-btn" class="btn btn-success">
+                + توريد خامة للمخزن (In)
+              </button>
+              <button id="open-material-out-btn" class="btn btn-warning">
+                - سحب خامة للموقع (Out)
+              </button>
+              <button id="open-add-material-btn" class="btn btn-secondary">
+                + تعريف خامة جديدة
+              </button>
+            </div>
+          </div>
+
+          <!-- بطاقات أرصدة الخامات -->
+          <div class="materials-stocks-grid" id="materials-container">
+            <!-- Rendered dynamically via JavaScript -->
+          </div>
+
+          <div id="materials-empty-state" class="empty-notice-box" style="display: none;">
+            <p>لا توجد خامات مسجلة بمخزن هذا المشروع حالياً.</p>
+          </div>
+
+          <!-- جدول سجل حركات المخزن -->
+          <div class="inventory-logs-section">
+            <div class="logs-header">
+              <h4>سجل حركات المخزن الأخيرة (التوريد والاستهلاك الميداني)</h4>
+              <span class="sub-counter" id="logs-count-str">0 حركة مسجلة</span>
+            </div>
+
+            <div class="table-card">
+              <div class="table-responsive">
+                <table class="erp-table">
+                  <thead>
+                    <tr>
+                      <th>الخامة</th>
+                      <th>نوع الحركة</th>
+                      <th>الكمية</th>
+                      <th>اسم المهندس</th>
+                      <th>البيان والملاحظات</th>
+                      <th>تاريخ ووقت الحركة</th>
+                    </tr>
+                  </thead>
+                  <tbody id="inventory-logs-table-body">
+                    <!-- Rendered dynamically via JavaScript -->
+                  </tbody>
+                </table>
+              </div>
+              <div id="logs-empty-state" class="empty-notice-box" style="display: none;">
+                <p>لا توجد حركات توريد أو سحب مسجلة في هذا المخزن بعد.</p>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- ========================================================
+             تبويب 4: طلب صرف نقدية للخزنة (Expense Request)
+             ======================================================== -->
+        <div id="pane-expenses" class="construction-pane" style="display: none;">
+          
+          <div class="expense-form-container">
+            <div class="expense-form-card">
+              <div class="form-card-head">
+                <div class="pod-icon">💵</div>
+                <div>
+                  <h3>رفع طلب صرف نقدية إلى الخزينة المركزية</h3>
+                  <p>سيتم إدراج هذا الطلب مباشرة بحالة "قيد المراجعة" للمحاسب والمدير المالي في قسم الخزنة لاعتماده وصرفه</p>
+                </div>
+              </div>
+
+              <form id="construction-expense-form" class="erp-compact-form">
+                
+                <div class="form-row">
+                  <div class="form-group">
+                    <label>المشروع المرتبط بالصرف *</label>
+                    <input type="text" id="expense-project-name" readonly class="input-readonly" value="-" />
+                  </div>
+
+                  <div class="form-group">
+                    <label>المبلغ المطلوب صرفه (جنيه مصري) *</label>
+                    <input type="number" id="expense-req-amount" min="1" step="any" placeholder="مثال: 50000" required />
+                  </div>
+                </div>
+
+                <div class="form-row">
+                  <div class="form-group">
+                    <label>تصنيف / سبب الصرف *</label>
+                    <select id="expense-req-category" required>
+                      <option value="materials">شراء خامات ومواد بناء (حديد / أسمنت / خرسانة)</option>
+                      <option value="contractor">دفعة تحت حساب مقاول / مستخلص أعمال</option>
+                      <option value="labor">أجور ومصنعيات عمالة يومية</option>
+                      <option value="operational">مصاريف حفر، نقل تربة ومعدات موقع</option>
+                      <option value="other">مصاريف نثرية وطارئة بالموقع</option>
+                    </select>
+                  </div>
+
+                  <div class="form-group">
+                    <label>اسم المهندس مقدم الطلب *</label>
+                    <input type="text" id="expense-req-requester" placeholder="اسم المهندس المشرف بالموقع" required />
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label>عنوان / سبب الصرف الرئيسي *</label>
+                  <input type="text" id="expense-req-title" placeholder="مثال: شراء 10 طن حديد تسليح عز لمرحلة القواعد" required />
+                </div>
+
+                <div class="form-group">
+                  <label>شرح وتفاصيل إضافية (اختياري)</label>
+                  <textarea id="expense-req-desc" rows="3" placeholder="اكتب تفاصيل إضافية عن الحاجة للصرف، أرقام الفواتير، أو اسم المقاول المستفيد..."></textarea>
+                </div>
+
+                <div class="form-submit-row">
+                  <button type="submit" class="btn btn-warning btn-lg" id="submit-expense-req-btn">
+                    <span>🚀 إرسال الطلب للخزنة للاعتماد والصرف</span>
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+
+          <!-- جدول طلبات الصرف السابقة للمشروع -->
+          <div class="project-past-expenses">
+            <div class="pane-action-bar">
+              <div>
+                <h4>سجل طلبات الصرف المالي الخاصة بقسم الإنشاءات</h4>
+                <p>متابعة حالة اعتماد وصرف الطلبات المحولة للخزينة المركزية</p>
+              </div>
+            </div>
+
+            <div class="table-card">
+              <div class="table-responsive">
+                <table class="erp-table">
+                  <thead>
+                    <tr>
+                      <th>سبب الصرف / العنوان</th>
+                      <th>التصنيف</th>
+                      <th>المبلغ المطلوب</th>
+                      <th>مقدم الطلب</th>
+                      <th>تاريخ الطلب</th>
+                      <th>الحالة في الخزينة</th>
+                    </tr>
+                  </thead>
+                  <tbody id="construction-expenses-table-body">
+                    <!-- Rendered dynamically via JavaScript -->
+                  </tbody>
+                </table>
+              </div>
+              <div id="expenses-empty-state" class="empty-notice-box" style="display: none;">
+                <p>لا توجد طلبات صرف مرسلة من هذا المشروع حتى الآن.</p>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- ========================================================
+             تبويب 5: مقايسة بنود الأعمال وجداول الكميات (BOQ)
+             ======================================================== -->
+        <div id="pane-boq" class="construction-pane" style="display: none;">
+          <div class="kpi-boq-strip" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin-bottom: 1.5rem;">
+            <div class="kpi-card" style="background: white; border: 1.5px solid #e2e8f0; border-radius: 16px; padding: 1.25rem; box-shadow: 0 2px 8px rgba(0,0,0,0.02);">
+              <span style="font-size: 0.82rem; font-weight: 700; color: #64748b;">إجمالي ميزانية المقايسة المعتمدة (Budget)</span>
+              <strong id="boq-total-budget" style="display: block; font-size: 1.45rem; font-weight: 900; color: #0284c7; margin-top: 0.25rem;">0 ج.م</strong>
+            </div>
+            <div class="kpi-card" style="background: white; border: 1.5px solid #e2e8f0; border-radius: 16px; padding: 1.25rem; box-shadow: 0 2px 8px rgba(0,0,0,0.02);">
+              <span style="font-size: 0.82rem; font-weight: 700; color: #64748b;">إجمالي المنصرف الفعلي حتى الآن</span>
+              <strong id="boq-total-spent" style="display: block; font-size: 1.45rem; font-weight: 900; color: #d97706; margin-top: 0.25rem;">0 ج.م</strong>
+            </div>
+            <div class="kpi-card" style="background: white; border: 1.5px solid #e2e8f0; border-radius: 16px; padding: 1.25rem; box-shadow: 0 2px 8px rgba(0,0,0,0.02);">
+              <span style="font-size: 0.82rem; font-weight: 700; color: #64748b;">انحراف التكلفة والمتبقي (Cost Variance)</span>
+              <strong id="boq-variance" style="display: block; font-size: 1.45rem; font-weight: 900; color: #059669; margin-top: 0.25rem;">0 ج.م</strong>
+            </div>
+          </div>
+
+          <div class="pane-action-bar">
+            <div>
+              <h3>جدول كميات وبنود الأعمال الإنشائية (Bill of Quantities)</h3>
+              <p>رصد ومقارنة تكلفة كل بند هندسي بالميزانية التقديرية المعتمدة واكتشاف أي انحراف مالي مبكراً</p>
+            </div>
+            <button id="open-add-boq-btn" class="btn btn-primary">
+              + إضافة بند مقايسة جديد
+            </button>
+          </div>
+
+          <div class="table-card">
+            <div class="table-responsive">
+              <table class="erp-table">
+                <thead>
+                  <tr>
+                    <th>كود البند</th>
+                    <th>التصنيف</th>
+                    <th>بيان ووصف البند</th>
+                    <th>الوحدة</th>
+                    <th>الكمية التقديرية</th>
+                    <th>سعر الوحدة</th>
+                    <th>الميزانية المعتمدة</th>
+                    <th>المنصرف الفعلي</th>
+                    <th>الانحراف والحالة</th>
+                    <th>الإجراء</th>
+                  </tr>
+                </thead>
+                <tbody id="boq-table-body">
+                  <!-- Rendered dynamically -->
+                </tbody>
+              </table>
+            </div>
+            <div id="boq-empty-state" class="empty-notice-box" style="display: none;">
+              <p>لا توجد بنود مقايسة مسجلة لهذا المشروع بعد. اضغط على "+ إضافة بند مقايسة جديد" لإدخال المقايسة.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- ========================================================
+             تبويب 6: المستخلصات الهندسية والاستقطاعات (Contractor Invoices)
+             ======================================================== -->
+        <div id="pane-invoices" class="construction-pane" style="display: none;">
+          <div class="kpi-invoices-strip" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin-bottom: 1.5rem;">
+            <div class="kpi-card" style="background: white; border: 1.5px solid #e2e8f0; border-radius: 16px; padding: 1.25rem; box-shadow: 0 2px 8px rgba(0,0,0,0.02);">
+              <span style="font-size: 0.82rem; font-weight: 700; color: #64748b;">إجمالي الأعمال المنفذة (Gross)</span>
+              <strong id="inv-total-gross" style="display: block; font-size: 1.45rem; font-weight: 900; color: #1e293b; margin-top: 0.25rem;">0 ج.م</strong>
+            </div>
+            <div class="kpi-card" style="background: white; border: 1.5px solid #e2e8f0; border-radius: 16px; padding: 1.25rem; box-shadow: 0 2px 8px rgba(0,0,0,0.02);">
+              <span style="font-size: 0.82rem; font-weight: 700; color: #64748b;">تأمينات أعمال محتجزة (Retention 5%)</span>
+              <strong id="inv-total-retention" style="display: block; font-size: 1.45rem; font-weight: 900; color: #d97706; margin-top: 0.25rem;">0 ج.م</strong>
+            </div>
+            <div class="kpi-card" style="background: white; border: 1.5px solid #e2e8f0; border-radius: 16px; padding: 1.25rem; box-shadow: 0 2px 8px rgba(0,0,0,0.02);">
+              <span style="font-size: 0.82rem; font-weight: 700; color: #64748b;">استقطاعات دفعات وضرائب</span>
+              <strong id="inv-total-deductions" style="display: block; font-size: 1.45rem; font-weight: 900; color: #ef4444; margin-top: 0.25rem;">0 ج.م</strong>
+            </div>
+            <div class="kpi-card" style="background: white; border: 1.5px solid #e2e8f0; border-radius: 16px; padding: 1.25rem; box-shadow: 0 2px 8px rgba(0,0,0,0.02);">
+              <span style="font-size: 0.82rem; font-weight: 700; color: #64748b;">صافي المبالغ المستحقة للصرف (Net)</span>
+              <strong id="inv-total-net" style="display: block; font-size: 1.45rem; font-weight: 900; color: #059669; margin-top: 0.25rem;">0 ج.م</strong>
+            </div>
+          </div>
+
+          <div class="pane-action-bar">
+            <div>
+              <h3>سجل المستخلصات الهندسية والاستقطاعات المالية للمقاولين</h3>
+              <p>تطبيق استقطاعات تأمين الأعمال (Retention) واستهلاك الدفعات المقدمة والاعتماد الاستشاري قبل الصرف من الخزينة</p>
+            </div>
+            <button id="open-create-invoice-btn" class="btn btn-primary">
+              + إصدار مستخلص هندسي جديد
+            </button>
+          </div>
+
+          <div class="table-card">
+            <div class="table-responsive">
+              <table class="erp-table">
+                <thead>
+                  <tr>
+                    <th>رقم المستخلص</th>
+                    <th>المقاول والتخصص</th>
+                    <th>بيان الأعمال المنفذة</th>
+                    <th>إجمالي الأعمال (Gross)</th>
+                    <th>تأمين الأعمال (5%)</th>
+                    <th>استقطاعات أخرى</th>
+                    <th>صافي المستحق (Net)</th>
+                    <th>اعتماد الاستشاري</th>
+                    <th>الحالة</th>
+                    <th>الإجراء</th>
+                  </tr>
+                </thead>
+                <tbody id="invoices-table-body">
+                  <!-- Rendered dynamically -->
+                </tbody>
+              </table>
+            </div>
+            <div id="invoices-empty-state" class="empty-notice-box" style="display: none;">
+              <p>لا توجد مستخلصات مسجلة لهذا المشروع بعد. اضغط على "+ إصدار مستخلص هندسي جديد" لإنشاء مستخلص.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- ========================================================
+             تبويب 7: محاضر الفحص والاستلام (Snagging & Handover)
+             ======================================================== -->
+        <div id="pane-inspections" class="construction-pane" style="display: none;">
+          <div class="pane-action-bar">
+            <div>
+              <h3>محاضر فحص واستلام الوحدات وقوائم الملاحظات (Snagging List)</h3>
+              <p>فحص بنود التشطيبات والسباكة والكهرباء وتتبع معالجة الملاحظات وتوثيق الاستلام الرسمي</p>
+            </div>
+            <button id="open-add-inspection-btn" class="btn btn-primary">
+              + إنشاء محضر فحص واستلام وحدة
+            </button>
+          </div>
+
+          <div class="inspections-grid" id="inspections-container" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 1.25rem;">
+            <!-- Rendered dynamically -->
+          </div>
+          <div id="inspections-empty-state" class="empty-notice-box" style="display: none;">
+            <p>لا توجد محاضر فحص مسجلة لهذا المشروع بعد. اضغط على "+ إنشاء محضر فحص واستلام وحدة" لبدء فحص وحدة.</p>
+          </div>
+        </div>
+
+      </section>
+
+    </main>
+
+    <!-- ========================================================
+         MODALS
+         ======================================================== -->
+    
+    <!-- Modal 1: إضافة مرحلة بناء جديدة -->
+    <div id="add-phase-modal" class="modal-backdrop" style="display: none;">
+      <div class="modal-card">
+        <div class="modal-header">
+          <div class="modal-title-wrap">
+            <div class="pod-icon">🏗️</div>
+            <div>
+              <h3>إضافة مرحلة بناء جديدة</h3>
+              <p>تسجيل مرحلة إنشائية جديدة وربطها بالمشروع</p>
+            </div>
+          </div>
+          <button class="close-modal-btn" id="close-add-phase-modal">&times;</button>
+        </div>
+
+        <form id="add-phase-form" class="modal-form-body">
+          <div class="form-group">
+            <label>اسم المرحلة *</label>
+            <input type="text" id="new-phase-name" placeholder="مثال: أعمال العزل والردم حول القواعد" required />
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>نسبة الإنجاز الحالية (%) *</label>
+              <input type="number" id="new-phase-progress" min="0" max="100" value="0" required />
+            </div>
+            <div class="form-group">
+              <label>رابط صورة التحديث (اختياري)</label>
+              <input type="url" id="new-phase-photo" placeholder="https://images.unsplash.com/..." />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>ملاحظات وتفاصيل الأعمال</label>
+            <textarea id="new-phase-notes" rows="2" placeholder="ملاحظات المهندس المشرف..."></textarea>
+          </div>
+
+          <div class="modal-form-actions">
+            <button type="submit" class="btn btn-primary" id="save-phase-btn">حفظ المرحلة</button>
+            <button type="button" class="btn btn-secondary" id="cancel-phase-btn">إلغاء</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Modal 2: إضافة مقاول جديد -->
+    <div id="add-contractor-modal" class="modal-backdrop" style="display: none;">
+      <div class="modal-card">
+        <div class="modal-header">
+          <div class="modal-title-wrap">
+            <div class="pod-icon">👷‍♂️</div>
+            <div>
+              <h3>تسجيل مقاول أو شركة مقاولات</h3>
+              <p>إدراج مقاول جديد وعقده بالمشروع</p>
+            </div>
+          </div>
+          <button class="close-modal-btn" id="close-contractor-modal">&times;</button>
+        </div>
+
+        <form id="add-contractor-form" class="modal-form-body">
+          <div class="form-row">
+            <div class="form-group">
+              <label>اسم المقاول أو الشركة *</label>
+              <input type="text" id="new-contractor-name" placeholder="مثال: شركة الأهرام للخرسانة" required />
+            </div>
+            <div class="form-group">
+              <label>التخصص *</label>
+              <select id="new-contractor-specialty" required>
+                <option value="مقاول خرسانات وهيكل">مقاول خرسانات وهيكل</option>
+                <option value="حداد مسلح">حداد مسلح</option>
+                <option value="نجار مسلح">نجار مسلح</option>
+                <option value="مقاول حفر وتجهيز">مقاول حفر وتجهيز</option>
+                <option value="مورد مواد بناء">مورد مواد بناء (حديد / أسمنت / رمل)</option>
+                <option value="مقاول مباني وتشطيبات">مقاول مباني وتشطيبات</option>
+                <option value="أعمال صحي وسباكة">أعمال صحي وسباكة</option>
+                <option value="أعمال كهرباء">أعمال كهرباء</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>رقم الهاتف</label>
+              <input type="text" id="new-contractor-phone" placeholder="010xxxxxxxx" />
+            </div>
+            <div class="form-group">
+              <label>إجمالي قيمة العقد (جنيه مصري) *</label>
+              <input type="number" id="new-contractor-contract" min="1" placeholder="مثال: 250000" required />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>المبلغ المدفوع كدفعة مقدمة (إن وجد)</label>
+            <input type="number" id="new-contractor-paid" min="0" value="0" placeholder="0" />
+          </div>
+
+          <div class="modal-form-actions">
+            <button type="submit" class="btn btn-primary" id="save-contractor-btn">تسجيل المقاول</button>
+            <button type="button" class="btn btn-secondary" id="cancel-contractor-btn">إلغاء</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Modal 3: سداد دفعة / مستخلص لمقاول -->
+    <div id="pay-contractor-modal" class="modal-backdrop" style="display: none;">
+      <div class="modal-card">
+        <div class="modal-header">
+          <div class="modal-title-wrap">
+            <div class="pod-icon">💸</div>
+            <div>
+              <h3>تسجيل دفعة / مستخلص لمقاول</h3>
+              <p id="pay-contractor-sub">تسجيل سداد نقدي للمقاول وتحديث الرصيد المتبقي</p>
+            </div>
+          </div>
+          <button class="close-modal-btn" id="close-pay-contractor-modal">&times;</button>
+        </div>
+
+        <form id="pay-contractor-form" class="modal-form-body">
+          <input type="hidden" id="pay-contractor-id" />
+          
+          <div class="expense-details-box" style="margin-bottom: 1rem;">
+            <div class="detail-row">
+              <span class="detail-lbl">المقاول:</span>
+              <strong id="pay-contractor-name" class="detail-val">-</strong>
+            </div>
+            <div class="detail-row">
+              <span class="detail-lbl">إجمالي العقد:</span>
+              <span id="pay-contractor-total" class="detail-val">-</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-lbl">المتبقي حالياً:</span>
+              <strong id="pay-contractor-remaining" class="detail-val" style="color: #dc2626;">-</strong>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>قيمة الدفعة المسددة (جنيه مصري) *</label>
+            <input type="number" id="pay-amount-input" min="1" step="any" placeholder="مثال: 30000" required />
+          </div>
+
+          <div class="modal-form-actions">
+            <button type="submit" class="btn btn-primary" id="save-payment-btn">تأكيد سداد الدفعة</button>
+            <button type="button" class="btn btn-secondary" id="cancel-payment-btn">إلغاء</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Modal 4: حركة مخزن (توريد In أو سحب Out) -->
+    <div id="inventory-movement-modal" class="modal-backdrop" style="display: none;">
+      <div class="modal-card">
+        <div class="modal-header">
+          <div class="modal-title-wrap">
+            <div class="pod-icon" id="inv-modal-icon">📦</div>
+            <div>
+              <h3 id="inv-modal-title">تسجيل حركة مخزن</h3>
+              <p id="inv-modal-subtitle">توريد أو صرف خامة من مخزن المشروع</p>
+            </div>
+          </div>
+          <button class="close-modal-btn" id="close-inv-modal">&times;</button>
+        </div>
+
+        <form id="inventory-movement-form" class="modal-form-body">
+          <input type="hidden" id="inv-movement-type" value="in" />
+
+          <div class="form-group">
+            <label>الخامة المستهدفة *</label>
+            <select id="inv-modal-material-id" required>
+              <!-- Populated dynamically -->
+            </select>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>الكمية *</label>
+              <input type="number" id="inv-modal-qty" min="0.1" step="any" placeholder="الكمية المطلوبة" required />
+            </div>
+            <div class="form-group">
+              <label>اسم المهندس المسؤول *</label>
+              <input type="text" id="inv-modal-engineer" placeholder="اسم المهندس المشرف" required />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>البيان / ملاحظات الحركة</label>
+            <input type="text" id="inv-modal-notes" placeholder="مثال: توريد سيارة رمل للموقع / سحب 5 طن لصب سقف الدور الأول" />
+          </div>
+
+          <div class="modal-form-actions">
+            <button type="submit" class="btn btn-primary" id="save-inv-movement-btn">تأكيد وقيد الحركة</button>
+            <button type="button" class="btn btn-secondary" id="cancel-inv-movement-btn">إلغاء</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Modal 5: تعريف صنف جديد بالمخزن -->
+    <div id="add-material-modal" class="modal-backdrop" style="display: none;">
+      <div class="modal-card">
+        <div class="modal-header">
+          <div class="modal-title-wrap">
+            <div class="pod-icon">🧱</div>
+            <div>
+              <h3>تعريف خامة جديدة بمخزن المشروع</h3>
+              <p>إضافة صنف جديد لمتابعة رصيده بالموقع</p>
+            </div>
+          </div>
+          <button class="close-modal-btn" id="close-add-material-modal">&times;</button>
+        </div>
+
+        <form id="add-material-form" class="modal-form-body">
+          <div class="form-group">
+            <label>اسم الخامة أو الصنف *</label>
+            <input type="text" id="new-material-name" placeholder="مثال: طوب أسمنتي مصمت، سن 1" required />
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>وحدة القياس *</label>
+              <select id="new-material-unit" required>
+                <option value="طن">طن</option>
+                <option value="شيكارة">شيكارة</option>
+                <option value="متر مكعب">متر مكعب</option>
+                <option value="ألف طوبة">ألف طوبة</option>
+                <option value="لوح">لوح</option>
+                <option value="قطعة">قطعة</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label>الرصيد الافتتاحي بالمخزن</label>
+              <input type="number" id="new-material-stock" min="0" step="any" value="0" placeholder="0" />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>ملاحظات ومواصفات الخامة</label>
+            <input type="text" id="new-material-notes" placeholder="رتبة الخامة، المورد المفضل..." />
+          </div>
+
+          <div class="modal-form-actions">
+            <button type="submit" class="btn btn-primary" id="save-new-material-btn">إضافة الصنف للمخزن</button>
+            <button type="button" class="btn btn-secondary" id="cancel-new-material-btn">إلغاء</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Modal: Add BOQ Item -->
+    <div id="add-boq-modal" class="modal-backdrop" style="display: none;">
+      <div class="modal-card">
+        <div class="modal-header">
+          <div class="modal-title-wrap">
+            <div class="pod-icon">📐</div>
+            <div>
+              <h3>إضافة بند مقايسة جديد (BOQ Item)</h3>
+              <p>إدراج بند جديد في جدول كميات وميزانية المشروع المعتمدة</p>
+            </div>
+          </div>
+          <button class="close-modal-btn" id="close-add-boq-modal">&times;</button>
+        </div>
+        <form id="add-boq-form" class="modal-form-body">
+          <div class="form-row">
+            <div class="form-group">
+              <label>كود البند *</label>
+              <input type="text" id="boq-item-code" placeholder="مثال: CONC-01, EXCAV-01" required />
+            </div>
+            <div class="form-group">
+              <label>تصنيف الأعمال *</label>
+              <select id="boq-category" required>
+                <option value="earthworks">أعمال ترابية وحفر وإحلال</option>
+                <option value="concrete">أعمال خرسانة مسلحة وعادية</option>
+                <option value="masonry">أعمال مباني وطوب</option>
+                <option value="finishes">أعمال تشطيبات داخلية وخارجية</option>
+                <option value="mep">أعمال كهروميكانيك MEP وصحي</option>
+                <option value="other">أعمال أخرى متفرقة</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>بيان ووصف البند التفصيلي *</label>
+            <input type="text" id="boq-description" placeholder="مثال: خرسانة مسلحة للأساسات والقواعد المسلحة سمك 60سم مع معالجة..." required />
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>وحدة القياس *</label>
+              <select id="boq-unit" required>
+                <option value="م3">متر مكعب (م3)</option>
+                <option value="م2">متر مربع (م2)</option>
+                <option value="طن">طن</option>
+                <option value="م.ط">متر طولي (م.ط)</option>
+                <option value="مقطوعية">مقطوعية</option>
+                <option value="عدد">عدد / نقطة</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>الكمية التقديرية بالمقايسة *</label>
+              <input type="number" id="boq-est-qty" placeholder="مثال: 450" step="any" required />
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>سعر الوحدة التقديري (ج.م) *</label>
+              <input type="number" id="boq-unit-cost" placeholder="مثال: 4200" step="any" required />
+            </div>
+            <div class="form-group">
+              <label>إجمالي الميزانية التقديرية المتوقعة</label>
+              <input type="text" id="boq-total-preview" readonly class="input-readonly" value="0 ج.م" />
+            </div>
+          </div>
+
+          <div class="modal-form-actions">
+            <button type="submit" class="btn btn-primary">حفظ البند في المقايسة</button>
+            <button type="button" class="btn btn-secondary" id="cancel-add-boq-btn">إلغاء</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Modal: Update BOQ Actual Spent -->
+    <div id="update-boq-modal" class="modal-backdrop" style="display: none;">
+      <div class="modal-card">
+        <div class="modal-header">
+          <div class="modal-title-wrap">
+            <div class="pod-icon">💰</div>
+            <div>
+              <h3>تسجيل منصرف فعلي لبند مقايسة</h3>
+              <p id="update-boq-item-info" class="modal-sub">...</p>
+            </div>
+          </div>
+          <button class="close-modal-btn" id="close-update-boq-modal">&times;</button>
+        </div>
+        <form id="update-boq-form" class="modal-form-body">
+          <input type="hidden" id="update-boq-id" />
+          <div class="form-row">
+            <div class="form-group">
+              <label>المبلغ المنصرف الفعلي (ج.م) *</label>
+              <input type="number" id="boq-add-spent" placeholder="مثال: 25000" step="any" required />
+            </div>
+            <div class="form-group">
+              <label>الكمية المنفذة فعلياً</label>
+              <input type="number" id="boq-add-qty" placeholder="مثال: 50" step="any" value="0" />
+            </div>
+          </div>
+          <div class="modal-form-actions">
+            <button type="submit" class="btn btn-primary">تسجيل التكلفة الفعلية</button>
+            <button type="button" class="btn btn-secondary" id="cancel-update-boq-btn">إلغاء</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Modal: Create Contractor Invoice -->
+    <div id="create-invoice-modal" class="modal-backdrop" style="display: none;">
+      <div class="modal-card modal-large">
+        <div class="modal-header">
+          <div class="modal-title-wrap">
+            <div class="pod-icon">📑</div>
+            <div>
+              <h3>إصدار مستخلص هندسي للمقاول</h3>
+              <p>حساب الاستقطاعات النظامية (تأمين الأعمال 5% واستهلاك الدفعات والضرائب)</p>
+            </div>
+          </div>
+          <button class="close-modal-btn" id="close-create-inv-modal">&times;</button>
+        </div>
+        <form id="create-invoice-form" class="modal-form-body">
+          <div class="form-row">
+            <div class="form-group">
+              <label>المقاول المستفيد *</label>
+              <select id="inv-contractor-select" required>
+                <option value="">جارٍ تحميل المقاولين...</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>رقم المستخلص *</label>
+              <input type="text" id="inv-number" placeholder="مثال: مستخلص جاري رقم 2" required />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>بيان الأعمال المنفذة المستحق عنها الصرف *</label>
+            <input type="text" id="inv-stage-desc" placeholder="مثال: إتمام صب خرسانة أعمدة الدور الأول وعزل القواعد..." required />
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>إجمالي قيمة الأعمال المنفذة (Gross) ج.م *</label>
+              <input type="number" id="inv-gross-amount" placeholder="مثال: 100000" step="any" required />
+            </div>
+            <div class="form-group">
+              <label>نسبة تأمين الأعمال المحتجزة (Retention %) *</label>
+              <input type="number" id="inv-retention-rate" value="5" step="any" required />
+              <small style="color: #64748b; font-size: 0.8rem;">تُحتجز بنسبة 5% كضمان حسن تنفيذ ولا تُصرف إلا بعد الاستلام النهائي</small>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>خصم استهلاك دفعة مقدمة (ج.م)</label>
+              <input type="number" id="inv-advance-deducted" value="0" step="any" />
+            </div>
+            <div class="form-group">
+              <label>خصم ضرائب أ.ت.ص (ج.م)</label>
+              <input type="number" id="inv-tax-deducted" value="0" step="any" />
+            </div>
+          </div>
+
+          <div class="invoice-calc-strip" style="background: #f8fafc; border: 1.5px dashed #cbd5e1; border-radius: 12px; padding: 1rem; margin-top: 0.5rem; display: flex; justify-content: space-between; align-items: center;">
+            <div>
+              <span style="font-size: 0.85rem; color: #64748b; font-weight: 700;">صافي المبلغ المستحق للصرف الفعلي (Net Payable):</span>
+              <strong id="inv-net-preview" style="display: block; font-size: 1.4rem; color: #059669; font-weight: 900;">0 ج.م</strong>
+            </div>
+            <div style="font-size: 0.82rem; color: #d97706; font-weight: 700;">
+              المبلغ المحتجز للتأمين: <span id="inv-ret-amount-preview">0 ج.م</span>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>تاريخ الاستحقاق المتوقع</label>
+              <input type="date" id="inv-due-date" />
+            </div>
+            <div class="form-group">
+              <label>ملاحظات إضافية</label>
+              <input type="text" id="inv-notes" placeholder="ملاحظات الاستشاري الهندسي..." />
+            </div>
+          </div>
+
+          <div class="modal-form-actions">
+            <button type="submit" class="btn btn-primary">إصدار المستخلص واعتماده المبدئي</button>
+            <button type="button" class="btn btn-secondary" id="cancel-create-inv-btn">إلغاء</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Modal: Create Unit Inspection (Snagging) -->
+    <div id="add-inspection-modal" class="modal-backdrop" style="display: none;">
+      <div class="modal-card">
+        <div class="modal-header">
+          <div class="modal-title-wrap">
+            <div class="pod-icon">🔑</div>
+            <div>
+              <h3>إنشاء محضر فحص واستلام وحدة</h3>
+              <p>بدء دورة معاينة الوحدة وتوثيق قائمة الملاحظات (Snag List)</p>
+            </div>
+          </div>
+          <button class="close-modal-btn" id="close-add-insp-modal">&times;</button>
+        </div>
+        <form id="add-inspection-form" class="modal-form-body">
+          <div class="form-group">
+            <label>اختر الوحدة المراد فحصها *</label>
+            <select id="insp-unit-select" required>
+              <option value="">جارٍ تحميل الوحدات...</option>
+            </select>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>اسم العميل المستلم *</label>
+              <input type="text" id="insp-client-name" placeholder="الاسم الكامل للعميل" required />
+            </div>
+            <div class="form-group">
+              <label>اسم المهندس الفاحص *</label>
+              <input type="text" id="insp-inspector-name" placeholder="مهندس الجودة والتسليم" required />
+            </div>
+          </div>
+          <div class="form-group">
+            <label>ملاحظات أولية عن حالة الوحدة</label>
+            <textarea id="insp-notes" rows="2" placeholder="ملاحظات عامة حول موعد التسليم..."></textarea>
+          </div>
+          <div class="modal-form-actions">
+            <button type="submit" class="btn btn-primary">بدء محضر المعاينة</button>
+            <button type="button" class="btn btn-secondary" id="cancel-add-insp-btn">إلغاء</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Modal: View & Update Snagging List -->
+    <div id="view-snag-modal" class="modal-backdrop" style="display: none;">
+      <div class="modal-card modal-large">
+        <div class="modal-header">
+          <div>
+            <h3 id="snag-modal-title">محضر معاينة وملاحظات الوحدة</h3>
+            <p id="snag-modal-sub" class="modal-sub">...</p>
+          </div>
+          <button class="close-modal-btn" id="close-view-snag-modal">&times;</button>
+        </div>
+        <div class="modal-form-body">
+          <div class="snag-items-list" id="snag-items-wrapper" style="display: flex; flex-direction: column; gap: 0.75rem; margin-bottom: 1.5rem;">
+            <!-- Rendered dynamically -->
+          </div>
+
+          <div class="snag-add-box" style="display: flex; gap: 0.5rem; margin-bottom: 1.5rem;">
+            <input type="text" id="new-snag-text" placeholder="إضافة ملاحظة جديدة (مثال: مفصلة شباك غرفة النوم غير محكمة)..." style="flex: 1; padding: 0.65rem 0.85rem; border: 1.5px solid #e2e8f0; border-radius: 10px;" />
+            <button type="button" class="btn btn-sm btn-outline" id="btn-add-snag-item">+ إضافة ملاحظة</button>
+          </div>
+
+          <div class="handover-sign-box" style="background: #f0fdf4; border: 1.5px solid #bbf7d0; border-radius: 14px; padding: 1.25rem;">
+            <h4 style="margin: 0 0 0.5rem 0; color: #166534;">اعتماد ومحضر الاستلام النهائي (Handover Signoff)</h4>
+            <p style="margin: 0 0 1rem 0; font-size: 0.88rem; color: #15803d;">بعد معالجة المقاول لجميع الملاحظات أعلاه، يتم توقيع العميل إلكترونياً واعتماد الاستلام النهائي وإغلاق المحضر.</p>
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem;">
+              <span id="handover-status-str" style="font-weight: 800; font-size: 0.95rem;">الحالة: ملاحظات قيد المعالجة</span>
+              <button type="button" class="btn btn-success" id="btn-sign-handover">
+                ✍️ اعتماد وتوقيع الاستلام الرسمي للوحدة
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Toast Notification Banner -->
+    <div id="construction-toast" class="construction-toast" style="display: none;">
+      <span class="toast-icon" id="c-toast-icon">✅</span>
+      <span class="toast-text" id="c-toast-text">تمت العملية بنجاح</span>
+    </div>
+
+  </div>
+</Layout>
+
+<style is:global>
+  * {
+    box-sizing: border-box;
+  }
+
+  .construction-app-root {
+    direction: rtl;
+    font-family: 'Cairo', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background-color: #f8fafc;
+    min-height: 100vh;
+    color: #0f172a;
+    padding-bottom: 4rem;
+  }
+
+  .erp-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+  }
+
+  /* Top Navigation Bar */
+  .erp-topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.25rem 0;
+    border-bottom: 1px solid #e2e8f0;
+    margin-bottom: 1.5rem;
+  }
+
+  .brand-crumb {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    font-size: 0.95rem;
+    color: #64748b;
+  }
+
+  .back-link {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    color: #0284c7;
+    text-decoration: none;
+    font-weight: 700;
+  }
+
+  .back-link:hover { text-decoration: underline; }
+  .sep { color: #cbd5e1; }
+  .active-crumb { color: #0f172a; font-weight: 700; }
+
+  /* Hero Banner */
+  .construction-hero-banner {
+    background: linear-gradient(135deg, #0c4a6e 0%, #0369a1 50%, #0284c7 100%);
+    color: #ffffff;
+    border-radius: 20px;
+    padding: 2.25rem 2.5rem;
+    margin-bottom: 1.75rem;
+    box-shadow: 0 10px 25px -5px rgba(2, 132, 199, 0.2);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero-badge-pill {
+    display: inline-flex;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.18);
+    backdrop-filter: blur(8px);
+    padding: 0.35rem 0.9rem;
+    border-radius: 50px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    margin-bottom: 0.75rem;
+  }
+
+  .construction-hero-banner h1 {
+    font-size: 1.85rem;
+    font-weight: 800;
+    margin: 0 0 0.5rem 0;
+    letter-spacing: -0.02em;
+  }
+
+  .construction-hero-banner p {
+    font-size: 0.95rem;
+    margin: 0;
+    opacity: 0.92;
+    max-width: 800px;
+    line-height: 1.6;
+  }
+
+  /* Project Summary Strip (Top Section) */
+  .project-summary-strip {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  }
+
+  .strip-grid {
+    display: grid;
+    grid-template-columns: 350px 1fr;
+    gap: 2rem;
+    align-items: center;
+  }
+
+  .project-picker-box {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .picker-label {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #334155;
+  }
+
+  .erp-main-select {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border-radius: 12px;
+    border: 2px solid #0284c7;
+    font-family: inherit;
+    font-size: 1rem;
+    font-weight: 700;
+    color: #0f172a;
+    background: #f0f9ff;
+    cursor: pointer;
+    outline: none;
+    transition: all 0.2s;
+  }
+
+  .erp-main-select:focus {
+    box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.25);
+  }
+
+  .total-progress-box {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .progress-info-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .prog-title {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #334155;
+  }
+
+  .prog-val {
+    font-size: 1.6rem;
+    font-weight: 800;
+    color: #0284c7;
+  }
+
+  .progress-bar-track {
+    width: 100%;
+    height: 16px;
+    background: #e2e8f0;
+    border-radius: 50px;
+    overflow: hidden;
+  }
+
+  .progress-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #0284c7 0%, #10b981 100%);
+    border-radius: 50px;
+    transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .prog-subtitle {
+    font-size: 0.8rem;
+    color: #64748b;
+  }
+
+  /* Construction Tabs Navigation */
+  .construction-tabs-nav {
+    display: flex;
+    gap: 0.75rem;
+    border-bottom: 2px solid #e2e8f0;
+    margin-bottom: 1.75rem;
+    overflow-x: auto;
+    padding-bottom: 2px;
+  }
+
+  .c-tab-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.85rem 1.4rem;
+    background: transparent;
+    border: none;
+    border-bottom: 3px solid transparent;
+    font-family: inherit;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #64748b;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+
+  .c-tab-btn:hover {
+    color: #0284c7;
+    background: rgba(2, 132, 199, 0.04);
+    border-radius: 8px 8px 0 0;
+  }
+
+  .c-tab-btn.active {
+    color: #0284c7;
+    border-bottom-color: #0284c7;
+    font-weight: 800;
+  }
+
+  .tab-badge {
+    background: #e2e8f0;
+    color: #475569;
+    padding: 0.15rem 0.55rem;
+    border-radius: 50px;
+    font-size: 0.75rem;
+  }
+
+  .c-tab-btn.active .tab-badge {
+    background: #0284c7;
+    color: #ffffff;
+  }
+
+  /* Construction Pane Actions */
+  .pane-action-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  .pane-action-bar h3 {
+    margin: 0 0 0.25rem 0;
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: #0f172a;
+  }
+
+  .pane-action-bar p {
+    margin: 0;
+    font-size: 0.85rem;
+    color: #64748b;
+  }
+
+  .action-buttons-wrap {
+    display: flex;
+    gap: 0.6rem;
+    flex-wrap: wrap;
+  }
+
+  /* Tab 1: Construction Phases Cards Grid */
+  .phases-cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+  }
+
+  .phase-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    transition: transform 0.2s, box-shadow 0.2s;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .phase-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  }
+
+  .phase-photo-wrap {
+    height: 160px;
+    background: #0f172a;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .phase-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .phase-status-badge {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    padding: 0.35rem 0.8rem;
+    border-radius: 50px;
+    font-size: 0.75rem;
+    font-weight: 800;
+    backdrop-filter: blur(8px);
+  }
+
+  .badge-completed { background: rgba(16, 185, 129, 0.9); color: white; }
+  .badge-in_progress { background: rgba(2, 132, 199, 0.9); color: white; }
+  .badge-pending { background: rgba(245, 158, 11, 0.9); color: white; }
+
+  .phase-card-body {
+    padding: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    flex: 1;
+  }
+
+  .phase-title-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .phase-title-row h4 {
+    margin: 0;
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: #0f172a;
+  }
+
+  .phase-order-pill {
+    background: #f1f5f9;
+    color: #64748b;
+    padding: 0.2rem 0.5rem;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 700;
+  }
+
+  .phase-notes-text {
+    font-size: 0.82rem;
+    color: #64748b;
+    margin: 0;
+    line-height: 1.4;
+  }
+
+  /* Phase Slider Interactive Box */
+  .phase-slider-box {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 0.9rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+  }
+
+  .slider-head-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .slider-lbl {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: #334155;
+  }
+
+  .slider-val-tag {
+    font-size: 1.1rem;
+    font-weight: 800;
+    color: #0284c7;
+  }
+
+  .phase-range-slider {
+    width: 100%;
+    cursor: pointer;
+    accent-color: #0284c7;
+  }
+
+  .phase-card-actions {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: auto;
+  }
+
+  .btn-save-progress {
+    flex: 1;
+    background: #0284c7;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 0.55rem;
+    font-family: inherit;
+    font-weight: 700;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+
+  .btn-save-progress:hover { background: #0369a1; }
+
+  /* Tab 2 & 3: Table Cards */
+  .table-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  }
+
+  .table-responsive {
+    overflow-x: auto;
+  }
+
+  .erp-table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: right;
+  }
+
+  .erp-table th {
+    background: #f8fafc;
+    color: #475569;
+    font-size: 0.82rem;
+    font-weight: 700;
+    padding: 1rem 1.25rem;
+    border-bottom: 2px solid #e2e8f0;
+    white-space: nowrap;
+  }
+
+  .erp-table td {
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid #f1f5f9;
+    font-size: 0.9rem;
+    color: #1e293b;
+    vertical-align: middle;
+  }
+
+  .erp-table tr:hover td {
+    background: #f8fafc;
+  }
+
+  .specialty-pill {
+    background: #e0f2fe;
+    color: #0369a1;
+    padding: 0.25rem 0.65rem;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    font-weight: 700;
+  }
+
+  /* Tab 3: Materials Grid */
+  .materials-stocks-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 1.25rem;
+    margin-bottom: 2rem;
+  }
+
+  .material-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    padding: 1.25rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .mat-card-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .mat-icon { font-size: 1.75rem; }
+  .mat-unit-pill {
+    background: #f1f5f9;
+    color: #475569;
+    padding: 0.2rem 0.6rem;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 700;
+  }
+
+  .mat-name {
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: #0f172a;
+    margin: 0;
+  }
+
+  .mat-stock-val {
+    font-size: 1.85rem;
+    font-weight: 900;
+    color: #0284c7;
+    margin: 0.25rem 0;
+  }
+
+  .mat-notes-sub {
+    font-size: 0.78rem;
+    color: #64748b;
+    margin: 0;
+  }
+
+  .inventory-logs-section {
+    margin-top: 2rem;
+  }
+
+  .logs-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+  }
+
+  .logs-header h4 {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 800;
+    color: #0f172a;
+  }
+
+  .sub-counter {
+    font-size: 0.82rem;
+    color: #64748b;
+    font-weight: 700;
+  }
+
+  .badge-log-in {
+    background: #ecfdf5;
+    color: #059669;
+    padding: 0.25rem 0.65rem;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    font-weight: 800;
+  }
+
+  .badge-log-out {
+    background: #fff7ed;
+    color: #ea580c;
+    padding: 0.25rem 0.65rem;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    font-weight: 800;
+  }
+
+  /* Tab 4: Expense Request Form */
+  .expense-form-container {
+    max-width: 820px;
+    margin: 0 auto 3rem auto;
+  }
+
+  .expense-form-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 20px;
+    padding: 2rem 2.25rem;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.06);
+  }
+
+  .form-card-head {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.75rem;
+    border-bottom: 1px solid #f1f5f9;
+    padding-bottom: 1.25rem;
+  }
+
+  .pod-icon {
+    width: 48px;
+    height: 48px;
+    background: #fef3c7;
+    color: #d97706;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+  }
+
+  .form-card-head h3 {
+    margin: 0 0 0.25rem 0;
+    font-size: 1.3rem;
+    font-weight: 800;
+    color: #0f172a;
+  }
+
+  .form-card-head p {
+    margin: 0;
+    font-size: 0.85rem;
+    color: #64748b;
+  }
+
+  .erp-compact-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+  }
+
+  .form-row {
+    display: flex;
+    gap: 1rem;
+  }
+
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+    flex: 1;
+  }
+
+  .form-group label {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #334155;
+  }
+
+  .form-group input,
+  .form-group select,
+  .form-group textarea {
+    padding: 0.75rem 0.95rem;
+    border-radius: 10px;
+    border: 1.5px solid #cbd5e1;
+    font-family: inherit;
+    font-size: 0.92rem;
+    color: #0f172a;
+    background: #ffffff;
+    transition: all 0.2s;
+  }
+
+  .form-group input:focus,
+  .form-group select:focus,
+  .form-group textarea:focus {
+    outline: none;
+    border-color: #0284c7;
+    box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15);
+  }
+
+  .input-readonly {
+    background: #f8fafc !important;
+    color: #64748b !important;
+    cursor: not-allowed;
+    font-weight: 700;
+  }
+
+  .form-submit-row {
+    margin-top: 0.75rem;
+  }
+
+  .btn-lg {
+    width: 100%;
+    padding: 1rem;
+    font-size: 1.05rem;
+    font-weight: 800;
+    border-radius: 12px;
+  }
+
+  /* Status Pills */
+  .req-status-pill {
+    padding: 0.25rem 0.7rem;
+    border-radius: 50px;
+    font-size: 0.78rem;
+    font-weight: 800;
+    display: inline-block;
+  }
+
+  .req-pending { background: #fef3c7; color: #b45309; }
+  .req-approved { background: #dcfce7; color: #15803d; }
+  .req-rejected { background: #fee2e2; color: #b91c1c; }
+
+  /* Buttons */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.65rem 1.25rem;
+    border-radius: 10px;
+    font-family: inherit;
+    font-size: 0.9rem;
+    font-weight: 700;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s;
+    text-decoration: none;
+  }
+
+  .btn-primary { background: #0284c7; color: white; }
+  .btn-primary:hover { background: #0369a1; }
+  .btn-warning { background: #d97706; color: white; }
+  .btn-warning:hover { background: #b45309; }
+  .btn-success { background: #059669; color: white; }
+  .btn-success:hover { background: #047857; }
+  .btn-secondary { background: #f1f5f9; color: #334155; }
+  .btn-secondary:hover { background: #e2e8f0; }
+
+  .btn-sm {
+    padding: 0.35rem 0.75rem;
+    font-size: 0.8rem;
+    border-radius: 6px;
+  }
+
+  /* Empty state */
+  .empty-notice-box {
+    padding: 2.5rem;
+    text-align: center;
+    color: #64748b;
+    font-weight: 600;
+    background: #ffffff;
+    border-radius: 12px;
+  }
+
+  /* Modals */
+  .modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.6);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    padding: 1rem;
+  }
+
+  .modal-card {
+    background: #ffffff;
+    border-radius: 20px;
+    width: 100%;
+    max-width: 540px;
+    overflow: hidden;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    animation: modalPop 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  @keyframes modalPop {
+    from { opacity: 0; transform: scale(0.95); }
+    to { opacity: 1; transform: scale(1); }
+  }
+
+  .modal-header {
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid #e2e8f0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .modal-title-wrap {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+  }
+
+  .modal-title-wrap h3 {
+    margin: 0;
+    font-size: 1.15rem;
+    font-weight: 800;
+  }
+
+  .modal-title-wrap p {
+    margin: 0;
+    font-size: 0.8rem;
+    color: #64748b;
+  }
+
+  .close-modal-btn {
+    background: transparent;
+    border: none;
+    font-size: 1.8rem;
+    cursor: pointer;
+    color: #94a3b8;
+    line-height: 1;
+  }
+
+  .close-modal-btn:hover { color: #0f172a; }
+
+  .modal-form-body {
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .modal-form-actions {
+    display: flex;
+    gap: 0.75rem;
+    justify-content: flex-end;
+    margin-top: 0.5rem;
+  }
+
+  /* Toast Notification */
+  .construction-toast {
+    position: fixed;
+    top: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #065f46;
+    color: #ffffff;
+    border: 1px solid #10b981;
+    padding: 0.85rem 1.6rem;
+    border-radius: 50px;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-weight: 700;
+    font-size: 0.92rem;
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.25);
+    z-index: 10000;
+    animation: toastSlideDown 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .construction-toast.toast-error {
+    background: #991b1b;
+    border-color: #ef4444;
+  }
+
+  @keyframes toastSlideDown {
+    from { opacity: 0; transform: translate(-50%, -20px); }
+    to { opacity: 1; transform: translate(-50%, 0); }
+  }
+
+  @media (max-width: 1024px) {
+    .strip-grid { grid-template-columns: 1fr; }
+  }
+
+  @media (max-width: 768px) {
+    .form-row { flex-direction: column; }
+    .construction-hero-banner { padding: 1.5rem; }
+    .erp-topbar { flex-direction: column; align-items: stretch; gap: 0.75rem; }
+    .construction-tabs-nav { gap: 0.25rem; }
+  }
+</style>
+
+<script>
+  import { checkAuth } from '../../lib/auth.js';
+
+  let constructionData = {
+    projects: [],
+    selectedProjectId: null,
+    totalProgress: 0,
+    stages: [],
+    contractors: [],
+    materials: [],
+    inventoryLogs: [],
+    expenseRequests: [],
+    boqItems: [],
+    contractorInvoices: [],
+    unitInspections: [],
+    units: []
+  };
+
+  const authLoading = document.getElementById('auth-loading-message');
+  const loginContainer = document.getElementById('admin-login-container');
+  const mainContent = document.getElementById('main-content');
+  const projectSelect = document.getElementById('project-select');
+
+  // Verify Auth
+  (async () => {
+    try {
+      const user = await checkAuth();
+      if (authLoading) authLoading.style.display = 'none';
+
+      if (user) {
+        if (mainContent) mainContent.style.display = 'block';
+        await loadConstructionData();
+      } else {
+        if (loginContainer) loginContainer.style.display = 'block';
+      }
+    } catch (e) {
+      if (authLoading) authLoading.style.display = 'none';
+      if (loginContainer) loginContainer.style.display = 'block';
+    }
+  })();
+
+  // Toast System
+  let toastTimer = null;
+  function showToast(message, isSuccess = true) {
+    const toast = document.getElementById('construction-toast');
+    const toastIcon = document.getElementById('c-toast-icon');
+    const toastText = document.getElementById('c-toast-text');
+    if (!toast) return;
+
+    if (toastTimer) clearTimeout(toastTimer);
+
+    toast.className = 'construction-toast ' + (isSuccess ? '' : 'toast-error');
+    if (toastIcon) toastIcon.textContent = isSuccess ? '✅' : '⚠️';
+    if (toastText) toastText.textContent = message;
+
+    toast.style.display = 'flex';
+    toastTimer = setTimeout(() => {
+      toast.style.display = 'none';
+    }, 4000);
+  }
+
+  // Load Construction Data
+  async function loadConstructionData(requestedProjId = null) {
+    try {
+      let url = '/api/erp/construction';
+      if (requestedProjId) {
+        url += `?projectId=${requestedProjId}`;
+      } else if (constructionData.selectedProjectId) {
+        url += `?projectId=${constructionData.selectedProjectId}`;
+      }
+
+      const res = await fetch(url);
+      const data = await res.json();
+      if (data.success) {
+        constructionData = data;
+        renderTopProjectPicker();
+        renderTotalProgress();
+        renderPhases();
+        renderContractors();
+        renderMaterials();
+        renderExpensesTab();
+        renderBoqTab();
+        renderInvoicesTab();
+        renderInspectionsTab();
+      } else {
+        showToast(data.error || 'فشل تحميل بيانات الإنشاءات', false);
+      }
+    } catch (err) {
+      console.error('Error fetching construction data:', err);
+    }
+  }
+
+  // Render Top Project Picker
+  function renderTopProjectPicker() {
+    if (!projectSelect) return;
+    const projs = constructionData.projects || [];
+    projectSelect.innerHTML = projs.map(p => `
+      <option value="${p.id}" ${p.id === constructionData.selectedProjectId ? 'selected' : ''}>
+        🏢 ${p.projectName}
+      </option>
+    `).join('');
+
+    const curr = projs.find(p => p.id === constructionData.selectedProjectId);
+    const expProjInput = document.getElementById('expense-project-name');
+    if (expProjInput && curr) {
+      expProjInput.value = curr.projectName;
+    }
+  }
+
+  projectSelect?.addEventListener('change', async (e) => {
+    const newId = e.target.value;
+    constructionData.selectedProjectId = newId;
+    await loadConstructionData(newId);
+  });
+
+  // Render Total Progress
+  function renderTotalProgress() {
+    const val = constructionData.totalProgress || 0;
+    const txt = document.getElementById('total-progress-text');
+    const bar = document.getElementById('total-progress-bar');
+    if (txt) txt.textContent = `${val}%`;
+    if (bar) bar.style.width = `${val}%`;
+  }
+
+  // Tab 1: Render Construction Phases (مراحل البناء)
+  function renderPhases() {
+    const stages = constructionData.stages || [];
+    const container = document.getElementById('phases-container');
+    const emptyBox = document.getElementById('phases-empty-state');
+    const badge = document.getElementById('phases-count-badge');
+
+    if (badge) badge.textContent = stages.length;
+
+    if (stages.length === 0) {
+      if (container) container.innerHTML = '';
+      if (emptyBox) emptyBox.style.display = 'block';
+      return;
+    }
+
+    if (emptyBox) emptyBox.style.display = 'none';
+
+    const gradients = [
+      'linear-gradient(135deg, #d97706 0%, #b45309 100%)', // الحفر
+      'linear-gradient(135deg, #0284c7 0%, #0369a1 100%)', // الأساسات
+      'linear-gradient(135deg, #4f46e5 0%, #3730a3 100%)', // الهيكل
+      'linear-gradient(135deg, #059669 0%, #047857 100%)'  // التشطيبات
+    ];
+    const icons = ['🚜', '🏗️', '🏢', '🎨'];
+
+    if (container) {
+      container.innerHTML = stages.map((st, idx) => {
+        const pVal = Math.round(st.progress || st.percentage || 0);
+        const grad = gradients[idx % gradients.length];
+        const icon = icons[idx % icons.length];
+        
+        let statusBadge = '<span class="phase-status-badge badge-pending">🟡 معلقة</span>';
+        if (pVal >= 100) statusBadge = '<span class="phase-status-badge badge-completed">🟢 مكتملة 100%</span>';
+        else if (pVal > 0) statusBadge = '<span class="phase-status-badge badge-in_progress">🔵 قيد التنفيذ</span>';
+
+        return `
+          <div class="phase-card" data-stage-id="${st.id}">
+            <div class="phase-photo-wrap" style="background: ${grad}; position: relative; display: flex; align-items: center; justify-content: center; height: 160px; overflow: hidden;">
+              <span style="font-size: 4rem; opacity: 0.35; transform: scale(1.1);">${icon}</span>
+              ${st.photoUrl ? `<img src="${st.photoUrl}" alt="${st.name}" class="phase-img" style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;" onerror="this.style.display='none'" />` : ''}
+              ${statusBadge}
+            </div>
+
+            <div class="phase-card-body">
+              <div class="phase-title-row">
+                <h4>${st.name}</h4>
+                <span class="phase-order-pill">مرحلة #${st.stageOrder}</span>
+              </div>
+
+              ${st.notes ? `<p class="phase-notes-text">${st.notes}</p>` : ''}
+
+              <!-- Interactive Progress Slider -->
+              <div class="phase-slider-box">
+                <div class="slider-head-row">
+                  <span class="slider-lbl">نسبة الإنجاز الفعلية:</span>
+                  <span class="slider-val-tag" id="slider-val-${st.id}">${pVal}%</span>
+                </div>
+                <input 
+                  type="range" 
+                  min="0" 
+                  max="100" 
+                  value="${pVal}" 
+                  class="phase-range-slider" 
+                  data-target-id="${st.id}" 
+                />
+              </div>
+
+              <div class="phase-card-actions">
+                <button type="button" class="btn-save-progress save-stage-btn" data-stage-id="${st.id}">
+                  حفظ نسبة الإنجاز ✓
+                </button>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // Attach Slider Live Input Listeners
+    container?.querySelectorAll('.phase-range-slider').forEach(slider => {
+      slider.addEventListener('input', (e) => {
+        const stageId = e.target.getAttribute('data-target-id');
+        const valTag = document.getElementById(`slider-val-${stageId}`);
+        if (valTag) valTag.textContent = `${e.target.value}%`;
+      });
+    });
+
+    // Attach Save Progress Button Listeners
+    container?.querySelectorAll('.save-stage-btn').forEach(btn => {
+      btn.addEventListener('click', async (e) => {
+        const stageId = e.currentTarget.getAttribute('data-stage-id');
+        const card = e.currentTarget.closest('.phase-card');
+        const slider = card?.querySelector('.phase-range-slider');
+        const progressVal = slider ? slider.value : 0;
+
+        e.currentTarget.textContent = 'جارٍ الحفظ...';
+        try {
+          const res = await fetch('/api/erp/construction', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              action: 'update_phase_progress',
+              stageId,
+              progress: progressVal
+            })
+          });
+
+          const data = await res.json();
+          if (data.success) {
+            showToast(`تم تحديث نسبة إنجاز المرحلة إلى ${progressVal}% بنجاح!`);
+            await loadConstructionData();
+          } else {
+            showToast(data.error || 'فشل تحديث المرحلة', false);
+          }
+        } catch (err) {
+          showToast('حدث خطأ في الاتصال بالخادم', false);
+        } finally {
+          e.currentTarget.textContent = 'حفظ نسبة الإنجاز ✓';
+        }
+      });
+    });
+  }
+
+  // Tab 2: Render Contractors (المقاولين والمستخلصات)
+  function renderContractors() {
+    const contractors = constructionData.contractors || [];
+    const tbody = document.getElementById('contractors-table-body');
+    const emptyBox = document.getElementById('contractors-empty-state');
+    const badge = document.getElementById('contractors-count-badge');
+
+    if (badge) badge.textContent = contractors.length;
+
+    if (contractors.length === 0) {
+      if (tbody) tbody.innerHTML = '';
+      if (emptyBox) emptyBox.style.display = 'block';
+      return;
+    }
+
+    if (emptyBox) emptyBox.style.display = 'none';
+
+    if (tbody) {
+      tbody.innerHTML = contractors.map(c => {
+        const cAmt = c.contractAmount || 0;
+        const pAmt = c.paidAmount || 0;
+        const rAmt = c.remainingAmount !== undefined ? c.remainingAmount : Math.max(0, cAmt - pAmt);
+
+        return `
+          <tr>
+            <td>
+              <strong>${c.name}</strong>
+              ${c.companyName ? `<br><small style="color: #64748b;">${c.companyName}</small>` : ''}
+            </td>
+            <td><span class="specialty-pill">${c.specialty}</span></td>
+            <td>${c.phone ? `<a href="tel:${c.phone}" style="color: #0284c7; text-decoration: none;">📞 ${c.phone}</a>` : '-'}</td>
+            <td><strong>${cAmt.toLocaleString('ar-EG')} ج.م</strong></td>
+            <td><strong style="color: #059669;">${pAmt.toLocaleString('ar-EG')} ج.م</strong></td>
+            <td><strong style="color: #dc2626;">${rAmt.toLocaleString('ar-EG')} ج.م</strong></td>
+            <td>
+              <button 
+                class="btn btn-sm btn-primary pay-contractor-btn" 
+                data-id="${c.id}"
+                data-name="${c.name}"
+                data-contract="${cAmt}"
+                data-remaining="${rAmt}"
+              >
+                + سداد دفعة
+              </button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    // Attach Pay Contractor Button Listeners
+    tbody?.querySelectorAll('.pay-contractor-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const id = e.currentTarget.getAttribute('data-id');
+        const name = e.currentTarget.getAttribute('data-name');
+        const contract = parseFloat(e.currentTarget.getAttribute('data-contract') || 0);
+        const remaining = parseFloat(e.currentTarget.getAttribute('data-remaining') || 0);
+
+        document.getElementById('pay-contractor-id').value = id;
+        document.getElementById('pay-contractor-name').textContent = name;
+        document.getElementById('pay-contractor-total').textContent = `${contract.toLocaleString('ar-EG')} ج.م`;
+        document.getElementById('pay-contractor-remaining').textContent = `${remaining.toLocaleString('ar-EG')} ج.م`;
+        document.getElementById('pay-amount-input').value = '';
+
+        document.getElementById('pay-contractor-modal').style.display = 'flex';
+      });
+    });
+  }
+
+  // Tab 3: Render Inventory Materials & Logs (المخازن والخامات)
+  function renderMaterials() {
+    const materials = constructionData.materials || [];
+    const logs = constructionData.inventoryLogs || [];
+    const container = document.getElementById('materials-container');
+    const emptyBox = document.getElementById('materials-empty-state');
+    const badge = document.getElementById('materials-count-badge');
+    const logsTbody = document.getElementById('inventory-logs-table-body');
+    const logsEmpty = document.getElementById('logs-empty-state');
+    const logsCountStr = document.getElementById('logs-count-str');
+
+    if (badge) badge.textContent = materials.length;
+
+    // 1. Materials Cards
+    if (materials.length === 0) {
+      if (container) container.innerHTML = '';
+      if (emptyBox) emptyBox.style.display = 'block';
+    } else {
+      if (emptyBox) emptyBox.style.display = 'none';
+      if (container) {
+        container.innerHTML = materials.map(m => {
+          let icon = '📦';
+          if (m.name.includes('حديد')) icon = '🏗️';
+          else if (m.name.includes('أسمنت')) icon = '🧱';
+          else if (m.name.includes('رمل')) icon = '⏳';
+          else if (m.name.includes('طوب')) icon = '🧱';
+
+          return `
+            <div class="material-card">
+              <div class="mat-card-head">
+                <span class="mat-icon">${icon}</span>
+                <span class="mat-unit-pill">الوحدة: ${m.unit}</span>
+              </div>
+              <h4 class="mat-name">${m.name}</h4>
+              <div class="mat-stock-val">${(m.currentStock || 0).toLocaleString('ar-EG')} <span style="font-size: 1rem; color: #475569;">${m.unit}</span></div>
+              <p class="mat-notes-sub">${m.notes || 'رصيد الخامة المتاح بالمخزن للاستخدام'}</p>
+            </div>
+          `;
+        }).join('');
+      }
+    }
+
+    // 2. Populate Materials Select in Movement Modal
+    const moveSelect = document.getElementById('inv-modal-material-id');
+    if (moveSelect) {
+      moveSelect.innerHTML = materials.map(m => `
+        <option value="${m.id}">${m.name} (المتاح: ${m.currentStock} ${m.unit})</option>
+      `).join('');
+    }
+
+    // 3. Inventory Logs Table
+    if (logsCountStr) logsCountStr.textContent = `${logs.length} حركة مسجلة`;
+
+    if (logs.length === 0) {
+      if (logsTbody) logsTbody.innerHTML = '';
+      if (logsEmpty) logsEmpty.style.display = 'block';
+    } else {
+      if (logsEmpty) logsEmpty.style.display = 'none';
+      if (logsTbody) {
+        logsTbody.innerHTML = logs.map(l => {
+          const isIncoming = l.type === 'in';
+          const typeBadge = isIncoming 
+            ? '<span class="badge-log-in">📥 توريد للمخزن (In)</span>'
+            : '<span class="badge-log-out">📤 سحب للموقع (Out)</span>';
+
+          const dateStr = new Date(l.createdAt).toLocaleDateString('ar-EG', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+          });
+
+          return `
+            <tr>
+              <td><strong>${l.material ? l.material.name : 'خامة'}</strong></td>
+              <td>${typeBadge}</td>
+              <td><strong style="color: ${isIncoming ? '#059669' : '#ea580c'}; font-size: 1.05rem;">${isIncoming ? '+' : '-'}${l.quantity} ${l.material?.unit || ''}</strong></td>
+              <td>${l.engineerName || 'المهندس المشرف'}</td>
+              <td>${l.notes || '-'}</td>
+              <td>${dateStr}</td>
+            </tr>
+          `;
+        }).join('');
+      }
+    }
+  }
+
+  // Tab 4: Render Expenses Tab (طلبات الصرف للخزنة)
+  function renderExpensesTab() {
+    const expenses = constructionData.expenseRequests || [];
+    const tbody = document.getElementById('construction-expenses-table-body');
+    const emptyBox = document.getElementById('expenses-empty-state');
+
+    const catLabels = {
+      materials: 'شراء خامات ومواد',
+      contractor: 'دفعة مستخلص مقاول',
+      labor: 'أجور وعمالة',
+      operational: 'مصاريف موقع وتشغيل',
+      other: 'أخرى'
+    };
+
+    if (expenses.length === 0) {
+      if (tbody) tbody.innerHTML = '';
+      if (emptyBox) emptyBox.style.display = 'block';
+      return;
+    }
+
+    if (emptyBox) emptyBox.style.display = 'none';
+
+    if (tbody) {
+      tbody.innerHTML = expenses.map(req => {
+        let statusBadge = '<span class="req-status-pill req-pending">🟡 قيد المراجعة</span>';
+        if (req.status === 'approved') statusBadge = '<span class="req-status-pill req-approved">🟢 معتمد وتم الصرف</span>';
+        else if (req.status === 'rejected') statusBadge = '<span class="req-status-pill req-rejected">🔴 مرفوض</span>';
+
+        const dateStr = new Date(req.createdAt).toLocaleDateString('ar-EG', {
+          year: 'numeric',
+          month: 'short',
+          day: 'numeric'
+        });
+
+        return `
+          <tr>
+            <td>
+              <strong>${req.title}</strong>
+              ${req.description ? `<br><small style="color: #64748b;">${req.description}</small>` : ''}
+            </td>
+            <td><span class="specialty-pill">${catLabels[req.category] || req.category}</span></td>
+            <td><strong style="font-size: 1.05rem; color: #dc2626;">${(req.amount || 0).toLocaleString('ar-EG')} ج.م</strong></td>
+            <td>${req.requesterName || 'مهندس الموقع'}</td>
+            <td>${dateStr}</td>
+            <td>${statusBadge}</td>
+          </tr>
+        `;
+      }).join('');
+    }
+  }
+
+  // Tab Switching Logic
+  const tabButtons = document.querySelectorAll('.c-tab-btn');
+  const panes = document.querySelectorAll('.construction-pane');
+
+  tabButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      tabButtons.forEach(b => b.classList.remove('active'));
+      panes.forEach(p => p.style.display = 'none');
+
+      btn.classList.add('active');
+      const targetPaneId = btn.getAttribute('data-pane');
+      const targetPane = document.getElementById(targetPaneId);
+      if (targetPane) targetPane.style.display = 'block';
+    });
+  });
+
+  // Quick Action Button: Switch to Expenses Tab
+  document.getElementById('quick-expense-req-btn')?.addEventListener('click', () => {
+    document.getElementById('tab-btn-expenses')?.click();
+    document.getElementById('expense-req-amount')?.focus();
+  });
+
+  // Modal 1: Add Construction Phase
+  const addPhaseModal = document.getElementById('add-phase-modal');
+  document.getElementById('open-add-phase-btn')?.addEventListener('click', () => {
+    if (addPhaseModal) addPhaseModal.style.display = 'flex';
+  });
+  document.getElementById('close-add-phase-modal')?.addEventListener('click', () => {
+    if (addPhaseModal) addPhaseModal.style.display = 'none';
+  });
+  document.getElementById('cancel-phase-btn')?.addEventListener('click', () => {
+    if (addPhaseModal) addPhaseModal.style.display = 'none';
+  });
+
+  document.getElementById('add-phase-form')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const saveBtn = document.getElementById('save-phase-btn');
+    if (saveBtn) saveBtn.textContent = 'جارٍ الحفظ...';
+
+    const name = document.getElementById('new-phase-name').value;
+    const progress = document.getElementById('new-phase-progress').value;
+    const photoUrl = document.getElementById('new-phase-photo').value;
+    const notes = document.getElementById('new-phase-notes').value;
+
+    try {
+      const res = await fetch('/api/erp/construction', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'add_phase',
+          projectId: constructionData.selectedProjectId,
+          name,
+          progress,
+          photoUrl,
+          notes
+        })
+      });
+
+      const data = await res.json();
+      if (data.success) {
+        if (addPhaseModal) addPhaseModal.style.display = 'none';
+        document.getElementById('add-phase-form').reset();
+        showToast('تمت إضافة مرحلة البناء الجديدة بنجاح!');
+        await loadConstructionData();
+      } else {
+        showToast(data.error || 'فشلت إضافة المرحلة', false);
+      }
+    } catch (err) {
+      showToast('حدث خطأ في الاتصال بالخادم', false);
+    } finally {
+      if (saveBtn) saveBtn.textContent = 'حفظ المرحلة';
+    }
+  });
+
+  // Modal 2: Add Contractor
+  const addContractorModal = document.getElementById('add-contractor-modal');
+  document.getElementById('open-add-contractor-btn')?.addEventListener('click', () => {
+    if (addContractorModal) addContractorModal.style.display = 'flex';
+  });
+  document.getElementById('close-contractor-modal')?.addEventListener('click', () => {
+    if (addContractorModal) addContractorModal.style.display = 'none';
+  });
+  document.getElementById('cancel-contractor-btn')?.addEventListener('click', () => {
+    if (addContractorModal) addContractorModal.style.display = 'none';
+  });
+
+  document.getElementById('add-contractor-form')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const saveBtn = document.getElementById('save-contractor-btn');
+    if (saveBtn) saveBtn.textContent = 'جارٍ التسجيل...';
+
+    const name = document.getElementById('new-contractor-name').value;
+    const specialty = document.getElementById('new-contractor-specialty').value;
+    const phone = document.getElementById('new-contractor-phone').value;
+    const contractAmount = document.getElementById('new-contractor-contract').value;
+    const paidAmount = document.getElementById('new-contractor-paid').value;
+
+    try {
+      const res = await fetch('/api/erp/construction', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'add_contractor',
+          projectId: constructionData.selectedProjectId,
+          name,
+          specialty,
+          phone,
+          contractAmount,
+          paidAmount
+        })
+      });
+
+      const data = await res.json();
+      if (data.success) {
+        if (addContractorModal) addContractorModal.style.display = 'none';
+        document.getElementById('add-contractor-form').reset();
+        showToast('تم تسجيل المقاول بنجاح!');
+        await loadConstructionData();
+      } else {
+        showToast(data.error || 'فشل تسجيل المقاول', false);
+      }
+    } catch (err) {
+      showToast('حدث خطأ في الاتصال بالخادم', false);
+    } finally {
+      if (saveBtn) saveBtn.textContent = 'تسجيل المقاول';
+    }
+  });
+
+  // Modal 3: Pay Contractor Installment
+  const payModal = document.getElementById('pay-contractor-modal');
+  document.getElementById('close-pay-contractor-modal')?.addEventListener('click', () => {
+    if (payModal) payModal.style.display = 'none';
+  });
+  document.getElementById('cancel-payment-btn')?.addEventListener('click', () => {
+    if (payModal) payModal.style.display = 'none';
+  });
+
+  document.getElementById('pay-contractor-form')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const saveBtn = document.getElementById('save-payment-btn');
+    if (saveBtn) saveBtn.textContent = 'جارٍ السداد...';
+
+    const contractorId = document.getElementById('pay-contractor-id').value;
+    const paymentAmount = document.getElementById('pay-amount-input').value;
+
+    try {
+      const res = await fetch('/api/erp/construction', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'pay_contractor',
+          contractorId,
+          paymentAmount
+        })
+      });
+
+      const data = await res.json();
+      if (data.success) {
+        if (payModal) payModal.style.display = 'none';
+        showToast('تم قيد سداد الدفعة وتحديث الرصيد المتبقي للمقاول!');
+        await loadConstructionData();
+      } else {
+        showToast(data.error || 'فشل تسجيل الدفعة', false);
+      }
+    } catch (err) {
+      showToast('حدث خطأ في الاتصال بالخادم', false);
+    } finally {
+      if (saveBtn) saveBtn.textContent = 'تأكيد سداد الدفعة';
+    }
+  });
+
+  // Modal 4: Inventory Movement (In / Out)
+  const invModal = document.getElementById('inventory-movement-modal');
+  const invTypeInput = document.getElementById('inv-movement-type');
+  const invModalTitle = document.getElementById('inv-modal-title');
+  const invModalIcon = document.getElementById('inv-modal-icon');
+
+  function openInventoryMovement(type = 'in') {
+    if (invTypeInput) invTypeInput.value = type;
+    if (type === 'in') {
+      if (invModalTitle) invModalTitle.textContent = 'توريد خامة جديدة للمخزن (In)';
+      if (invModalIcon) invModalIcon.textContent = '📥';
+    } else {
+      if (invModalTitle) invModalTitle.textContent = 'سحب خامة للاستخدام بالموقع (Out)';
+      if (invModalIcon) invModalIcon.textContent = '📤';
+    }
+    if (invModal) invModal.style.display = 'flex';
+  }
+
+  document.getElementById('open-material-in-btn')?.addEventListener('click', () => openInventoryMovement('in'));
+  document.getElementById('open-material-out-btn')?.addEventListener('click', () => openInventoryMovement('out'));
+  document.getElementById('close-inv-modal')?.addEventListener('click', () => { if (invModal) invModal.style.display = 'none'; });
+  document.getElementById('cancel-inv-movement-btn')?.addEventListener('click', () => { if (invModal) invModal.style.display = 'none'; });
+
+  document.getElementById('inventory-movement-form')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const saveBtn = document.getElementById('save-inv-movement-btn');
+    if (saveBtn) saveBtn.textContent = 'جارٍ تسجيل الحركة...';
+
+    const materialId = document.getElementById('inv-modal-material-id').value;
+    const type = document.getElementById('inv-movement-type').value;
+    const quantity = document.getElementById('inv-modal-qty').value;
+    const engineerName = document.getElementById('inv-modal-engineer').value;
+    const notes = document.getElementById('inv-modal-notes').value;
+
+    try {
+      const res = await fetch('/api/erp/construction', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'log_inventory_movement',
+          projectId: constructionData.selectedProjectId,
+          materialId,
+          type,
+          quantity,
+          engineerName,
+          notes
+        })
+      });
+
+      const data = await res.json();
+      if (data.success) {
+        if (invModal) invModal.style.display = 'none';
+        document.getElementById('inventory-movement-form').reset();
+        showToast(`تم تسجيل حركة المخزن (${type === 'in' ? 'توريد +' : 'سحب -'}) وتحديث الرصيد فورا!`);
+        await loadConstructionData();
+      } else {
+        showToast(data.error || 'فشلت معالجة حركة المخزن', false);
+      }
+    } catch (err) {
+      showToast('حدث خطأ في الاتصال بالخادم', false);
+    } finally {
+      if (saveBtn) saveBtn.textContent = 'تأكيد وقيد الحركة';
+    }
+  });
+
+  // Modal 5: Add New Material
+  const addMatModal = document.getElementById('add-material-modal');
+  document.getElementById('open-add-material-btn')?.addEventListener('click', () => {
+    if (addMatModal) addMatModal.style.display = 'flex';
+  });
+  document.getElementById('close-add-material-modal')?.addEventListener('click', () => {
+    if (addMatModal) addMatModal.style.display = 'none';
+  });
+  document.getElementById('cancel-new-material-btn')?.addEventListener('click', () => {
+    if (addMatModal) addMatModal.style.display = 'none';
+  });
+
+  document.getElementById('add-material-form')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const saveBtn = document.getElementById('save-new-material-btn');
+    if (saveBtn) saveBtn.textContent = 'جارٍ الحفظ...';
+
+    const name = document.getElementById('new-material-name').value;
+    const unit = document.getElementById('new-material-unit').value;
+    const initialStock = document.getElementById('new-material-stock').value;
+    const notes = document.getElementById('new-material-notes').value;
+
+    try {
+      const res = await fetch('/api/erp/construction', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'add_material',
+          projectId: constructionData.selectedProjectId,
+          name,
+          unit,
+          initialStock,
+          notes
+        })
+      });
+
+      const data = await res.json();
+      if (data.success) {
+        if (addMatModal) addMatModal.style.display = 'none';
+        document.getElementById('add-material-form').reset();
+        showToast('تمت إضافة صنف الخامة الجديد للمخزن!');
+        await loadConstructionData();
+      } else {
+        showToast(data.error || 'فشلت إضافة الخامة', false);
+      }
+    } catch (err) {
+      showToast('حدث خطأ في الاتصال بالخادم', false);
+    } finally {
+      if (saveBtn) saveBtn.textContent = 'إضافة الصنف للمخزن';
+    }
+  });
+
+  // Tab 4: Submit Expense Request Form to Treasury
+  document.getElementById('construction-expense-form')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const submitBtn = document.getElementById('submit-expense-req-btn');
+    if (submitBtn) submitBtn.innerHTML = '<span>جارٍ إرسال الطلب للخزنة...</span>';
+
+    const amount = document.getElementById('expense-req-amount').value;
+    const category = document.getElementById('expense-req-category').value;
+    const requesterName = document.getElementById('expense-req-requester').value;
+    const title = document.getElementById('expense-req-title').value;
+    const description = document.getElementById('expense-req-desc').value;
+
+    try {
+      const res = await fetch('/api/erp/construction', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'create_expense_request',
+          projectId: constructionData.selectedProjectId,
+          title,
+          category,
+          amount,
+          requesterName,
+          description
+        })
+      });
+
+      const data = await res.json();
+      if (data.success) {
+        document.getElementById('expense-req-amount').value = '';
+        document.getElementById('expense-req-title').value = '';
+        document.getElementById('expense-req-desc').value = '';
+        showToast('🚀 تم إرسال طلب الصرف بنجاح إلى الخزنة المركزية بحالة (قيد المراجعة)!');
+        await loadConstructionData();
+      } else {
+        showToast(data.error || 'فشل إرسال طلب الصرف', false);
+      }
+    } catch (err) {
+      showToast('حدث خطأ في الاتصال بالخادم', false);
+    } finally {
+      if (submitBtn) submitBtn.innerHTML = '<span>🚀 إرسال الطلب للخزنة للاعتماد والصرف</span>';
+    }
+  });
+
+  // =========================================================
+  // BOQ Tab (مقايسة الكميات ومراقبة التكاليف)
+  // =========================================================
+  function renderBoqTab() {
+    const items = constructionData.boqItems || [];
+    const totalBudget = constructionData.totalBoqBudget || 0;
+    const totalSpent = constructionData.totalBoqSpent || 0;
+    const variance = constructionData.boqVariance || 0;
+
+    const badge = document.getElementById('boq-count-badge');
+    if (badge) badge.textContent = items.length;
+
+    const elBudget = document.getElementById('boq-total-budget');
+    if (elBudget) elBudget.textContent = `${totalBudget.toLocaleString()} ج.م`;
+
+    const elSpent = document.getElementById('boq-total-spent');
+    if (elSpent) elSpent.textContent = `${totalSpent.toLocaleString()} ج.م`;
+
+    const elVar = document.getElementById('boq-variance');
+    if (elVar) {
+      const isPositive = variance >= 0;
+      elVar.textContent = `${Math.abs(variance).toLocaleString()} ج.م (${isPositive ? 'وفر بالميزانية' : 'عجز / تجاوز ⚠️'})`;
+      elVar.style.color = isPositive ? '#059669' : '#dc2626';
+    }
+
+    const tbody = document.getElementById('boq-table-body');
+    const emptyBox = document.getElementById('boq-empty-state');
+    if (items.length === 0) {
+      if (tbody) tbody.innerHTML = '';
+      if (emptyBox) emptyBox.style.display = 'block';
+      return;
+    }
+
+    if (emptyBox) emptyBox.style.display = 'none';
+    if (tbody) {
+      const catLabels = {
+        earthworks: 'أعمال ترابية',
+        concrete: 'خرسانات',
+        masonry: 'مباني',
+        finishes: 'تشطيبات',
+        mep: 'كهروميكانيك MEP',
+        other: 'أخرى'
+      };
+
+      tbody.innerHTML = items.map(item => {
+        const budget = item.totalBudget || 0;
+        const spent = item.actualCostSpent || 0;
+        const isOver = spent > budget;
+        const pct = budget > 0 ? Math.round((spent / budget) * 100) : 0;
+
+        return `
+          <tr>
+            <td><strong style="font-family: monospace; color: #0284c7;">${item.itemCode}</strong></td>
+            <td><span class="specialty-pill">${catLabels[item.category] || item.category}</span></td>
+            <td><strong>${item.description}</strong></td>
+            <td>${item.unit}</td>
+            <td>${(item.estimatedQty || 0).toLocaleString()}</td>
+            <td>${(item.unitCost || 0).toLocaleString()} ج.م</td>
+            <td><strong style="color: #0284c7;">${budget.toLocaleString()} ج.م</strong></td>
+            <td><strong style="color: ${isOver ? '#dc2626' : '#d97706'};">${spent.toLocaleString()} ج.م</strong></td>
+            <td>
+              <span class="status-badge" style="background: ${isOver ? '#fee2e2' : '#ecfdf5'}; color: ${isOver ? '#991b1b' : '#065f46'}; font-weight: 800;">
+                ${isOver ? `⚠️ تجاوز (${pct}%)` : `✅ ضمن الميزانية (${pct}%)`}
+              </span>
+            </td>
+            <td>
+              <button class="btn btn-sm btn-outline open-update-boq-btn" data-id="${item.id}" data-code="${item.itemCode}" data-desc="${item.description}">
+                + تسجيل منصرف
+              </button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+
+      document.querySelectorAll('.open-update-boq-btn').forEach(btn => {
+        btn.onclick = (e) => {
+          const id = e.currentTarget.getAttribute('data-id');
+          const code = e.currentTarget.getAttribute('data-code');
+          const desc = e.currentTarget.getAttribute('data-desc');
+
+          document.getElementById('update-boq-id').value = id;
+          document.getElementById('update-boq-item-info').textContent = `بند: ${code} - ${desc}`;
+          document.getElementById('update-boq-modal').style.display = 'flex';
+        };
+      });
+    }
+  }
+
+  // BOQ Modals triggers
+  const addBoqModal = document.getElementById('add-boq-modal');
+  document.getElementById('open-add-boq-btn')?.addEventListener('click', () => {
+    if (addBoqModal) addBoqModal.style.display = 'flex';
+  });
+  document.getElementById('close-add-boq-modal')?.addEventListener('click', () => {
+    if (addBoqModal) addBoqModal.style.display = 'none';
+  });
+  document.getElementById('cancel-add-boq-btn')?.addEventListener('click', () => {
+    if (addBoqModal) addBoqModal.style.display = 'none';
+  });
+
+  const updateBoqModal = document.getElementById('update-boq-modal');
+  document.getElementById('close-update-boq-modal')?.addEventListener('click', () => {
+    if (updateBoqModal) updateBoqModal.style.display = 'none';
+  });
+  document.getElementById('cancel-update-boq-btn')?.addEventListener('click', () => {
+    if (updateBoqModal) updateBoqModal.style.display = 'none';
+  });
+
+  // Calculate live preview for BOQ add modal
+  const calcBoqTotal = () => {
+    const qty = parseFloat(document.getElementById('boq-est-qty')?.value || 0);
+    const cost = parseFloat(document.getElementById('boq-unit-cost')?.value || 0);
+    const totalEl = document.getElementById('boq-total-preview');
+    if (totalEl) totalEl.value = `${(qty * cost).toLocaleString()} ج.م`;
+  };
+  document.getElementById('boq-est-qty')?.addEventListener('input', calcBoqTotal);
+  document.getElementById('boq-unit-cost')?.addEventListener('input', calcBoqTotal);
+
+  document.getElementById('add-boq-form')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const itemCode = document.getElementById('boq-item-code').value;
+    const category = document.getElementById('boq-category').value;
+    const description = document.getElementById('boq-description').value;
+    const unit = document.getElementById('boq-unit').value;
+    const estimatedQty = document.getElementById('boq-est-qty').value;
+    const unitCost = document.getElementById('boq-unit-cost').value;
+
+    try {
+      const res = await fetch('/api/erp/construction', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'add_boq_item',
+          projectId: constructionData.selectedProjectId,
+          itemCode,
+          category,
+          description,
+          unit,
+          estimatedQty,
+          unitCost
+        })
+      });
+      const data = await res.json();
+      if (data.success) {
+        if (addBoqModal) addBoqModal.style.display = 'none';
+        document.getElementById('add-boq-form').reset();
+        showToast('تمت إضافة بند المقايسة بنجاح!');
+        await loadConstructionData();
+      } else {
+        showToast(data.error || 'فشلت إضافة البند', false);
+      }
+    } catch (err) {
+      showToast('خطأ في الاتصال بالسيرفر', false);
+    }
+  });
+
+  document.getElementById('update-boq-form')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const boqItemId = document.getElementById('update-boq-id').value;
+    const addSpent = document.getElementById('boq-add-spent').value;
+    const addQty = document.getElementById('boq-add-qty').value;
+
+    try {
+      const res = await fetch('/api/erp/construction', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'update_boq_actuals',
+          boqItemId,
+          addSpent,
+          addQty
+        })
+      });
+      const data = await res.json();
+      if (data.success) {
+        if (updateBoqModal) updateBoqModal.style.display = 'none';
+        document.getElementById('update-boq-form').reset();
+        showToast('تم تسجيل المنصرف الفعلي وتحديث المقايسة!');
+        await loadConstructionData();
+      } else {
+        showToast(data.error || 'فشل تحديث المنصرف', false);
+      }
+    } catch (err) {
+      showToast('خطأ في الاتصال بالسيرفر', false);
+    }
+  });
+
+  // =========================================================
+  // Invoices Tab (المستخلصات الهندسية والاستقطاعات)
+  // =========================================================
+  function renderInvoicesTab() {
+    const invoices = constructionData.contractorInvoices || [];
+    const badge = document.getElementById('invoices-count-badge');
+    if (badge) badge.textContent = invoices.length;
+
+    let totalGross = 0;
+    let totalRetention = 0;
+    let totalDeductions = 0;
+    let totalNet = 0;
+
+    invoices.forEach(inv => {
+      totalGross += (inv.grossAmount || 0);
+      totalRetention += (inv.retentionAmount || 0);
+      totalDeductions += ((inv.advanceDeducted || 0) + (inv.taxDeducted || 0));
+      totalNet += (inv.netAmountPayable || inv.amount || 0);
+    });
+
+    const elGross = document.getElementById('inv-total-gross');
+    if (elGross) elGross.textContent = `${totalGross.toLocaleString()} ج.م`;
+
+    const elRet = document.getElementById('inv-total-retention');
+    if (elRet) elRet.textContent = `${totalRetention.toLocaleString()} ج.م`;
+
+    const elDed = document.getElementById('inv-total-deductions');
+    if (elDed) elDed.textContent = `${totalDeductions.toLocaleString()} ج.م`;
+
+    const elNet = document.getElementById('inv-total-net');
+    if (elNet) elNet.textContent = `${totalNet.toLocaleString()} ج.م`;
+
+    // Populate contractor select in create invoice modal
+    const contSelect = document.getElementById('inv-contractor-select');
+    if (contSelect && constructionData.contractors) {
+      contSelect.innerHTML = '<option value="">-- اختر المقاول --</option>' +
+        constructionData.contractors.map(c => `
+          <option value="${c.id}">${c.name} (${c.specialty})</option>
+        `).join('');
+    }
+
+    const tbody = document.getElementById('invoices-table-body');
+    const emptyBox = document.getElementById('invoices-empty-state');
+    if (invoices.length === 0) {
+      if (tbody) tbody.innerHTML = '';
+      if (emptyBox) emptyBox.style.display = 'block';
+      return;
+    }
+
+    if (emptyBox) emptyBox.style.display = 'none';
+    if (tbody) {
+      tbody.innerHTML = invoices.map(inv => {
+        const gross = inv.grossAmount || 0;
+        const ret = inv.retentionAmount || 0;
+        const otherDed = (inv.advanceDeducted || 0) + (inv.taxDeducted || 0);
+        const net = inv.netAmountPayable || inv.amount || 0;
+        const isApproved = inv.consultantApproval;
+        const isPaid = inv.status === 'paid';
+
+        return `
+          <tr>
+            <td><strong style="color: #0284c7;">${inv.invoiceNumber}</strong></td>
+            <td>
+              <strong>${inv.contractor?.name || 'مقاول'}</strong>
+              <br><small style="color: #64748b;">${inv.contractor?.specialty || ''}</small>
+            </td>
+            <td>${inv.stageDescription}</td>
+            <td><strong>${gross.toLocaleString()} ج.م</strong></td>
+            <td><span style="color: #d97706; font-weight: 700;">-${ret.toLocaleString()} ج.م</span></td>
+            <td><span style="color: #ef4444; font-weight: 700;">-${otherDed.toLocaleString()} ج.م</span></td>
+            <td><strong style="color: #059669; font-size: 1.05rem;">${net.toLocaleString()} ج.م</strong></td>
+            <td>
+              ${isApproved ? `
+                <span class="status-badge" style="background: #ecfdf5; color: #047857; font-weight: 800;">معتمد ✅</span>
+              ` : `
+                <button class="btn btn-sm btn-outline btn-approve-inv" data-id="${inv.id}">
+                  اعتماد الاستشاري ⏳
+                </button>
+              `}
+            </td>
+            <td>
+              <span class="status-badge ${isPaid ? 'badge-paid' : inv.status === 'approved' ? 'badge-safe' : 'badge-pending'}">
+                ${isPaid ? 'تم الصرف 💵' : inv.status === 'approved' ? 'معتمد للصرف' : 'قيد المراجعة'}
+              </span>
+            </td>
+            <td>
+              ${isPaid ? `
+                <small style="color: #64748b;">إيصال: ${inv.receiptNumber || 'نظامي'}</small>
+              ` : isApproved ? `
+                <button class="btn btn-sm btn-success btn-pay-inv" data-id="${inv.id}">
+                  صرف من الخزينة 💳
+                </button>
+              ` : `
+                <span style="color: #94a3b8; font-size: 0.8rem;">يتطلب الاعتماد أولاً</span>
+              `}
+            </td>
+          </tr>
+        `;
+      }).join('');
+
+      // Attach events for invoice approvals & payouts
+      document.querySelectorAll('.btn-approve-inv').forEach(btn => {
+        btn.onclick = async (e) => {
+          const id = e.currentTarget.getAttribute('data-id');
+          if (!confirm('هل توافق على اعتماد الاستشاري الهندسي لهذا المستخلص وجاهزيته للصرف؟')) return;
+
+          try {
+            const res = await fetch('/api/erp/construction', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ action: 'approve_contractor_invoice', invoiceId: id })
+            });
+            const data = await res.json();
+            if (data.success) {
+              showToast('تم اعتماد المستخلص بنجاح!');
+              await loadConstructionData();
+            } else {
+              showToast(data.error || 'فشل الاعتماد', false);
+            }
+          } catch (err) {
+            showToast('خطأ في الاتصال', false);
+          }
+        };
+      });
+
+      document.querySelectorAll('.btn-pay-inv').forEach(btn => {
+        btn.onclick = async (e) => {
+          const id = e.currentTarget.getAttribute('data-id');
+          if (!confirm('تأكيد صرف المستخلص الآن من الخزينة وتسجيل حركة مصروف وخصمها من رصيد المقاول؟')) return;
+
+          try {
+            const res = await fetch('/api/erp/construction', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ action: 'pay_contractor_invoice', invoiceId: id })
+            });
+            const data = await res.json();
+            if (data.success) {
+              showToast(`تم صرف المستخلص بنجاح! رقم الإيصال: ${data.receiptNumber}`);
+              await loadConstructionData();
+            } else {
+              showToast(data.error || 'فشل الصرف', false);
+            }
+          } catch (err) {
+            showToast('خطأ في الاتصال', false);
+          }
+        };
+      });
+    }
+  }
+
+  // Invoice Calculator live updates
+  const calcInvoiceNet = () => {
+    const gross = parseFloat(document.getElementById('inv-gross-amount')?.value || 0);
+    const retRate = parseFloat(document.getElementById('inv-retention-rate')?.value || 5);
+    const adv = parseFloat(document.getElementById('inv-advance-deducted')?.value || 0);
+    const tax = parseFloat(document.getElementById('inv-tax-deducted')?.value || 0);
+
+    const retAmount = Math.round((gross * (retRate / 100)) * 100) / 100;
+    const net = Math.max(0, Math.round((gross - retAmount - adv - tax) * 100) / 100);
+
+    const netEl = document.getElementById('inv-net-preview');
+    if (netEl) netEl.textContent = `${net.toLocaleString()} ج.م`;
+
+    const retEl = document.getElementById('inv-ret-amount-preview');
+    if (retEl) retEl.textContent = `${retAmount.toLocaleString()} ج.م (${retRate}%)`;
+  };
+
+  document.getElementById('inv-gross-amount')?.addEventListener('input', calcInvoiceNet);
+  document.getElementById('inv-retention-rate')?.addEventListener('input', calcInvoiceNet);
+  document.getElementById('inv-advance-deducted')?.addEventListener('input', calcInvoiceNet);
+  document.getElementById('inv-tax-deducted')?.addEventListener('input', calcInvoiceNet);
+
+  const createInvModal = document.getElementById('create-invoice-modal');
+  document.getElementById('open-create-invoice-btn')?.addEventListener('click', () => {
+    if (createInvModal) createInvModal.style.display = 'flex';
+  });
+  document.getElementById('close-create-inv-modal')?.addEventListener('click', () => {
+    if (createInvModal) createInvModal.style.display = 'none';
+  });
+  document.getElementById('cancel-create-inv-btn')?.addEventListener('click', () => {
+    if (createInvModal) createInvModal.style.display = 'none';
+  });
+
+  document.getElementById('create-invoice-form')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const contractorId = document.getElementById('inv-contractor-select').value;
+    const invoiceNumber = document.getElementById('inv-number').value;
+    const stageDescription = document.getElementById('inv-stage-desc').value;
+    const grossAmount = document.getElementById('inv-gross-amount').value;
+    const retentionRate = document.getElementById('inv-retention-rate').value;
+    const advanceDeducted = document.getElementById('inv-advance-deducted').value;
+    const taxDeducted = document.getElementById('inv-tax-deducted').value;
+    const dueDate = document.getElementById('inv-due-date').value;
+    const notes = document.getElementById('inv-notes').value;
+
+    try {
+      const res = await fetch('/api/erp/construction', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'create_contractor_invoice',
+          projectId: constructionData.selectedProjectId,
+          contractorId,
+          invoiceNumber,
+          stageDescription,
+          grossAmount,
+          retentionRate,
+          advanceDeducted,
+          taxDeducted,
+          dueDate,
+          notes
+        })
+      });
+      const data = await res.json();
+      if (data.success) {
+        if (createInvModal) createInvModal.style.display = 'none';
+        document.getElementById('create-invoice-form').reset();
+        showToast('تم إصدار المستخلص بنجاح بانتظار اعتماد الاستشاري!');
+        await loadConstructionData();
+      } else {
+        showToast(data.error || 'فشل إصدار المستخلص', false);
+      }
+    } catch (err) {
+      showToast('خطأ في الاتصال', false);
+    }
+  });
+
+  // =========================================================
+  // Inspections & Snagging Tab (الفحص والتسليم)
+  // =========================================================
+  let activeInspection = null;
+
+  function renderInspectionsTab() {
+    const inspections = constructionData.unitInspections || [];
+    const badge = document.getElementById('inspections-count-badge');
+    if (badge) badge.textContent = inspections.length;
+
+    // Populate units select in add inspection modal
+    const unitSelect = document.getElementById('insp-unit-select');
+    if (unitSelect && constructionData.units) {
+      unitSelect.innerHTML = '<option value="">-- اختر الوحدة --</option>' +
+        constructionData.units.map(u => `
+          <option value="${u.id}">وحدة رقم ${u.unitNumber} (${u.unitType})</option>
+        `).join('');
+    }
+
+    const container = document.getElementById('inspections-container');
+    const emptyBox = document.getElementById('inspections-empty-state');
+    if (inspections.length === 0) {
+      if (container) container.innerHTML = '';
+      if (emptyBox) emptyBox.style.display = 'block';
+      return;
+    }
+
+    if (emptyBox) emptyBox.style.display = 'none';
+    if (container) {
+      container.innerHTML = inspections.map(insp => {
+        const snags = Array.isArray(insp.snagItems) ? insp.snagItems : [];
+        const openSnags = snags.filter(s => s.status === 'open').length;
+        const fixedSnags = snags.filter(s => s.status === 'fixed').length;
+        const isCompleted = insp.status === 'completed' || insp.clientSigned;
+
+        return `
+          <div class="kpi-card" style="background: white; border: 1.5px solid ${isCompleted ? '#bbf7d0' : '#fed7aa'}; border-radius: 18px; padding: 1.5rem; display: flex; flex-direction: column; gap: 0.85rem; box-shadow: 0 4px 12px rgba(0,0,0,0.03);">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+              <div>
+                <span style="font-size: 0.78rem; font-weight: 800; color: #64748b;">محضر فحص وحدة</span>
+                <h4 style="margin: 0.15rem 0 0 0; font-size: 1.2rem; font-weight: 900; color: #0f172a;">وحدة ${insp.unit?.unitNumber || ''}</h4>
+              </div>
+              <span class="status-badge" style="background: ${isCompleted ? '#ecfdf5' : '#fff7ed'}; color: ${isCompleted ? '#15803d' : '#c2410c'}; font-weight: 800;">
+                ${isCompleted ? 'تم الاستلام الرسمي ✅' : 'ملاحظات جارية ⚠️'}
+              </span>
+            </div>
+
+            <div style="font-size: 0.88rem; color: #334155; display: flex; flex-direction: column; gap: 0.3rem;">
+              <div><strong>العميل المستلم:</strong> ${insp.clientName}</div>
+              <div><strong>المهندس الفاحص:</strong> ${insp.inspectorName}</div>
+              <div><strong>تاريخ المعاينة:</strong> ${new Date(insp.inspectionDate).toLocaleDateString('ar-EG')}</div>
+            </div>
+
+            <div style="background: #f8fafc; border-radius: 10px; padding: 0.65rem 0.85rem; font-size: 0.82rem; font-weight: 700; display: flex; justify-content: space-between;">
+              <span style="color: #ea580c;">⚠️ ملاحظات معلقة: ${openSnags}</span>
+              <span style="color: #059669;">✅ تم معالجتها: ${fixedSnags}</span>
+            </div>
+
+            <button class="btn btn-sm btn-outline open-view-snag-btn" data-id="${insp.id}" style="margin-top: auto; justify-content: center;">
+              📋 تفاصيل الملاحظات ومحضر الاستلام
+            </button>
+          </div>
+        `;
+      }).join('');
+
+      document.querySelectorAll('.open-view-snag-btn').forEach(btn => {
+        btn.onclick = (e) => {
+          const id = e.currentTarget.getAttribute('data-id');
+          openSnagModal(id);
+        };
+      });
+    }
+  }
+
+  function openSnagModal(inspId) {
+    const insp = constructionData.unitInspections?.find(i => i.id === inspId);
+    if (!insp) return;
+    activeInspection = insp;
+
+    document.getElementById('snag-modal-title').textContent = `محضر معاينة وحدة ${insp.unit?.unitNumber || ''} - العميل: ${insp.clientName}`;
+    document.getElementById('snag-modal-sub').textContent = `المهندس: ${insp.inspectorName} | تاريخ: ${new Date(insp.inspectionDate).toLocaleDateString('ar-EG')}`;
+
+    const isSigned = insp.clientSigned || insp.status === 'completed';
+    const statusStr = document.getElementById('handover-status-str');
+    if (statusStr) {
+      statusStr.textContent = isSigned ? '✅ تم توقيع واستلام الوحدة نهائياً' : '⚠️ جاري معالجة ملاحظات التشطيب';
+      statusStr.style.color = isSigned ? '#166534' : '#c2410c';
+    }
+
+    const signBtn = document.getElementById('btn-sign-handover');
+    if (signBtn) {
+      signBtn.style.display = isSigned ? 'none' : 'inline-flex';
+    }
+
+    renderSnagItemsList();
+    document.getElementById('view-snag-modal').style.display = 'flex';
+  }
+
+  function renderSnagItemsList() {
+    if (!activeInspection) return;
+    const snags = Array.isArray(activeInspection.snagItems) ? activeInspection.snagItems : [];
+    const wrapper = document.getElementById('snag-items-wrapper');
+    if (!wrapper) return;
+
+    if (snags.length === 0) {
+      wrapper.innerHTML = '<div style="color: #64748b; font-size: 0.9rem; padding: 1rem; text-align: center;">لا توجد ملاحظات مسجلة على هذه الوحدة (الوحدة جاهزة للاستلام).</div>';
+      return;
+    }
+
+    wrapper.innerHTML = snags.map((s, idx) => `
+      <div style="display: flex; align-items: center; justify-content: space-between; background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 12px; padding: 0.75rem 1rem;">
+        <label style="display: flex; align-items: center; gap: 0.65rem; cursor: pointer; flex: 1;">
+          <input type="checkbox" class="snag-toggle-checkbox" data-idx="${idx}" ${s.status === 'fixed' ? 'checked' : ''} style="width: 18px; height: 18px; accent-color: #059669;" />
+          <span style="font-weight: 700; ${s.status === 'fixed' ? 'text-decoration: line-through; color: #94a3b8;' : 'color: #1e293b;'}">${s.item}</span>
+        </label>
+        <span class="status-badge" style="background: ${s.status === 'fixed' ? '#ecfdf5' : '#fee2e2'}; color: ${s.status === 'fixed' ? '#047857' : '#991b1b'}; font-weight: 800;">
+          ${s.status === 'fixed' ? 'تم الإصلاح' : 'ملاحظة مفتوحة'}
+        </span>
+      </div>
+    `).join('');
+
+    wrapper.querySelectorAll('.snag-toggle-checkbox').forEach(chk => {
+      chk.onchange = async (e) => {
+        const idx = parseInt(e.target.getAttribute('data-idx'));
+        activeInspection.snagItems[idx].status = e.target.checked ? 'fixed' : 'open';
+        renderSnagItemsList();
+
+        await fetch('/api/erp/construction', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'update_inspection_status',
+            inspectionId: activeInspection.id,
+            snagItems: activeInspection.snagItems
+          })
+        });
+      };
+    });
+  }
+
+  // Add new snag item
+  document.getElementById('btn-add-snag-item')?.addEventListener('click', async () => {
+    const input = document.getElementById('new-snag-text');
+    const text = input?.value?.trim();
+    if (!text || !activeInspection) return;
+
+    if (!Array.isArray(activeInspection.snagItems)) activeInspection.snagItems = [];
+    activeInspection.snagItems.push({
+      id: Date.now(),
+      item: text,
+      status: 'open',
+      notes: ''
+    });
+
+    input.value = '';
+    renderSnagItemsList();
+
+    await fetch('/api/erp/construction', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        action: 'update_inspection_status',
+        inspectionId: activeInspection.id,
+        snagItems: activeInspection.snagItems
+      })
+    });
+  });
+
+  // Sign Handover
+  document.getElementById('btn-sign-handover')?.addEventListener('click', async () => {
+    if (!activeInspection) return;
+    if (!confirm(`هل أنت متأكد من اعتماد محضر الاستلام النهائي للوحدة ${activeInspection.unit?.unitNumber || ''} للعميل (${activeInspection.clientName})؟`)) return;
+
+    try {
+      const res = await fetch('/api/erp/construction', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'update_inspection_status',
+          inspectionId: activeInspection.id,
+          clientSigned: true,
+          status: 'completed'
+        })
+      });
+      const data = await res.json();
+      if (data.success) {
+        showToast('🎉 تم توقيع واعتماد محضر الاستلام النهائي بنجاح!');
+        document.getElementById('view-snag-modal').style.display = 'none';
+        await loadConstructionData();
+      } else {
+        showToast(data.error || 'فشل توقيع الاستلام', false);
+      }
+    } catch (err) {
+      showToast('خطأ في الاتصال', false);
+    }
+  });
+
+  // Inspection modals triggers
+  const addInspModal = document.getElementById('add-inspection-modal');
+  document.getElementById('open-add-inspection-btn')?.addEventListener('click', () => {
+    if (addInspModal) addInspModal.style.display = 'flex';
+  });
+  document.getElementById('close-add-insp-modal')?.addEventListener('click', () => {
+    if (addInspModal) addInspModal.style.display = 'none';
+  });
+  document.getElementById('cancel-add-insp-btn')?.addEventListener('click', () => {
+    if (addInspModal) addInspModal.style.display = 'none';
+  });
+
+  const viewSnagModal = document.getElementById('view-snag-modal');
+  document.getElementById('close-view-snag-modal')?.addEventListener('click', () => {
+    if (viewSnagModal) viewSnagModal.style.display = 'none';
+  });
+
+  document.getElementById('add-inspection-form')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const unitId = document.getElementById('insp-unit-select').value;
+    const clientName = document.getElementById('insp-client-name').value;
+    const inspectorName = document.getElementById('insp-inspector-name').value;
+    const notes = document.getElementById('insp-notes').value;
+
+    try {
+      const res = await fetch('/api/erp/construction', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'create_unit_inspection',
+          projectId: constructionData.selectedProjectId,
+          unitId,
+          clientName,
+          inspectorName,
+          notes
+        })
+      });
+      const data = await res.json();
+      if (data.success) {
+        if (addInspModal) addInspModal.style.display = 'none';
+        document.getElementById('add-inspection-form').reset();
+        showToast('تم فتح محضر فحص واستلام للوحدة!');
+        await loadConstructionData();
+      } else {
+        showToast(data.error || 'فشل فتح المحضر', false);
+      }
+    } catch (err) {
+      showToast('خطأ في الاتصال', false);
+    }
+  });
+
+</script>

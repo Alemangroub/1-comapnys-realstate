@@ -1,0 +1,432 @@
+---
+// Principle Icons
+const qualityIcon = `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'><path d='M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z'/></svg>`;
+const innovationIcon = `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'><path d='M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83'/><circle cx='12' cy='12' r='3.5'/></svg>`;
+const transparencyIcon = `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'><path d='M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z'/><polyline points='9 12 11 14 15 10'/></svg>`;
+
+const principles = [
+  {
+    icon: qualityIcon,
+    title: "الجودة هي أساس عملنا",
+    text: "الجودة لدينا ليست مجرد شعار، بل هي حجر الزاوية في كل ما نقوم به. يمتد هذا الالتزام من مراحل التخطيط والتصميم الأولية، مرورًا باختيار أجود أنواع مواد البناء والتشطيب، وصولًا إلى أدق التفاصيل في التنفيذ والتسليم النهائي.",
+    glow: "rgba(245, 158, 11, 0.35)"
+  },
+  {
+    icon: innovationIcon,
+    title: "ابتكار يصنع المستقبل",
+    text: "في عالم يتطور باستمرار، نرى في الابتكار محركًا أساسيًا للتميز. نسعى دائمًا لتطبيق أحدث التقنيات والتصاميم المعمارية التي تضيف قيمة حقيقية لمشاريعنا، ونقدم حلولاً ذكية للمساحات واستخدام مواد بناء صديقة للبيئة.",
+    glow: "rgba(168, 85, 247, 0.35)"
+  },
+  {
+    icon: transparencyIcon,
+    title: "شفافية تبني الثقة",
+    text: "نؤمن بأن العلاقة مع عملائنا هي استثمار طويل الأمد، وأساس هذا الاستثمار هو الثقة. لذلك، نضع الشفافية في صميم جميع تعاملاتنا، ونحرص على تزويد عملائنا بكافة المعلومات والجداول الزمنية بوضوح كامل.",
+    glow: "rgba(56, 189, 248, 0.35)"
+  }
+];
+
+// "How We Work" Icons
+const planningIcon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>`;
+const designIcon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m4.93 4.93 4.24 4.24"/><path d="m14.83 9.17 4.24-4.24"/><path d="m14.83 14.83 4.24 4.24"/><path d="m9.17 14.83-4.24 4.24"/></svg>`;
+const constructionIcon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>`;
+const deliveryIcon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m9 11 3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>`;
+
+const workflow = [
+  {
+    number: "01",
+    icon: planningIcon,
+    title: "الاستماع والتخطيط",
+    text: "نبدأ بجلسة استشارية لفهم رؤيتك، متطلباتك، وميزانيتك. نضع معًا أساسًا متينًا وخطة عمل واضحة لمشروعك."
+  },
+  {
+    number: "02",
+    icon: designIcon,
+    title: "التصميم والإبداع",
+    text: "يقوم فريقنا من المصممين والمهندسين بتحويل أفكارك إلى مخططات وتصاميم بصرية مبتكرة، مع التركيز على الجمال الوظيفي والاستغلال الأمثل للمساحات."
+  },
+  {
+    number: "03",
+    icon: constructionIcon,
+    title: "التنفيذ والبناء",
+    text: "بإشراف هندسي دقيق، نبدأ عملية البناء باستخدام أجود المواد وأحدث الأساليب، مع إطلاعك المستمر على تقدم سير العمل."
+  },
+  {
+    number: "04",
+    icon: deliveryIcon,
+    title: "التسليم والدعم",
+    text: "نسلمك مفتاح مشروعك جاهزًا كما تخيلته، مع ضماناتنا للجودة. ونبقى على تواصل لتقديم أي دعم قد تحتاجه بعد التسليم."
+  }
+];
+---
+
+<section class="our-principles">
+  <div class="ambient-glow glow-1"></div>
+  <div class="ambient-glow glow-2"></div>
+  <div class="mesh-pattern"></div>
+
+  <div class="container">
+    <div class="section-header">
+      <div class="top-badge">
+        <span class="badge-dot"></span>
+        <span class="badge-text">فلسفة العمل والريادة</span>
+      </div>
+      <h2 class="section-title">منهجيتنا في تقديم القيمة</h2>
+      <p class="section-subtitle">نحن لا نبني عقارات فحسب، بل نبني ثقة وعلاقات تمتد للمستقبل. إليك كيف نضمن التميز في كل خدمة نقدمها.</p>
+    </div>
+
+    <div class="principles-grid">
+      {principles.map((principle) => (
+        <article class="principle-card glass-panel" style={`--p-glow: ${principle.glow};`}>
+          <div class="card-radial-glow"></div>
+          <div class="principle-icon-wrapper" set:html={principle.icon}></div>
+          <div class="principle-content">
+            <h3 class="principle-title">{principle.title}</h3>
+            <p class="principle-text">{principle.text}</p>
+          </div>
+        </article>
+      ))}
+    </div>
+  </div>
+</section>
+
+<section class="how-we-work">
+  <div class="container">
+    <div class="section-header">
+      <div class="top-badge">
+        <span class="badge-dot"></span>
+        <span class="badge-text">خطوات مدروسة بدقة</span>
+      </div>
+      <h2 class="section-title">رحلة مشروعك معنا</h2>
+      <p class="section-subtitle">نؤمن بالشفافية والوضوح. إليك كيف نحول فكرتك إلى واقع ملموس عبر أربع مراحل أساسية.</p>
+    </div>
+
+    <div class="workflow-grid">
+      {workflow.map((step) => (
+        <div class="workflow-card glass-panel">
+          <div class="step-top">
+            <span class="step-num">{step.number}</span>
+            <div class="step-icon-box" set:html={step.icon}></div>
+          </div>
+          <div class="step-body">
+            <h3 class="step-title">{step.title}</h3>
+            <p class="step-text">{step.text}</p>
+          </div>
+        </div>
+      ))}
+    </div>
+
+    <div class="cta-container">
+      <a href="/contact" class="cta-button">
+        <span>ابدأ رحلتك معنا الآن</span>
+        <i class="fas fa-arrow-left"></i>
+      </a>
+    </div>
+  </div>
+</section>
+
+<style>
+  .our-principles, .how-we-work {
+    position: relative;
+    padding: 90px 0;
+    background: radial-gradient(circle at 50% 20%, #0d1627 0%, #080d19 60%, #050812 100%);
+    direction: rtl;
+    overflow: hidden;
+  }
+
+  .how-we-work {
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  .ambient-glow {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(120px);
+    pointer-events: none;
+    z-index: 1;
+    opacity: 0.3;
+  }
+
+  .glow-1 {
+    width: 480px;
+    height: 480px;
+    top: -50px;
+    right: -80px;
+    background: radial-gradient(circle, rgba(56, 189, 248, 0.45) 0%, transparent 70%);
+  }
+
+  .glow-2 {
+    width: 450px;
+    height: 450px;
+    bottom: -50px;
+    left: -80px;
+    background: radial-gradient(circle, rgba(211, 191, 169, 0.35) 0%, transparent 70%);
+  }
+
+  .mesh-pattern {
+    position: absolute;
+    inset: 0;
+    background-size: 40px 40px;
+    background-image: 
+      linear-gradient(to right, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+    z-index: 1;
+    mask-image: radial-gradient(circle at center, black 40%, transparent 85%);
+    -webkit-mask-image: radial-gradient(circle at center, black 40%, transparent 85%);
+  }
+
+  .container {
+    position: relative;
+    z-index: 2;
+    max-width: 1240px;
+    margin: 0 auto;
+    padding: 0 25px;
+  }
+
+  .section-header {
+    text-align: center;
+    margin-bottom: 60px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .top-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 16px;
+    border-radius: 30px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(211, 191, 169, 0.3);
+    backdrop-filter: blur(10px);
+    margin-bottom: 18px;
+  }
+
+  .badge-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: #38bdf8;
+    box-shadow: 0 0 10px #38bdf8;
+  }
+
+  .badge-text {
+    font-family: 'Cairo', sans-serif;
+    font-size: 0.92rem;
+    font-weight: 700;
+    color: #d3bfa9;
+  }
+
+  .section-title {
+    font-family: 'Cairo', sans-serif;
+    font-size: 2.8rem;
+    font-weight: 800;
+    color: #ffffff;
+    margin-bottom: 15px;
+    background: linear-gradient(180deg, #ffffff 40%, #cbd5e1 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .section-subtitle {
+    font-family: 'Almarai', sans-serif;
+    font-size: 1.2rem;
+    color: #94a3b8;
+    max-width: 720px;
+    margin: 0 auto;
+    line-height: 1.8;
+  }
+
+  .glass-panel {
+    background: linear-gradient(160deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0.015) 100%);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+    transition: transform 0.4s ease, border-color 0.4s ease, box-shadow 0.4s ease;
+  }
+
+  /* Principles Grid */
+  .principles-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 30px;
+  }
+
+  .principle-card {
+    position: relative;
+    padding: 35px 30px;
+    overflow: hidden;
+  }
+
+  .card-radial-glow {
+    position: absolute;
+    top: -40px;
+    left: -40px;
+    width: 160px;
+    height: 160px;
+    border-radius: 50%;
+    background: radial-gradient(circle, var(--p-glow) 0%, transparent 70%);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.4s ease;
+  }
+
+  .principle-card:hover {
+    transform: translateY(-8px);
+    border-color: rgba(255, 255, 255, 0.25);
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4), 0 0 30px var(--p-glow);
+  }
+
+  .principle-card:hover .card-radial-glow {
+    opacity: 1;
+  }
+
+  .principle-icon-wrapper {
+    width: 58px;
+    height: 58px;
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #d3bfa9;
+    margin-bottom: 22px;
+    transition: transform 0.3s ease, background-color 0.3s ease;
+  }
+
+  .principle-icon-wrapper :global(svg) {
+    width: 30px;
+    height: 30px;
+  }
+
+  .principle-card:hover .principle-icon-wrapper {
+    transform: scale(1.1);
+    background: rgba(211, 191, 169, 0.15);
+  }
+
+  .principle-title {
+    font-family: 'Cairo', sans-serif;
+    font-size: 1.45rem;
+    font-weight: 700;
+    color: #ffffff;
+    margin: 0 0 12px 0;
+  }
+
+  .principle-text {
+    font-family: 'Almarai', sans-serif;
+    font-size: 1rem;
+    color: #94a3b8;
+    line-height: 1.8;
+    margin: 0;
+  }
+
+  /* Workflow Grid */
+  .workflow-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 25px;
+    margin-bottom: 50px;
+  }
+
+  .workflow-card {
+    padding: 30px 25px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
+  .workflow-card:hover {
+    transform: translateY(-8px);
+    border-color: rgba(211, 191, 169, 0.35);
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.35);
+  }
+
+  .step-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+
+  .step-num {
+    font-family: 'Cairo', monospace;
+    font-size: 1.6rem;
+    font-weight: 800;
+    color: rgba(255, 255, 255, 0.25);
+  }
+
+  .workflow-card:hover .step-num {
+    color: #d3bfa9;
+  }
+
+  .step-icon-box {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    background: rgba(56, 189, 248, 0.12);
+    border: 1px solid rgba(56, 189, 248, 0.25);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #38bdf8;
+  }
+
+  .step-icon-box :global(svg) {
+    width: 24px;
+    height: 24px;
+  }
+
+  .step-title {
+    font-family: 'Cairo', sans-serif;
+    font-size: 1.35rem;
+    font-weight: 700;
+    color: #ffffff;
+    margin: 0 0 10px 0;
+  }
+
+  .step-text {
+    font-family: 'Almarai', sans-serif;
+    font-size: 0.95rem;
+    color: #94a3b8;
+    line-height: 1.7;
+    margin: 0;
+  }
+
+  .cta-container {
+    text-align: center;
+    margin-top: 40px;
+  }
+
+  .cta-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 40px;
+    border-radius: 30px;
+    background: linear-gradient(135deg, #d3bfa9 0%, #b89f84 100%);
+    color: #080d19;
+    font-family: 'Cairo', sans-serif;
+    font-weight: 800;
+    font-size: 1.05rem;
+    text-decoration: none;
+    box-shadow: 0 8px 25px rgba(211, 191, 169, 0.25);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  .cta-button:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 30px rgba(211, 191, 169, 0.35);
+  }
+
+  @media (max-width: 768px) {
+    .section-title {
+      font-size: 2.1rem;
+    }
+    .principles-grid, .workflow-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

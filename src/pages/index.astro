@@ -1,0 +1,39 @@
+
+---
+import Layout from '../layouts/Layout.astro';
+import Footer from '../components/Footer.astro';
+import FloatingButton from '../components/FloatingButton.astro';
+import TopBar from '../components/TopBar.astro';
+import Header from '../components/Header.astro';
+import Hero from '../components/Hero.astro';
+import Services from '../components/Services.astro';
+import Achievements from '../components/Achievements.astro';
+import InfoSection from '../components/InfoSection.astro';
+import ContactUs from '../components/ContactUs.astro';
+---
+
+<Layout title="الاستثمار والتطوير العقاري" bodyClass="homepage-body">
+  <TopBar />
+  <Header showMenu={true} />
+  <Hero 
+    title="نبتكر مجتمعات استثنائية ونبني مستقبلاً مستداماً"
+    subtitle="هندسة الاستثمار، وفن التطوير العقاري المعاصر."
+  />
+  <main>
+    <Services />
+    <Achievements isTitleLink={true} />
+    <InfoSection isTitleLink={true} />
+    <ContactUs isTitleLink={true} />
+  </main>
+  <Footer />
+  <FloatingButton />
+</Layout>
+
+<style>
+  main {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    overflow-x: hidden;
+  }
+</style>

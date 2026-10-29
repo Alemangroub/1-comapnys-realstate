@@ -1,0 +1,1225 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import AdminLogin from '../../components/AdminLogin.astro';
+---
+
+<Layout title="نظام التحصيل ومحفظة الشيكات البنكية">
+  <div id="auth-loading-message" class="loading-state">
+    <div class="spinner"></div>
+    <p>جارٍ التحقق من الصلاحيات...</p>
+  </div>
+
+  <div id="admin-login-container" style="display: none;">
+    <AdminLogin />
+  </div>
+
+  <main id="main-content" class="erp-container" style="display: none;">
+    
+    <!-- Top Navigation Bar -->
+    <header class="erp-topbar">
+      <div class="brand-crumb">
+        <a href="/crs" class="back-link">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+          الرئيسية
+        </a>
+        <span class="sep">/</span>
+        <span class="active-crumb">نظام التحصيل ومحفظة أوراق القبض</span>
+      </div>
+
+      <div class="topbar-actions">
+        <button id="open-add-cheques-modal" class="btn btn-primary">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+          + تسجيل شيكات لتعاقد
+        </button>
+      </div>
+    </header>
+
+    <!-- Subsystem Hero Banner -->
+    <section class="subsystem-hero hero-collection">
+      <div class="hero-text">
+        <div class="hero-badge">المتابعة المالية ومحفظة الشيكات</div>
+        <h1>جدولة الأقساط، إدارة محفظة الشيكات البنكية، والتحصيل</h1>
+        <p>متابعة أوراق القبض (الشيكات في الخزنة، قيد التحصيل بالبنوك، الشيكات المرتدة)، ورصد متأخرات الأقساط، مع التسميع التلقائي الفوري في الخزينة وإصدار إيصالات إلكترونية رسمية.</p>
+      </div>
+    </section>
+
+    <!-- Main Navigation Tabs: Installments vs Cheques -->
+    <div class="collection-main-tabs">
+      <button class="c-tab-nav active" data-pane="pane-installments">
+        <span>📋 جدول استحقاقات الأقساط</span>
+      </button>
+      <button class="c-tab-nav" data-pane="pane-cheques">
+        <span>🏦 محفظة الشيكات البنكية (أوراق القبض)</span>
+        <span class="tab-badge" id="cheques-count-badge">0</span>
+      </button>
+    </div>
+
+    <!-- ==========================================
+         PANE 1: SCHEDULED INSTALLMENTS
+         ========================================== -->
+    <div id="pane-installments" class="collection-pane active">
+      <!-- Filter Buttons for Installments -->
+      <div class="collection-filter-bar" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+        <div class="filter-chips-grp" style="display: flex; gap: 0.5rem;">
+          <button class="filter-chip active" data-status="">الكل</button>
+          <button class="filter-chip" data-status="pending">المستحقة</button>
+          <button class="filter-chip" data-status="paid">المدفوعة</button>
+        </div>
+        <button type="button" class="btn btn-warning" id="open-reschedule-modal-btn">
+          🔄 إعادة جدولة أقساط عميل
+        </button>
+      </div>
+
+      <!-- Installments Table Card -->
+      <div class="collection-table-card">
+        <div class="table-responsive">
+          <table class="erp-table">
+            <thead>
+              <tr>
+                <th>رقم القسط / البيان</th>
+                <th>المشروع والوحدة</th>
+                <th>اسم العميل</th>
+                <th>رقم الهاتف</th>
+                <th>قيمة القسط</th>
+                <th>تاريخ الاستحقاق</th>
+                <th>الحالة</th>
+                <th>الإجراء</th>
+              </tr>
+            </thead>
+            <tbody id="collection-tbody">
+              <!-- Rendered via JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==========================================
+         PANE 2: CHEQUES PORTFOLIO (محفظة الشيكات)
+         ========================================== -->
+    <div id="pane-cheques" class="collection-pane" style="display: none;">
+      
+      <!-- Cheques Live KPI Ribbon -->
+      <div class="cheques-kpi-grid">
+        <div class="c-kpi-card">
+          <span class="c-kpi-label">إجمالي محفظة الشيكات</span>
+          <h3 id="stat-total-cheques-amt">0 ج.م</h3>
+          <span class="c-kpi-sub" id="stat-total-cheques-count">0 شيك مسجل</span>
+        </div>
+        <div class="c-kpi-card kpi-safe">
+          <span class="c-kpi-label">شيكات محفوظة بالخزنة</span>
+          <h3 id="stat-safe-cheques-amt">0 ج.م</h3>
+          <span class="c-kpi-sub" id="stat-safe-cheques-count">0 شيك في الخزينة</span>
+        </div>
+        <div class="c-kpi-card kpi-bank">
+          <span class="c-kpi-label">قيد التحصيل في البنوك</span>
+          <h3 id="stat-bank-cheques-amt">0 ج.م</h3>
+          <span class="c-kpi-sub" id="stat-bank-cheques-count">0 شيك بالبنك</span>
+        </div>
+        <div class="c-kpi-card kpi-collected">
+          <span class="c-kpi-label">شيكات تم تحصيلها</span>
+          <h3 id="stat-collected-cheques-amt">0 ج.م</h3>
+          <span class="c-kpi-sub" id="stat-collected-cheques-count">0 شيك محصل</span>
+        </div>
+        <div class="c-kpi-card kpi-bounced">
+          <span class="c-kpi-label">شيكات مرتدة / مرفوضة</span>
+          <h3 id="stat-bounced-cheques-amt">0 ج.م</h3>
+          <span class="c-kpi-sub" id="stat-bounced-cheques-count">0 شيك مرتد</span>
+        </div>
+      </div>
+
+      <!-- Filter Bar for Cheques -->
+      <div class="cheques-toolbar-row">
+        <div class="cheques-filters">
+          <button class="chk-filter-chip active" data-chk-status="all">جميع الشيكات</button>
+          <button class="chk-filter-chip" data-chk-status="in_safe">📦 في الخزنة</button>
+          <button class="chk-filter-chip" data-chk-status="under_collection">🏦 قيد التحصيل بالبنك</button>
+          <button class="chk-filter-chip" data-chk-status="collected">✅ تم التحصيل</button>
+          <button class="chk-filter-chip chip-danger" data-chk-status="bounced">⚠️ مرتدة / مرفوضة</button>
+        </div>
+
+        <div class="chk-search-box">
+          <input type="text" id="chk-search-input" placeholder="بحث برقم الشيك، العميل، أو البنك..." />
+        </div>
+      </div>
+
+      <!-- Cheques Table Card -->
+      <div class="collection-table-card">
+        <div class="table-responsive">
+          <table class="erp-table">
+            <thead>
+              <tr>
+                <th>رقم الشيك</th>
+                <th>البنك المسحوب عليه</th>
+                <th>الساحب</th>
+                <th>العميل / المشروع / الوحدة</th>
+                <th>قيمة الشيك</th>
+                <th>تاريخ الاستحقاق</th>
+                <th>القسط المقترن</th>
+                <th>الحالة</th>
+                <th>إجراءات الشيك</th>
+              </tr>
+            </thead>
+            <tbody id="cheques-tbody">
+              <!-- Rendered via JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ==========================================
+         MODALS
+         ========================================== -->
+
+    <!-- Modal: Pay Installment -->
+    <div id="pay-modal" class="modal-backdrop" style="display: none;">
+      <div class="modal-card">
+        <div class="modal-header">
+          <h3>تسجيل سداد قسط وإصدار إيصال</h3>
+          <button class="close-modal-btn" id="close-pay-modal">&times;</button>
+        </div>
+        <form id="pay-installment-form" class="modal-form">
+          <input type="hidden" id="pay-installment-id" />
+          <div class="info-strip">
+            <span id="pay-modal-unit">الوحدة: --</span>
+            <span id="pay-modal-client">العميل: --</span>
+            <span id="pay-modal-amount">المبلغ المستحق: 0 ج.م</span>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>المبلغ المدفوع فعلياً (ج.م) *</label>
+              <input type="number" id="pay-actual-amount" required step="any" />
+            </div>
+            <div class="form-group">
+              <label>غرامة تأخير إن وجدت (ج.م)</label>
+              <input type="number" id="pay-penalty" value="0" step="any" />
+            </div>
+          </div>
+          <div class="form-group">
+            <label>طريقة الدفع *</label>
+            <select id="pay-method">
+              <option value="cash">نقداً في مقر الشركة</option>
+              <option value="bank_transfer">تحويل بنكي</option>
+              <option value="online_card">بطاقة بنكية (فيزا / ماستركارد)</option>
+              <option value="vodafone_cash">محفظة إلكترونية (فودافون كاش)</option>
+              <option value="fawry">فوري</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>ملاحظات السداد</label>
+            <input type="text" id="pay-notes" placeholder="رقم الشيك أو الحوالة البنكية..." />
+          </div>
+          <div class="form-actions">
+            <button type="submit" class="btn btn-success">تأكيد السداد وتوريد للخزنة فوراً</button>
+            <button type="button" class="btn btn-secondary" id="cancel-pay-btn">إلغاء</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Modal: Add Batch Cheques to a Reservation -->
+    <div id="add-cheques-modal" class="modal-backdrop" style="display: none;">
+      <div class="modal-card modal-large">
+        <div class="modal-header">
+          <div>
+            <h3>تسجيل شيكات بنكية في حافظة الشيكات</h3>
+            <p class="modal-sub">إيداع أوراق القبض المستلمة من العميل في خزينة الشركة وتسكينها على الأقساط</p>
+          </div>
+          <button class="close-modal-btn" id="close-add-cheques-modal">&times;</button>
+        </div>
+        <form id="add-cheques-form" class="modal-form">
+          <div class="form-group">
+            <label>اختر التعاقد / العميل المستلم منه الشيكات *</label>
+            <select id="modal-cheque-reservation-select" required>
+              <option value="">جارٍ تحميل التعاقدات...</option>
+            </select>
+          </div>
+
+          <div class="cheques-batch-header">
+            <h4>بيانات الشيكات:</h4>
+            <button type="button" class="btn btn-sm btn-secondary" id="add-cheque-row-btn">+ إضافة شيك آخر</button>
+          </div>
+
+          <div class="cheques-rows-container" id="cheque-rows-wrapper">
+            <!-- Row 1 Default -->
+            <div class="cheque-input-row">
+              <div class="chk-field">
+                <label>رقم الشيك *</label>
+                <input type="text" class="input-chk-number" placeholder="مثال: 004819" required />
+              </div>
+              <div class="chk-field">
+                <label>اسم البنك *</label>
+                <input type="text" class="input-chk-bank" placeholder="البنك الأهلي، CIB..." required />
+              </div>
+              <div class="chk-field">
+                <label>الساحب</label>
+                <input type="text" class="input-chk-drawer" placeholder="اسم صاحب الحساب" />
+              </div>
+              <div class="chk-field">
+                <label>القيمة (ج.م) *</label>
+                <input type="number" class="input-chk-amount" placeholder="50000" required step="any" />
+              </div>
+              <div class="chk-field">
+                <label>تاريخ الاستحقاق *</label>
+                <input type="date" class="input-chk-date" required />
+              </div>
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <button type="submit" class="btn btn-primary" id="save-cheques-btn">إيداع الشيكات في الحافظة</button>
+            <button type="button" class="btn btn-secondary" id="cancel-add-cheques-btn">إلغاء</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Modal: Send Cheque Under Collection -->
+    <div id="deposit-cheque-modal" class="modal-backdrop" style="display: none;">
+      <div class="modal-card">
+        <div class="modal-header">
+          <h3>إرسال الشيك للتحصيل بالبنك</h3>
+          <button class="close-modal-btn" id="close-deposit-modal">&times;</button>
+        </div>
+        <form id="deposit-cheque-form" class="modal-form">
+          <input type="hidden" id="deposit-chk-id" />
+          <p id="deposit-chk-info" class="modal-sub">...</p>
+          <div class="form-group">
+            <label>اسم البنك المودع فيه للتحصيل *</label>
+            <input type="text" id="deposit-bank-name" placeholder="مثال: البنك الأهلي المصري - فرع التجمع" required />
+          </div>
+          <div class="form-actions">
+            <button type="submit" class="btn btn-primary">تأكيد الإرسال للبنك</button>
+            <button type="button" class="btn btn-secondary" id="cancel-deposit-btn">إلغاء</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Modal: Record Bounced Cheque -->
+    <div id="bounce-cheque-modal" class="modal-backdrop" style="display: none;">
+      <div class="modal-card">
+        <div class="modal-header">
+          <h3 class="text-danger">تسجيل ارتداد / رفض شيك بنكي</h3>
+          <button class="close-modal-btn" id="close-bounce-modal">&times;</button>
+        </div>
+        <form id="bounce-cheque-form" class="modal-form">
+          <input type="hidden" id="bounce-chk-id" />
+          <p id="bounce-chk-info" class="modal-sub">...</p>
+          <div class="form-group">
+            <label>سبب ارتداد الشيك من البنك *</label>
+            <select id="bounce-reason-select" required>
+              <option value="عدم كفاية الرصيد">عدم كفاية الرصيد (Insufficient Funds)</option>
+              <option value="اختلاف التوقيع عن نموذج البنك">اختلاف التوقيع عن نموذج البنك</option>
+              <option value="إغلاق أو تجميد الحساب البنكي">إغلاق أو تجميد الحساب البنكي</option>
+              <option value="أمر كتابي من الساحب بوقف الصرف">أمر كتابي من الساحب بوقف الصرف</option>
+              <option value="تقادم تاريخ الشيك">تقادم تاريخ الشيك (مضى أكثر من 6 أشهر)</option>
+              <option value="أخرى">أخرى (كتابة يدوية)...</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>ملاحظات إضافية وتاريخ إشعار البنك</label>
+            <input type="text" id="bounce-notes" placeholder="ملاحظات المتابعة مع العميل..." />
+          </div>
+          <div class="form-actions">
+            <button type="submit" class="btn btn-danger">تأكيد قيد الشيك كمرتد</button>
+            <button type="button" class="btn btn-secondary" id="cancel-bounce-btn">إلغاء</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Modal: Replace Bounced Cheque -->
+    <div id="replace-cheque-modal" class="modal-backdrop" style="display: none;">
+      <div class="modal-card">
+        <div class="modal-header">
+          <h3>استبدال شيك بشيك جديد</h3>
+          <button class="close-modal-btn" id="close-replace-modal">&times;</button>
+        </div>
+        <form id="replace-cheque-form" class="modal-form">
+          <input type="hidden" id="replace-old-chk-id" />
+          <p id="replace-chk-info" class="modal-sub">...</p>
+          <div class="form-row">
+            <div class="form-group">
+              <label>رقم الشيك البديل *</label>
+              <input type="text" id="rep-chk-number" required />
+            </div>
+            <div class="form-group">
+              <label>البنك المسحوب عليه *</label>
+              <input type="text" id="rep-chk-bank" required />
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>قيمة الشيك (ج.م) *</label>
+              <input type="number" id="rep-chk-amount" required step="any" />
+            </div>
+            <div class="form-group">
+              <label>تاريخ الاستحقاق الجديد *</label>
+              <input type="date" id="rep-chk-date" required />
+            </div>
+          </div>
+          <div class="form-group">
+            <label>ملاحظات الاستبدال</label>
+            <input type="text" id="rep-chk-notes" placeholder="ملاحظات..." />
+          </div>
+          <div class="form-actions">
+            <button type="submit" class="btn btn-primary">إصدار الشيك البديل</button>
+            <button type="button" class="btn btn-secondary" id="cancel-replace-btn">إلغاء</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Modal: Reschedule Installments -->
+    <div id="reschedule-modal" class="modal-backdrop" style="display: none;">
+      <div class="modal-card">
+        <div class="modal-header">
+          <div>
+            <h3>إعادة جدولة الأقساط المتبقية للعميل</h3>
+            <p class="modal-sub">إلغاء الأقساط غير المسددة وإعادة توزيع الرصيد المتبقي على فترات جديدة</p>
+          </div>
+          <button class="close-modal-btn" id="close-reschedule-modal">&times;</button>
+        </div>
+        <form id="reschedule-form" class="modal-form">
+          <div class="form-group">
+            <label>اختر التعاقد / العميل لإعادة الجدولة *</label>
+            <select id="reschedule-reservation-select" required>
+              <option value="">جارٍ تحميل التعاقدات...</option>
+            </select>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>مدة السداد الجديدة (سنوات) *</label>
+              <select id="reschedule-years" required>
+                <option value="1">سنة واحدة</option>
+                <option value="2" selected>سنتان (2)</option>
+                <option value="3">3 سنوات</option>
+                <option value="4">4 سنوات</option>
+                <option value="5">5 سنوات</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>دورية الأقساط *</label>
+              <select id="reschedule-frequency" required>
+                <option value="quarterly" selected>أقساط ربع سنوية (كل 3 شهور)</option>
+                <option value="monthly">أقساط شهرية (كل شهر)</option>
+                <option value="semi_annual">أقساط نصف سنوية (كل 6 شهور)</option>
+                <option value="annual">أقساط سنوية (كل سنة)</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>تاريخ استحقاق أول قسط جديد *</label>
+            <input type="date" id="reschedule-start-date" required />
+          </div>
+          <div class="form-group">
+            <label>سبب أو ملاحظات إعادة الجدولة</label>
+            <input type="text" id="reschedule-notes" placeholder="مثال: تسوية تعثر مؤقت أو تعديل خطة السداد باتفاق الطرفين..." />
+          </div>
+          <div class="form-actions">
+            <button type="submit" class="btn btn-warning">تأكيد وإعادة توزيع الأقساط</button>
+            <button type="button" class="btn btn-secondary" id="cancel-reschedule-btn">إلغاء</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+  </main>
+</Layout>
+
+<script>
+  import { checkAuth } from '../../lib/auth.js';
+
+  let currentInstallments = [];
+  let allCheques = [];
+  let allReservations = [];
+  let currentChkFilter = 'all';
+
+  const authLoading = document.getElementById('auth-loading-message');
+  const loginContainer = document.getElementById('admin-login-container');
+  const mainContent = document.getElementById('main-content');
+
+  (async () => {
+    try {
+      const user = await checkAuth();
+      if (authLoading) authLoading.style.display = 'none';
+
+      if (user && (user.role === 'admin' || user.role === 'collector' || user.role === 'finance')) {
+        if (mainContent) mainContent.style.display = 'block';
+        loadInstallments();
+        loadCheques();
+        loadReservationsForCheques();
+      } else {
+        if (loginContainer) loginContainer.style.display = 'block';
+      }
+    } catch (e) {
+      if (authLoading) authLoading.style.display = 'none';
+      if (loginContainer) loginContainer.style.display = 'block';
+    }
+  })();
+
+  // Main Tabs navigation (Installments vs Cheques)
+  document.querySelectorAll('.c-tab-nav').forEach(tab => {
+    tab.addEventListener('click', (e) => {
+      document.querySelectorAll('.c-tab-nav').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.collection-pane').forEach(p => p.style.display = 'none');
+
+      const targetPane = e.currentTarget.getAttribute('data-pane');
+      e.currentTarget.classList.add('active');
+      const pane = document.getElementById(targetPane);
+      if (pane) pane.style.display = 'block';
+
+      if (targetPane === 'pane-cheques') {
+        loadCheques();
+      }
+    });
+  });
+
+  // Load Installments
+  async function loadInstallments(status = '') {
+    try {
+      const url = status ? `/api/erp/collection?status=${status}` : '/api/erp/collection';
+      const res = await fetch(url);
+      const data = await res.json();
+      if (data.success) {
+        currentInstallments = data.installments;
+        renderInstallmentsTable();
+      }
+    } catch (e) { console.error(e); }
+  }
+
+  function renderInstallmentsTable() {
+    const tbody = document.getElementById('collection-tbody');
+    if (!tbody) return;
+    if (currentInstallments.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="8" class="text-center p-4 text-muted">لا توجد أقساط مسجلة في هذا القسم.</td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = currentInstallments.map(inst => {
+      const res = inst.reservation || {};
+      const unit = res.unit || {};
+      const proj = res.project || {};
+      const due = new Date(inst.dueDate).toLocaleDateString('ar-EG');
+      const isLate = inst.isOverdue;
+
+      return `
+        <tr>
+          <td><strong>${inst.title}</strong></td>
+          <td>${proj.projectName || ''} - وحدة <strong>${unit.unitNumber || ''}</strong></td>
+          <td>${res.clientName || ''}</td>
+          <td>${res.clientPhone || ''}</td>
+          <td><strong class="text-primary">${inst.amount.toLocaleString()} ج.م</strong></td>
+          <td>${due}</td>
+          <td>
+            <span class="status-badge ${inst.status === 'paid' ? 'badge-paid' : isLate ? 'badge-late' : 'badge-pending'}">
+              ${inst.status === 'paid' ? 'مسدد بالكامل' : isLate ? 'متأخر ⚠️' : 'مستحق'}
+            </span>
+          </td>
+          <td>
+            ${inst.status !== 'paid' ? `
+              <button class="btn btn-sm btn-success open-pay-modal-btn" 
+                data-id="${inst.id}" 
+                data-amount="${inst.amount}" 
+                data-unit="${unit.unitNumber || ''}" 
+                data-client="${res.clientName || ''}">
+                سداد القسط 💳
+              </button>
+            ` : `
+              <span class="text-muted"><small>إيصال: ${inst.receiptNumber || 'نظامي'}</small></span>
+            `}
+          </td>
+        </tr>
+      `;
+    }).join('');
+
+    document.querySelectorAll('.open-pay-modal-btn').forEach(btn => {
+      btn.onclick = (e) => {
+        const id = e.currentTarget.getAttribute('data-id');
+        const amt = e.currentTarget.getAttribute('data-amount');
+        const unit = e.currentTarget.getAttribute('data-unit');
+        const client = e.currentTarget.getAttribute('data-client');
+
+        document.getElementById('pay-installment-id').value = id;
+        document.getElementById('pay-actual-amount').value = amt;
+        document.getElementById('pay-modal-unit').textContent = `الوحدة: ${unit}`;
+        document.getElementById('pay-modal-client').textContent = `العميل: ${client}`;
+        document.getElementById('pay-modal-amount').textContent = `المبلغ: ${Number(amt).toLocaleString()} ج.م`;
+
+        const modal = document.getElementById('pay-modal');
+        if (modal) modal.style.display = 'flex';
+      };
+    });
+  }
+
+  // Load Cheques Portfolio
+  async function loadCheques(status = '') {
+    try {
+      const url = status && status !== 'all' ? `/api/erp/cheques?status=${status}` : '/api/erp/cheques';
+      const res = await fetch(url);
+      const data = await res.json();
+      if (data.success) {
+        allCheques = data.cheques || [];
+        updateChequesKPIs(data.stats);
+        renderChequesTable();
+      }
+    } catch (e) {
+      console.error('Failed to load cheques:', e);
+    }
+  }
+
+  function updateChequesKPIs(stats) {
+    if (!stats) return;
+    const badge = document.getElementById('cheques-count-badge');
+    if (badge) badge.textContent = stats.total || 0;
+
+    const elTotalAmt = document.getElementById('stat-total-cheques-amt');
+    const elTotalCount = document.getElementById('stat-total-cheques-count');
+    if (elTotalAmt) elTotalAmt.textContent = `${(stats.amounts.total || 0).toLocaleString()} ج.م`;
+    if (elTotalCount) elTotalCount.textContent = `${stats.total || 0} شيك مسجل`;
+
+    const elSafeAmt = document.getElementById('stat-safe-cheques-amt');
+    const elSafeCount = document.getElementById('stat-safe-cheques-count');
+    if (elSafeAmt) elSafeAmt.textContent = `${(stats.amounts.in_safe || 0).toLocaleString()} ج.م`;
+    if (elSafeCount) elSafeCount.textContent = `${stats.in_safe || 0} شيك في الخزينة`;
+
+    const elBankAmt = document.getElementById('stat-bank-cheques-amt');
+    const elBankCount = document.getElementById('stat-bank-cheques-count');
+    if (elBankAmt) elBankAmt.textContent = `${(stats.amounts.under_collection || 0).toLocaleString()} ج.م`;
+    if (elBankCount) elBankCount.textContent = `${stats.under_collection || 0} شيك بالبنك`;
+
+    const elCollAmt = document.getElementById('stat-collected-cheques-amt');
+    const elCollCount = document.getElementById('stat-collected-cheques-count');
+    if (elCollAmt) elCollAmt.textContent = `${(stats.amounts.collected || 0).toLocaleString()} ج.م`;
+    if (elCollCount) elCollCount.textContent = `${stats.collected || 0} شيك محصل`;
+
+    const elBouncedAmt = document.getElementById('stat-bounced-cheques-amt');
+    const elBouncedCount = document.getElementById('stat-bounced-cheques-count');
+    if (elBouncedAmt) elBouncedAmt.textContent = `${(stats.amounts.bounced || 0).toLocaleString()} ج.م`;
+    if (elBouncedCount) elBouncedCount.textContent = `${stats.bounced || 0} شيك مرتد`;
+  }
+
+  function getChequeStatusBadge(status) {
+    if (status === 'in_safe') return '<span class="status-badge badge-safe">📦 في الخزنة</span>';
+    if (status === 'under_collection') return '<span class="status-badge badge-bank">🏦 قيد التحصيل</span>';
+    if (status === 'collected') return '<span class="status-badge badge-paid">✅ محصل بالخزنة</span>';
+    if (status === 'bounced') return '<span class="status-badge badge-late">⚠️ مرتد / مرفوض</span>';
+    if (status === 'replaced') return '<span class="status-badge badge-replaced">🔄 مستبدل</span>';
+    return `<span class="status-badge">${status}</span>`;
+  }
+
+  function renderChequesTable() {
+    const tbody = document.getElementById('cheques-tbody');
+    if (!tbody) return;
+
+    const query = (document.getElementById('chk-search-input')?.value || '').trim().toLowerCase();
+    const filtered = allCheques.filter(chk => {
+      if (currentChkFilter !== 'all' && chk.status !== currentChkFilter) return false;
+      if (!query) return true;
+      const numMatch = chk.chequeNumber && chk.chequeNumber.toLowerCase().includes(query);
+      const bankMatch = chk.bankName && chk.bankName.toLowerCase().includes(query);
+      const clientMatch = chk.reservation?.clientName && chk.reservation.clientName.toLowerCase().includes(query);
+      return numMatch || bankMatch || clientMatch;
+    });
+
+    if (filtered.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="9" class="text-center p-4 text-muted">لا توجد شيكات مطابقة للبحث أو الفلتر الحالي.</td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = filtered.map(chk => {
+      const res = chk.reservation || {};
+      const proj = res.project || {};
+      const unit = res.unit || {};
+      const inst = chk.installment || {};
+      const due = new Date(chk.dueDate).toLocaleDateString('ar-EG');
+
+      return `
+        <tr>
+          <td><strong class="chk-num-tag">${chk.chequeNumber}</strong></td>
+          <td>
+            <div class="bank-col">
+              <strong>${chk.bankName}</strong>
+              ${chk.branch ? `<small class="text-muted">فرع ${chk.branch}</small>` : ''}
+            </div>
+          </td>
+          <td>${chk.drawerName || res.clientName || '--'}</td>
+          <td>
+            <div class="client-unit-col">
+              <strong>${res.clientName || 'عميل'}</strong>
+              <small class="text-muted">${proj.projectName || ''} - وحدة ${unit.unitNumber || ''}</small>
+            </div>
+          </td>
+          <td><strong class="text-primary">${chk.amount.toLocaleString()} ج.م</strong></td>
+          <td>${due}</td>
+          <td>${inst.title ? `<span class="tag-inst">${inst.title}</span>` : '<span class="text-muted">--</span>'}</td>
+          <td>${getChequeStatusBadge(chk.status)}</td>
+          <td>
+            <div class="chk-actions-btns">
+              ${chk.status !== 'collected' && chk.status !== 'replaced' ? `
+                <button class="btn btn-sm btn-success btn-collect-chk" data-id="${chk.id}" title="تحصيل وتوريد للخزنة">
+                  💰 تحصيل
+                </button>
+              ` : ''}
+
+              ${chk.status === 'in_safe' ? `
+                <button class="btn btn-sm btn-outline btn-deposit-chk" data-id="${chk.id}" data-num="${chk.chequeNumber}" title="إرسال للبنك للتحصيل">
+                  🏦 إيداع بالبنك
+                </button>
+              ` : ''}
+
+              ${chk.status !== 'collected' && chk.status !== 'bounced' && chk.status !== 'replaced' ? `
+                <button class="btn btn-sm btn-danger btn-bounce-chk" data-id="${chk.id}" data-num="${chk.chequeNumber}" title="تسجيل ارتداد">
+                  ⚠️ ارتداد
+                </button>
+              ` : ''}
+
+              ${chk.status === 'bounced' ? `
+                <button class="btn btn-sm btn-warning btn-replace-chk" data-id="${chk.id}" data-num="${chk.chequeNumber}" data-amt="${chk.amount}" title="استبدال بشيك جديد">
+                  🔄 استبدال
+                </button>
+              ` : ''}
+            </div>
+          </td>
+        </tr>
+      `;
+    }).join('');
+
+    // Attach Event Listeners for Cheques Actions
+    document.querySelectorAll('.btn-collect-chk').forEach(btn => {
+      btn.onclick = async (e) => {
+        const id = e.currentTarget.getAttribute('data-id');
+        if (!confirm('هل أنت متأكد من تأكيد تحصيل هذا الشيك وتوريد قيمته مباشرة في الخزينة؟')) return;
+
+        try {
+          const res = await fetch('/api/erp/cheques', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'collect_cheque', chequeId: id })
+          });
+          const data = await res.json();
+          if (data.success) {
+            alert(data.message);
+            loadCheques();
+            loadInstallments();
+          } else {
+            alert(data.error || 'فشل تحصيل الشيك');
+          }
+        } catch (err) {
+          alert('حدث خطأ أثناء الاتصال بالخادم');
+        }
+      };
+    });
+
+    document.querySelectorAll('.btn-deposit-chk').forEach(btn => {
+      btn.onclick = (e) => {
+        const id = e.currentTarget.getAttribute('data-id');
+        const num = e.currentTarget.getAttribute('data-num');
+        document.getElementById('deposit-chk-id').value = id;
+        document.getElementById('deposit-chk-info').textContent = `الشيك رقم: ${num}`;
+        document.getElementById('deposit-cheque-modal').style.display = 'flex';
+      };
+    });
+
+    document.querySelectorAll('.btn-bounce-chk').forEach(btn => {
+      btn.onclick = (e) => {
+        const id = e.currentTarget.getAttribute('data-id');
+        const num = e.currentTarget.getAttribute('data-num');
+        document.getElementById('bounce-chk-id').value = id;
+        document.getElementById('bounce-chk-info').textContent = `تسجيل ارتداد الشيك رقم: ${num}`;
+        document.getElementById('bounce-cheque-modal').style.display = 'flex';
+      };
+    });
+
+    document.querySelectorAll('.btn-replace-chk').forEach(btn => {
+      btn.onclick = (e) => {
+        const id = e.currentTarget.getAttribute('data-id');
+        const num = e.currentTarget.getAttribute('data-num');
+        const amt = e.currentTarget.getAttribute('data-amt');
+        document.getElementById('replace-old-chk-id').value = id;
+        document.getElementById('replace-chk-info').textContent = `استبدال الشيك المرتد رقم: ${num} بمبلغ ${amt} ج.م`;
+        document.getElementById('rep-chk-amount').value = amt;
+        document.getElementById('replace-cheque-modal').style.display = 'flex';
+      };
+    });
+  }
+
+  // Filter chips for Cheques
+  document.querySelectorAll('.chk-filter-chip').forEach(chip => {
+    chip.addEventListener('click', (e) => {
+      document.querySelectorAll('.chk-filter-chip').forEach(c => c.classList.remove('active'));
+      e.currentTarget.classList.add('active');
+      currentChkFilter = e.currentTarget.getAttribute('data-chk-status');
+      renderChequesTable();
+    });
+  });
+
+  const chkSearch = document.getElementById('chk-search-input');
+  if (chkSearch) {
+    chkSearch.addEventListener('input', () => {
+      renderChequesTable();
+    });
+  }
+
+  // Load reservations for Add Cheques Modal
+  async function loadReservationsForCheques() {
+    try {
+      const res = await fetch('/api/erp/sales');
+      const data = await res.json();
+      if (data.success && data.reservations) {
+        allReservations = data.reservations;
+        const select = document.getElementById('modal-cheque-reservation-select');
+        if (select) {
+          select.innerHTML = '<option value="">-- اختر التعاقد المُراد تسجيل شيكاته --</option>' +
+            data.reservations.map(r => `
+              <option value="${r.id}">
+                ${r.clientName} - مشروع ${r.project?.projectName || ''} (وحدة ${r.unit?.unitNumber || ''})
+              </option>
+            `).join('');
+        }
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  // Add Cheque Row Dynamic Generator
+  const addRowBtn = document.getElementById('add-cheque-row-btn');
+  const rowsWrapper = document.getElementById('cheque-rows-wrapper');
+  if (addRowBtn && rowsWrapper) {
+    addRowBtn.addEventListener('click', () => {
+      const div = document.createElement('div');
+      div.className = 'cheque-input-row';
+      div.innerHTML = `
+        <div class="chk-field">
+          <label>رقم الشيك *</label>
+          <input type="text" class="input-chk-number" placeholder="رقم الشيك" required />
+        </div>
+        <div class="chk-field">
+          <label>اسم البنك *</label>
+          <input type="text" class="input-chk-bank" placeholder="اسم البنك" required />
+        </div>
+        <div class="chk-field">
+          <label>الساحب</label>
+          <input type="text" class="input-chk-drawer" placeholder="الساحب" />
+        </div>
+        <div class="chk-field">
+          <label>القيمة (ج.م) *</label>
+          <input type="number" class="input-chk-amount" placeholder="المبلغ" required step="any" />
+        </div>
+        <div class="chk-field">
+          <label>تاريخ الاستحقاق *</label>
+          <input type="date" class="input-chk-date" required />
+        </div>
+        <button type="button" class="btn-remove-row" title="حذف هذا الشيك">&times;</button>
+      `;
+      rowsWrapper.appendChild(div);
+      div.querySelector('.btn-remove-row')?.addEventListener('click', () => div.remove());
+    });
+  }
+
+  // Submit Add Batch Cheques Form
+  const addChequesForm = document.getElementById('add-cheques-form');
+  if (addChequesForm) {
+    addChequesForm.onsubmit = async (e) => {
+      e.preventDefault();
+      const reservationId = document.getElementById('modal-cheque-reservation-select').value;
+      if (!reservationId) {
+        alert('يرجى اختيار التعاقد أولاً');
+        return;
+      }
+
+      const rows = document.querySelectorAll('#cheque-rows-wrapper .cheque-input-row');
+      const cheques = [];
+
+      rows.forEach(r => {
+        const num = r.querySelector('.input-chk-number')?.value.trim();
+        const bank = r.querySelector('.input-chk-bank')?.value.trim();
+        const drawer = r.querySelector('.input-chk-drawer')?.value.trim();
+        const amount = r.querySelector('.input-chk-amount')?.value;
+        const date = r.querySelector('.input-chk-date')?.value;
+
+        if (num && bank && amount && date) {
+          cheques.push({
+            chequeNumber: num,
+            bankName: bank,
+            drawerName: drawer,
+            amount: parseFloat(amount),
+            dueDate: date
+          });
+        }
+      });
+
+      if (cheques.length === 0) {
+        alert('يرجى إدخال بيانات شيك واحد على الأقل');
+        return;
+      }
+
+      try {
+        const res = await fetch('/api/erp/cheques', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'add_batch_cheques', reservationId, cheques })
+        });
+        const data = await res.json();
+        if (data.success) {
+          alert(`✅ ${data.message}`);
+          document.getElementById('add-cheques-modal').style.display = 'none';
+          addChequesForm.reset();
+          loadCheques();
+        } else {
+          alert(data.error || 'فشل تسجيل الشيكات');
+        }
+      } catch (err) {
+        alert('حدث خطأ أثناء الاتصال بالخادم');
+      }
+    };
+  }
+
+  // Submit Deposit Cheque Form
+  const depositForm = document.getElementById('deposit-cheque-form');
+  if (depositForm) {
+    depositForm.onsubmit = async (e) => {
+      e.preventDefault();
+      const chequeId = document.getElementById('deposit-chk-id').value;
+      const depositBank = document.getElementById('deposit-bank-name').value;
+
+      const res = await fetch('/api/erp/cheques', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'update_status', chequeId, newStatus: 'under_collection', depositBank })
+      });
+      const data = await res.json();
+      if (data.success) {
+        alert('✅ تم إرسال الشيك للتحصيل بالبنك');
+        document.getElementById('deposit-cheque-modal').style.display = 'none';
+        depositForm.reset();
+        loadCheques();
+      } else {
+        alert(data.error || 'فشلت العملية');
+      }
+    };
+  }
+
+  // Submit Bounce Cheque Form
+  const bounceForm = document.getElementById('bounce-cheque-form');
+  if (bounceForm) {
+    bounceForm.onsubmit = async (e) => {
+      e.preventDefault();
+      const chequeId = document.getElementById('bounce-chk-id').value;
+      const bouncedReason = document.getElementById('bounce-reason-select').value;
+      const notes = document.getElementById('bounce-notes').value;
+
+      const res = await fetch('/api/erp/cheques', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'update_status', chequeId, newStatus: 'bounced', bouncedReason, notes })
+      });
+      const data = await res.json();
+      if (data.success) {
+        alert('⚠️ تم قيد الشيك كمرتد وإدراجه في قائمة المتابعة');
+        document.getElementById('bounce-cheque-modal').style.display = 'none';
+        bounceForm.reset();
+        loadCheques();
+      } else {
+        alert(data.error || 'فشلت العملية');
+      }
+    };
+  }
+
+  // Submit Replace Cheque Form
+  const replaceForm = document.getElementById('replace-cheque-form');
+  if (replaceForm) {
+    replaceForm.onsubmit = async (e) => {
+      e.preventDefault();
+      const oldChequeId = document.getElementById('replace-old-chk-id').value;
+      const newCheque = {
+        chequeNumber: document.getElementById('rep-chk-number').value,
+        bankName: document.getElementById('rep-chk-bank').value,
+        amount: document.getElementById('rep-chk-amount').value,
+        dueDate: document.getElementById('rep-chk-date').value,
+        notes: document.getElementById('rep-chk-notes').value
+      };
+
+      const res = await fetch('/api/erp/cheques', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'replace_cheque', oldChequeId, newCheque })
+      });
+      const data = await res.json();
+      if (data.success) {
+        alert(`✅ ${data.message}`);
+        document.getElementById('replace-cheque-modal').style.display = 'none';
+        replaceForm.reset();
+        loadCheques();
+      } else {
+        alert(data.error || 'فشل استبدال الشيك');
+      }
+    };
+  }
+
+  // Modals Open/Close triggers
+  const addChkModalBtn = document.getElementById('open-add-cheques-modal');
+  if (addChkModalBtn) {
+    addChkModalBtn.onclick = () => {
+      document.getElementById('add-cheques-modal').style.display = 'flex';
+      loadReservationsForCheques();
+    };
+  }
+
+  const closeAddChkBtn = document.getElementById('close-add-cheques-modal');
+  const cancelAddChkBtn = document.getElementById('cancel-add-cheques-btn');
+  if (closeAddChkBtn) closeAddChkBtn.onclick = () => { document.getElementById('add-cheques-modal').style.display = 'none'; };
+  if (cancelAddChkBtn) cancelAddChkBtn.onclick = () => { document.getElementById('add-cheques-modal').style.display = 'none'; };
+
+  const closeDepBtn = document.getElementById('close-deposit-modal');
+  const cancelDepBtn = document.getElementById('cancel-deposit-btn');
+  if (closeDepBtn) closeDepBtn.onclick = () => { document.getElementById('deposit-cheque-modal').style.display = 'none'; };
+  if (cancelDepBtn) cancelDepBtn.onclick = () => { document.getElementById('deposit-cheque-modal').style.display = 'none'; };
+
+  const closeBncBtn = document.getElementById('close-bounce-modal');
+  const cancelBncBtn = document.getElementById('cancel-bounce-btn');
+  if (closeBncBtn) closeBncBtn.onclick = () => { document.getElementById('bounce-cheque-modal').style.display = 'none'; };
+  if (cancelBncBtn) cancelBncBtn.onclick = () => { document.getElementById('bounce-cheque-modal').style.display = 'none'; };
+
+  const closeRepBtn = document.getElementById('close-replace-modal');
+  const cancelRepBtn = document.getElementById('cancel-replace-btn');
+  if (closeRepBtn) closeRepBtn.onclick = () => { document.getElementById('replace-cheque-modal').style.display = 'none'; };
+  if (cancelRepBtn) cancelRepBtn.onclick = () => { document.getElementById('replace-cheque-modal').style.display = 'none'; };
+
+  // Pay Installment modal
+  const payModal = document.getElementById('pay-modal');
+  const closePayBtn = document.getElementById('close-pay-modal');
+  const cancelPayBtn = document.getElementById('cancel-pay-btn');
+  if (closePayBtn) closePayBtn.onclick = () => { if (payModal) payModal.style.display = 'none'; };
+  if (cancelPayBtn) cancelPayBtn.onclick = () => { if (payModal) payModal.style.display = 'none'; };
+
+  const payForm = document.getElementById('pay-installment-form');
+  if (payForm) {
+    payForm.onsubmit = async (e) => {
+      e.preventDefault();
+      const installmentId = document.getElementById('pay-installment-id').value;
+      const paidAmount = document.getElementById('pay-actual-amount').value;
+      const latePenalty = document.getElementById('pay-penalty').value;
+      const paymentMethod = document.getElementById('pay-method').value;
+      const notes = document.getElementById('pay-notes').value;
+
+      const res = await fetch('/api/erp/collection', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'pay_installment', installmentId, paidAmount, latePenalty, paymentMethod, notes })
+      });
+      const data = await res.json();
+      if (data.success) {
+        alert(`✅ تم السداد بنجاح وتوريد المبلغ في الخزنة!\nرقم الإيصال: ${data.receipt.receiptNumber}`);
+        if (payModal) payModal.style.display = 'none';
+        payForm.reset();
+        loadInstallments();
+      } else {
+        alert(data.error || 'فشل تسجيل السداد');
+      }
+    };
+  }
+
+  // Filter chips for installments
+  document.querySelectorAll('.filter-chip').forEach(c => {
+    c.onclick = (e) => {
+      document.querySelectorAll('.filter-chip').forEach(chip => chip.classList.remove('active'));
+      e.currentTarget.classList.add('active');
+      const st = e.currentTarget.getAttribute('data-status');
+      loadInstallments(st);
+    };
+  });
+
+  // Setup Reschedule Modal
+  const openRescheduleBtn = document.getElementById('open-reschedule-modal-btn');
+  const rescheduleModal = document.getElementById('reschedule-modal');
+  const closeRescheduleBtn = document.getElementById('close-reschedule-modal');
+  const cancelRescheduleBtn = document.getElementById('cancel-reschedule-btn');
+  const rescheduleForm = document.getElementById('reschedule-form');
+
+  if (openRescheduleBtn && rescheduleModal) {
+    openRescheduleBtn.onclick = async () => {
+      // Set default start date to next month
+      const nextMonth = new Date();
+      nextMonth.setMonth(nextMonth.getMonth() + 1);
+      const dateInput = document.getElementById('reschedule-start-date');
+      if (dateInput) dateInput.value = nextMonth.toISOString().slice(0, 10);
+
+      // Populate reservations select
+      const sel = document.getElementById('reschedule-reservation-select');
+      if (sel) {
+        sel.innerHTML = '<option value="">جارٍ تحميل التعاقدات...</option>';
+        try {
+          const res = await fetch('/api/erp/sales');
+          const data = await res.json();
+          if (data.success && data.reservations) {
+            sel.innerHTML = '<option value="">-- اختر العميل / الوحدة --</option>' +
+              data.reservations.map(r => `
+                <option value="${r.id}">
+                  ${r.clientName} - ${r.project?.projectName || ''} (وحدة ${r.unit?.unitNumber || ''})
+                </option>
+              `).join('');
+          }
+        } catch (e) {
+          sel.innerHTML = '<option value="">فشل تحميل التعاقدات</option>';
+        }
+      }
+
+      rescheduleModal.style.display = 'flex';
+    };
+
+    const closeReschedule = () => { rescheduleModal.style.display = 'none'; };
+    if (closeRescheduleBtn) closeRescheduleBtn.onclick = closeReschedule;
+    if (cancelRescheduleBtn) cancelRescheduleBtn.onclick = closeReschedule;
+
+    if (rescheduleForm) {
+      rescheduleForm.onsubmit = async (e) => {
+        e.preventDefault();
+        const reservationId = document.getElementById('reschedule-reservation-select')?.value;
+        const years = document.getElementById('reschedule-years')?.value;
+        const frequency = document.getElementById('reschedule-frequency')?.value;
+        const startDate = document.getElementById('reschedule-start-date')?.value;
+        const notes = document.getElementById('reschedule-notes')?.value;
+
+        if (!reservationId) {
+          alert('يرجى اختيار التعاقد');
+          return;
+        }
+
+        try {
+          const res = await fetch('/api/erp/collection', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              action: 'reschedule_installments',
+              reservationId,
+              years,
+              frequency,
+              startDate,
+              notes
+            })
+          });
+          const data = await res.json();
+          if (data.success) {
+            alert(data.message || 'تمت إعادة الجدولة بنجاح!');
+            closeReschedule();
+            loadInstallments();
+          } else {
+            alert(data.error || 'فشلت إعادة الجدولة');
+          }
+        } catch (err) {
+          console.error(err);
+          alert('حدث خطأ بالاتصال بالسيرفر');
+        }
+      };
+    }
+  }
+</script>
+
+<style>
+  * { box-sizing: border-box; }
+  .erp-container { direction: rtl; font-family: 'Cairo', system-ui, sans-serif; background-color: #f8fafc; min-height: 100vh; padding: 2rem; }
+  .loading-state { text-align: center; padding: 5rem; font-family: 'Cairo', sans-serif; }
+  .spinner { width: 40px; height: 40px; border: 4px solid #e2e8f0; border-top-color: #0284c7; border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 1rem; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .erp-topbar { display: flex; justify-content: space-between; align-items: center; background: white; border: 1px solid #e2e8f0; padding: 1rem 1.75rem; border-radius: 16px; margin-bottom: 2rem; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02); }
+  .brand-crumb { display: flex; align-items: center; gap: 0.65rem; font-weight: 700; }
+  .back-link { display: inline-flex; align-items: center; gap: 0.35rem; color: #0284c7; text-decoration: none; }
+  .sep { color: #94a3b8; }
+  .active-crumb { color: #0f172a; }
+
+  .subsystem-hero { background: linear-gradient(135deg, #1e3a8a 0%, #0f172a 100%); color: white; border-radius: 24px; padding: 2.5rem; margin-bottom: 2rem; }
+  .hero-badge { display: inline-block; padding: 0.35rem 0.95rem; border-radius: 20px; background: rgba(255,255,255,0.18); font-size: 0.8rem; font-weight: 800; margin-bottom: 0.75rem; }
+  .hero-text h1 { margin: 0 0 0.65rem 0; font-size: 1.85rem; font-weight: 900; }
+  .hero-text p { margin: 0; max-width: 750px; font-size: 0.95rem; color: #93c5fd; line-height: 1.6; }
+
+  /* Navigation Tabs */
+  .collection-main-tabs { display: flex; gap: 0.75rem; margin-bottom: 1.5rem; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+  .c-tab-nav { background: transparent; border: none; font-family: inherit; font-size: 1rem; font-weight: 800; color: #64748b; padding: 0.75rem 1.25rem; border-radius: 12px; cursor: pointer; display: flex; align-items: center; gap: 0.6rem; transition: all 0.2s ease; }
+  .c-tab-nav:hover { background: #f1f5f9; color: #0f172a; }
+  .c-tab-nav.active { background: #1e3a8a; color: white; box-shadow: 0 4px 12px rgba(30, 58, 138, 0.25); }
+  .tab-badge { background: #ef4444; color: white; font-size: 0.75rem; padding: 0.15rem 0.55rem; border-radius: 12px; font-weight: 900; }
+
+  /* Cheques KPI Cards */
+  .cheques-kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 1rem; margin-bottom: 1.75rem; }
+  .c-kpi-card { background: white; border: 1px solid #e2e8f0; border-radius: 16px; padding: 1.25rem; box-shadow: 0 2px 8px rgba(0,0,0,0.02); display: flex; flex-direction: column; }
+  .c-kpi-label { font-size: 0.8rem; font-weight: 700; color: #64748b; margin-bottom: 0.35rem; }
+  .c-kpi-card h3 { margin: 0 0 0.35rem 0; font-size: 1.45rem; font-weight: 900; color: #0f172a; }
+  .c-kpi-sub { font-size: 0.78rem; font-weight: 600; color: #94a3b8; }
+  .kpi-safe h3 { color: #0284c7; }
+  .kpi-bank h3 { color: #6366f1; }
+  .kpi-collected h3 { color: #10b981; }
+  .kpi-bounced h3 { color: #ef4444; }
+
+  /* Toolbar and Filters */
+  .cheques-toolbar-row { display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap; margin-bottom: 1.25rem; }
+  .cheques-filters { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+  .chk-filter-chip { padding: 0.5rem 1rem; border-radius: 20px; background: white; border: 1.5px solid #e2e8f0; font-family: inherit; font-size: 0.85rem; font-weight: 700; color: #475569; cursor: pointer; transition: all 0.2s ease; }
+  .chk-filter-chip.active { background: #0f172a; color: white; border-color: #0f172a; }
+  .chk-filter-chip.chip-danger.active { background: #ef4444; border-color: #ef4444; color: white; }
+
+  .chk-search-box input { padding: 0.55rem 1rem; border: 1.5px solid #e2e8f0; border-radius: 20px; font-family: inherit; font-size: 0.88rem; width: 280px; }
+
+  .collection-filter-bar { display: flex; gap: 0.5rem; margin-bottom: 1.5rem; }
+  .filter-chip { padding: 0.6rem 1.25rem; border-radius: 20px; background: white; border: 1.5px solid #e2e8f0; font-family: inherit; font-size: 0.9rem; font-weight: 700; color: #475569; cursor: pointer; }
+  .filter-chip.active { background: #1e3a8a; color: white; border-color: #1e3a8a; }
+
+  /* Table */
+  .collection-table-card { background: white; border: 1px solid #e2e8f0; border-radius: 20px; padding: 1.5rem; box-shadow: 0 4px 16px rgba(0,0,0,0.03); }
+  .erp-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+  .erp-table th, .erp-table td { padding: 0.85rem 1rem; text-align: right; border-bottom: 1px solid #f1f5f9; vertical-align: middle; }
+  .erp-table th { background: #f8fafc; color: #475569; font-weight: 800; }
+
+  .chk-num-tag { font-family: monospace; background: #f1f5f9; padding: 0.25rem 0.65rem; border-radius: 8px; font-size: 0.92rem; color: #0f172a; }
+  .tag-inst { background: #eff6ff; color: #1e40af; padding: 0.2rem 0.5rem; border-radius: 6px; font-size: 0.78rem; font-weight: 700; }
+
+  .status-badge { padding: 0.3rem 0.75rem; border-radius: 20px; font-size: 0.78rem; font-weight: 800; display: inline-flex; align-items: center; }
+  .badge-paid { background: #dcfce7; color: #15803d; }
+  .badge-pending { background: #fef3c7; color: #b45309; }
+  .badge-late { background: #fee2e2; color: #b91c1c; }
+  .badge-safe { background: #e0f2fe; color: #0369a1; }
+  .badge-bank { background: #ede9fe; color: #6d28d9; }
+  .badge-replaced { background: #f1f5f9; color: #64748b; text-decoration: line-through; }
+
+  .chk-actions-btns { display: flex; gap: 0.4rem; flex-wrap: wrap; }
+  .btn { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.65rem 1.25rem; border-radius: 12px; font-weight: 700; font-size: 0.92rem; cursor: pointer; border: none; text-decoration: none; transition: transform 0.15s ease; }
+  .btn:hover { transform: translateY(-1px); }
+  .btn-sm { padding: 0.35rem 0.75rem; font-size: 0.82rem; border-radius: 8px; }
+  .btn-primary { background: #0284c7; color: white; }
+  .btn-success { background: #059669; color: white; }
+  .btn-danger { background: #dc2626; color: white; }
+  .btn-warning { background: #d97706; color: white; }
+  .btn-secondary { background: #f1f5f9; color: #475569; }
+  .btn-outline { background: white; border: 1.5px solid #cbd5e1; color: #334155; }
+
+  .cheques-batch-header { display: flex; justify-content: space-between; align-items: center; margin-top: 1rem; border-top: 1px solid #e2e8f0; padding-top: 1rem; }
+  .cheques-batch-header h4 { margin: 0; font-size: 1rem; font-weight: 800; color: #0f172a; }
+  .cheques-rows-container { display: flex; flex-direction: column; gap: 0.85rem; max-height: 340px; overflow-y: auto; padding-right: 0.35rem; }
+  .cheque-input-row { display: grid; grid-template-columns: 1.2fr 1.2fr 1.2fr 1fr 1.2fr auto; gap: 0.6rem; align-items: end; background: #f8fafc; padding: 0.85rem; border-radius: 12px; border: 1px solid #e2e8f0; }
+  .chk-field { display: flex; flex-direction: column; gap: 0.3rem; }
+  .chk-field label { font-size: 0.75rem; font-weight: 700; color: #64748b; }
+  .chk-field input { padding: 0.55rem 0.75rem; border: 1px solid #cbd5e1; border-radius: 8px; font-family: inherit; font-size: 0.85rem; }
+  .btn-remove-row { background: #fee2e2; color: #dc2626; border: none; width: 32px; height: 32px; border-radius: 8px; font-size: 1.2rem; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+
+  /* Modals */
+  .modal-backdrop { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.65); backdrop-filter: blur(8px); z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 1.5rem; }
+  .modal-card { background: white; border-radius: 24px; width: 100%; max-width: 580px; padding: 2.25rem; box-shadow: 0 25px 60px rgba(0, 0, 0, 0.25); max-height: 90vh; overflow-y: auto; }
+  .modal-large { max-width: 900px; }
+  .modal-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1.5rem; }
+  .modal-header h3 { margin: 0; font-size: 1.35rem; font-weight: 900; }
+  .modal-sub { margin: 0.35rem 0 0 0; font-size: 0.85rem; color: #64748b; }
+  .close-modal-btn { background: #f1f5f9; border: none; width: 34px; height: 34px; border-radius: 50%; cursor: pointer; font-size: 1.4rem; }
+  .modal-form { display: flex; flex-direction: column; gap: 1.15rem; }
+  .form-group { display: flex; flex-direction: column; gap: 0.45rem; flex: 1; }
+  .form-group label { font-size: 0.85rem; font-weight: 700; color: #334155; }
+  .form-group input, .form-group select { padding: 0.75rem 1rem; border: 1.5px solid #e2e8f0; border-radius: 12px; font-family: inherit; font-size: 0.95rem; }
+  .form-row { display: flex; gap: 1rem; }
+  .form-actions { display: flex; justify-content: flex-end; gap: 0.75rem; margin-top: 1.25rem; }
+  .info-strip { background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 12px; padding: 0.85rem 1rem; display: flex; justify-content: space-between; font-weight: 700; font-size: 0.88rem; color: #1e40af; }
+  .text-danger { color: #dc2626; }
+</style>

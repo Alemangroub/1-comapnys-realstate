@@ -1,0 +1,517 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import TopBar from '../../components/TopBar.astro';
+import Header from '../../components/Header.astro';
+import Footer from '../../components/Footer.astro';
+import FloatingButton from '../../components/FloatingButton.astro';
+
+const service = {
+  title: "المشاريع التجارية",
+  tag: "أبراج ومراكز أعمال حيوية",
+  glowColor: "rgba(168, 85, 247, 0.4)",
+  description: "نبتكر وجهات ومجمعات تجارية وإدارية حيوية بمواقع استراتيجية مدروسة، مصممة لتعزيز نمو الأعمال وتوفير بيئات عمل مستقبلية متكاملة.",
+  detailedPoints: [
+    {
+      title: "مواقع حيوية واستراتيجية",
+      text: "نختار مواقع مشاريعنا بعناية فائقة في مناطق ذات كثافة سكانية وحركة تجارية نشطة لضمان وصول سهل لعملائك وتعظيم قيمة أصولك العقارية."
+    },
+    {
+      title: "تصاميم معمارية مرنة وذكية",
+      text: "تصاميم مستقبلية تتيح أعلى درجات المرونة في تقسيم المساحات لتناسب مختلف الأنشطة الإدارية، العيادات، المحلات، ومقار الشركات الكبرى."
+    },
+    {
+      title: "بنية تحتية وأنظمة ذكية",
+      text: "أنظمة تكييف مركزي متطورة، شبكات اتصالات فائقة السرعة، أنظمة تحكم ومراقبة ذكية، ومواقف سيارات متسعة مؤمنة بالكامل على مدار الساعة."
+    },
+    {
+      title: "وجهة تجارية متكاملة الخدمات",
+      text: "نوفر بيئة عمل ملهمة تحتوي على خدمات بنكية، مقاهٍ ومطاعم راقية، وقاعات اجتماعات متطورة لتلبية كافة متطلبات رواد الأعمال والزوار."
+    }
+  ],
+  icon: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="9" y1="6" x2="9" y2="6.01"/><line x1="15" y1="6" x2="15" y2="6.01"/><line x1="9" y1="10" x2="9" y2="10.01"/><line x1="15" y1="10" x2="15" y2="10.01"/><line x1="9" y1="14" x2="9" y2="14.01"/><line x1="15" y1="14" x2="15" y2="14.01"/><path d="M10 22v-4h4v4"/></svg>`
+};
+---
+
+<Layout title={`${service.title} - للاستثمار والتطوير العقاري`}>
+  <TopBar />
+  <Header showMenu={true} />
+
+  <main class="service-detail-page">
+    <div class="page-banner" style={`--banner-glow: ${service.glowColor};`}>
+      <div class="banner-mesh"></div>
+      <div class="banner-glow"></div>
+
+      <div class="banner-content">
+        <nav class="breadcrumb-nav">
+          <a href="/"><i class="fas fa-home"></i> الرئيسية</a>
+          <span class="sep">/</span>
+          <a href="/services">خدماتنا</a>
+          <span class="sep">/</span>
+          <span class="current">{service.title}</span>
+        </nav>
+
+        <div class="banner-badge">
+          <span class="badge-dot"></span>
+          <span class="badge-text">{service.tag}</span>
+        </div>
+
+        <div class="title-wrap">
+          <div class="icon-box" set:html={service.icon}></div>
+          <h1 class="page-title">{service.title}</h1>
+        </div>
+
+        <p class="banner-desc">{service.description}</p>
+      </div>
+    </div>
+
+    <div class="container">
+      <div class="service-grid">
+        <article class="detail-glass-card">
+          <div class="card-header">
+            <h2 class="section-title">منهجية ورؤية {service.title}</h2>
+            <div class="title-accent"></div>
+          </div>
+
+          <div class="points-grid">
+            {service.detailedPoints.map((point) => (
+              <div class="point-item">
+                <div class="point-bullet"></div>
+                <div class="point-body">
+                  <h3 class="point-title">{point.title}</h3>
+                  <p class="point-text">{point.text}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div class="card-footer-nav">
+            <a href="/services" class="back-link">
+              <i class="fas fa-arrow-right"></i>
+              العودة إلى جميع الخدمات
+            </a>
+            <a href="/contact" class="consult-button">
+              <span>طلب استشارة تجارية</span>
+              <i class="fas fa-arrow-left"></i>
+            </a>
+          </div>
+        </article>
+
+        <aside class="services-sidebar">
+          <div class="sidebar-box glass-panel">
+            <h3 class="sidebar-title">منظومة خدماتنا</h3>
+            <ul class="nav-links">
+              <li><a href="/services/residential-development"><i class="fas fa-home"></i> التطوير السكني</a></li>
+              <li><a href="/services/commercial-projects" class="active"><i class="fas fa-building"></i> المشاريع التجارية</a></li>
+              <li><a href="/services/project-management"><i class="fas fa-tasks"></i> إدارة المشاريع</a></li>
+              <li><a href="/services/real-estate-investment"><i class="fas fa-chart-line"></i> الاستثمار العقاري</a></li>
+            </ul>
+          </div>
+
+          <div class="cta-sidebar glass-panel">
+            <div class="cta-icon"><i class="fas fa-phone-alt"></i></div>
+            <h4>الخط الساخن المباشر</h4>
+            <p>تواصل مع مستشاري قطاع المشاريع التجارية</p>
+            <a href="tel:19000" class="phone-btn">19000</a>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </main>
+
+  <Footer />
+  <FloatingButton />
+</Layout>
+
+<style>
+  .service-detail-page {
+    position: relative;
+    background: radial-gradient(circle at 50% 10%, #0d1627 0%, #080d19 60%, #050812 100%);
+    direction: rtl;
+    padding-bottom: 90px;
+    color: #e2e8f0;
+    overflow: hidden;
+  }
+
+  .page-banner {
+    position: relative;
+    padding: 70px 25px 60px;
+    background: linear-gradient(180deg, rgba(14, 23, 42, 0.9) 0%, rgba(8, 13, 25, 0.95) 100%);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    overflow: hidden;
+  }
+
+  .banner-mesh {
+    position: absolute;
+    inset: 0;
+    background-size: 35px 35px;
+    background-image: 
+      linear-gradient(to right, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+    mask-image: radial-gradient(circle at center, black 40%, transparent 85%);
+    -webkit-mask-image: radial-gradient(circle at center, black 40%, transparent 85%);
+  }
+
+  .banner-glow {
+    position: absolute;
+    width: 450px;
+    height: 450px;
+    top: -100px;
+    left: -50px;
+    border-radius: 50%;
+    filter: blur(100px);
+    background: radial-gradient(circle, var(--banner-glow) 0%, transparent 70%);
+    opacity: 0.35;
+    pointer-events: none;
+  }
+
+  .banner-content {
+    position: relative;
+    z-index: 2;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .breadcrumb-nav {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.9rem;
+    color: #94a3b8;
+    margin-bottom: 22px;
+  }
+
+  .breadcrumb-nav a {
+    color: #94a3b8;
+    text-decoration: none;
+    transition: color 0.3s ease;
+  }
+
+  .breadcrumb-nav a:hover {
+    color: #d3bfa9;
+  }
+
+  .breadcrumb-nav .sep {
+    opacity: 0.4;
+  }
+
+  .breadcrumb-nav .current {
+    color: #ffffff;
+    font-weight: 700;
+  }
+
+  .banner-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 14px;
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(211, 191, 169, 0.3);
+    margin-bottom: 20px;
+  }
+
+  .badge-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: #a855f7;
+    box-shadow: 0 0 10px #a855f7;
+  }
+
+  .badge-text {
+    font-family: 'Cairo', sans-serif;
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: #d3bfa9;
+  }
+
+  .title-wrap {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    margin-bottom: 15px;
+  }
+
+  .icon-box {
+    width: 55px;
+    height: 55px;
+    border-radius: 14px;
+    background: rgba(211, 191, 169, 0.12);
+    border: 1px solid rgba(211, 191, 169, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #d3bfa9;
+    flex-shrink: 0;
+  }
+
+  .icon-box :global(svg) {
+    width: 30px;
+    height: 30px;
+  }
+
+  .page-title {
+    font-family: 'Cairo', sans-serif;
+    font-size: 2.8rem;
+    font-weight: 900;
+    color: #ffffff;
+    margin: 0;
+    background: linear-gradient(180deg, #ffffff 40%, #cbd5e1 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .banner-desc {
+    font-family: 'Almarai', sans-serif;
+    font-size: 1.15rem;
+    color: #94a3b8;
+    max-width: 800px;
+    line-height: 1.8;
+    margin: 0;
+  }
+
+  .container {
+    max-width: 1200px;
+    margin: 45px auto 0;
+    padding: 0 25px;
+  }
+
+  .service-grid {
+    display: grid;
+    grid-template-columns: 2.6fr 1fr;
+    gap: 35px;
+  }
+
+  .detail-glass-card {
+    background: linear-gradient(145deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.015) 100%);
+    backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 18px;
+    padding: 40px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+  }
+
+  .card-header {
+    margin-bottom: 30px;
+  }
+
+  .section-title {
+    font-family: 'Cairo', sans-serif;
+    font-size: 1.9rem;
+    font-weight: 800;
+    color: #ffffff;
+    margin: 0 0 12px 0;
+  }
+
+  .title-accent {
+    width: 60px;
+    height: 4px;
+    border-radius: 2px;
+    background: linear-gradient(90deg, #a855f7, #d3bfa9);
+  }
+
+  .points-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+  }
+
+  .point-item {
+    display: flex;
+    gap: 18px;
+    align-items: flex-start;
+  }
+
+  .point-bullet {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background-color: #a855f7;
+    box-shadow: 0 0 10px rgba(168, 85, 247, 0.8);
+    margin-top: 8px;
+    flex-shrink: 0;
+  }
+
+  .point-title {
+    font-family: 'Cairo', sans-serif;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #ffffff;
+    margin: 0 0 8px 0;
+  }
+
+  .point-text {
+    font-family: 'Almarai', sans-serif;
+    font-size: 1.05rem;
+    color: #cbd5e1;
+    line-height: 1.85;
+    margin: 0;
+  }
+
+  .card-footer-nav {
+    margin-top: 45px;
+    padding-top: 25px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 20px;
+  }
+
+  .back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    color: #d3bfa9;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 1rem;
+    transition: transform 0.3s ease;
+  }
+
+  .back-link:hover {
+    transform: translateX(-5px);
+  }
+
+  .consult-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 24px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #d3bfa9 0%, #b89f84 100%);
+    color: #080d19;
+    font-family: 'Cairo', sans-serif;
+    font-weight: 800;
+    font-size: 0.95rem;
+    text-decoration: none;
+    box-shadow: 0 8px 20px rgba(211, 191, 169, 0.25);
+    transition: transform 0.3s ease;
+  }
+
+  .consult-button:hover {
+    transform: translateY(-2px);
+  }
+
+  .services-sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+  }
+
+  .glass-panel {
+    background: linear-gradient(145deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.015) 100%);
+    backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 18px;
+    padding: 30px 25px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+  }
+
+  .sidebar-title {
+    font-family: 'Cairo', sans-serif;
+    font-size: 1.3rem;
+    font-weight: 800;
+    color: #ffffff;
+    margin: 0 0 20px 0;
+    padding-bottom: 12px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  .nav-links {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .nav-links a {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    border-radius: 10px;
+    color: #94a3b8;
+    text-decoration: none;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid transparent;
+    transition: all 0.3s ease;
+    font-size: 0.95rem;
+    font-weight: 600;
+  }
+
+  .nav-links a:hover {
+    background: rgba(255, 255, 255, 0.06);
+    color: #ffffff;
+    transform: translateX(-4px);
+  }
+
+  .nav-links a.active {
+    background: rgba(211, 191, 169, 0.12);
+    border-color: rgba(211, 191, 169, 0.3);
+    color: #d3bfa9;
+    font-weight: 700;
+  }
+
+  .cta-sidebar {
+    text-align: center;
+  }
+
+  .cta-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: rgba(211, 191, 169, 0.15);
+    color: #d3bfa9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 15px;
+    font-size: 1.2rem;
+  }
+
+  .cta-sidebar h4 {
+    font-family: 'Cairo', sans-serif;
+    font-size: 1.25rem;
+    color: #ffffff;
+    margin: 0 0 8px 0;
+  }
+
+  .cta-sidebar p {
+    font-family: 'Almarai', sans-serif;
+    font-size: 0.92rem;
+    color: #94a3b8;
+    margin: 0 0 16px 0;
+  }
+
+  .phone-btn {
+    display: inline-block;
+    padding: 8px 24px;
+    border-radius: 8px;
+    background: #d3bfa9;
+    color: #080d19;
+    font-family: 'Cairo', sans-serif;
+    font-weight: 800;
+    text-decoration: none;
+    font-size: 1.1rem;
+    direction: ltr;
+  }
+
+  @media (max-width: 992px) {
+    .service-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .page-title {
+      font-size: 2.2rem;
+    }
+    .detail-glass-card {
+      padding: 25px 20px;
+    }
+  }
+</style>

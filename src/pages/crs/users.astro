@@ -1,0 +1,2061 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import AdminLogin from '../../components/AdminLogin.astro';
+---
+
+<Layout title="إدارة المستخدمين وفريق العمل | منظومة التطوير العقاري">
+  <div id="auth-loading-message" class="auth-loading-screen">
+    <div class="auth-spinner"></div>
+    <p>جارٍ التحقق من صلاحيات الإدارة...</p>
+  </div>
+
+  <div id="admin-login-container" class="auth-container" style="display: none;">
+    <AdminLogin />
+  </div>
+
+  <main id="page-content" class="user-management-page" style="display: none;">
+    
+    <!-- Top Executive Header -->
+    <header class="executive-top-header">
+      <div class="header-inner">
+        <div class="title-meta">
+          <div class="meta-icon-badge">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+          </div>
+          <div>
+            <h1>إدارة المستخدمين وفريق العمل</h1>
+            <p>التحكم المركزي في حسابات مسؤولي المبيعات، المحاسبين، والمشرفين الميدانيين</p>
+          </div>
+        </div>
+
+        <div class="header-actions">
+          <a href="/crs" class="btn-action btn-back">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+            <span>لوحة التحكم الرئيسية</span>
+          </a>
+          <button id="logout-button" class="btn-action btn-logout" title="تسجيل الخروج">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+            <span>خروج</span>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <div class="management-container">
+      
+      <!-- Live Metrics Cards -->
+      <section class="metrics-row">
+        <div class="stat-glass-card">
+          <div class="stat-icon-pod pod-indigo">
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+          </div>
+          <div class="stat-details">
+            <span class="stat-label">إجمالي فريق العمل</span>
+            <h3 id="stat-total-users">0</h3>
+            <span class="stat-footnote">حسابات نشطة مسجلة</span>
+          </div>
+        </div>
+
+        <div class="stat-glass-card">
+          <div class="stat-icon-pod pod-emerald">
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><line x1="19" y1="8" x2="19" y2="14"></line><line x1="22" y1="11" x2="16" y2="11"></line></svg>
+          </div>
+          <div class="stat-details">
+            <span class="stat-label">مسؤولو المبيعات</span>
+            <h3 id="stat-sales-users">0</h3>
+            <span class="stat-footnote">مكلفون بالتعاقدات</span>
+          </div>
+        </div>
+
+        <div class="stat-glass-card">
+          <div class="stat-icon-pod pod-amber">
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"></rect><line x1="12" y1="8" x2="12" y2="16"></line><line x1="8" y1="12" x2="16" y2="12"></line></svg>
+          </div>
+          <div class="stat-details">
+            <span class="stat-label">الحسابات والتحصيل</span>
+            <h3 id="stat-accountant-users">0</h3>
+            <span class="stat-footnote">الخزينة والأقساط</span>
+          </div>
+        </div>
+
+        <div class="stat-glass-card">
+          <div class="stat-icon-pod pod-blue">
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 20h20"></path><path d="M5 20V8l7-5 7 5v12"></path><rect x="9" y="12" width="6" height="8"></rect></svg>
+          </div>
+          <div class="stat-details">
+            <span class="stat-label">المشرفون والمهندسون</span>
+            <h3 id="stat-supervisor-users">0</h3>
+            <span class="stat-footnote">متابعة المواقع والمستخلصات</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Navigation Tabs: Users Directory / Audit Trail / Approvals Policy -->
+      <div class="user-tabs-bar">
+        <button id="tab-btn-users" class="user-tab-btn active" data-pane="pane-users">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+          <span>دليل المستخدمين والصلاحيات</span>
+        </button>
+        <button id="tab-btn-audit" class="user-tab-btn" data-pane="pane-audit">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+          <span>سجل التدقيق والرقابة الأمني (Audit Trail)</span>
+          <span class="tab-badge" id="audit-badge-count">0</span>
+        </button>
+        <button id="tab-btn-policy" class="user-tab-btn" data-pane="pane-policy">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+          <span>مصفوفة سلاسل الاعتمادات المالية</span>
+        </button>
+      </div>
+
+      <!-- Pane 1: Users Directory -->
+      <div id="pane-users" class="user-pane active">
+        <!-- Main Layout Grid: Add User Panel + Users Directory -->
+        <div class="management-grid">
+        
+        <!-- Left/Top: Add User Luxury Glass Form -->
+        <section class="creation-panel">
+          <div class="panel-card-crystal">
+            <div class="panel-card-header">
+              <div class="header-icon-pod">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><line x1="19" y1="8" x2="19" y2="14"></line><line x1="22" y1="11" x2="16" y2="11"></line></svg>
+              </div>
+              <div>
+                <h2>إنشاء حساب مستخدم جديد</h2>
+                <p>إصدار بيانات اعتماد فورية لأحد أفراد المنظومة</p>
+              </div>
+            </div>
+
+            <form id="add-user-form" class="crystal-form">
+              
+              <div class="form-field-box">
+                <label for="user-name">
+                  <span>اسم المستخدم الكامل</span>
+                  <span class="required-star">*</span>
+                </label>
+                <div class="input-icon-wrap">
+                  <span class="input-svg">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                  </span>
+                  <input type="text" id="user-name" placeholder="مثال: م. أحمد عبد العزيز" required />
+                </div>
+              </div>
+
+              <div class="form-field-box">
+                <label for="user-email">
+                  <span>البريد الإلكتروني للعمل</span>
+                  <span class="required-star">*</span>
+                </label>
+                <div class="input-icon-wrap">
+                  <span class="input-svg">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+                  </span>
+                  <input type="email" id="user-email" placeholder="name@company.com" required />
+                </div>
+              </div>
+
+              <div class="form-field-box">
+                <label for="user-password">
+                  <span>كلمة المرور الابتدائية</span>
+                  <span class="required-star">*</span>
+                </label>
+                <div class="input-icon-wrap">
+                  <span class="input-svg">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                  </span>
+                  <input type="password" id="user-password" placeholder="•••••••• (6 أحرف على الأقل)" required minlength="6" />
+                </div>
+              </div>
+
+              <div class="form-field-box">
+                <label for="user-role">
+                  <span>الدور الوظيفي والصلاحية</span>
+                  <span class="required-star">*</span>
+                </label>
+                <div class="input-icon-wrap select-wrap">
+                  <span class="input-svg">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                  </span>
+                  <select id="user-role" required>
+                    <option value="" disabled selected>اختر الصلاحية والمسؤولية...</option>
+                    <option value="sales">مسؤول مبيعات (Sales)</option>
+                    <option value="accountant">محاسب / مسؤول تحصيل (Accountant)</option>
+                    <option value="supervisor">مشرف ميداني / مهندس (Supervisor)</option>
+                    <option value="admin">مالك / مدير عام (Admin)</option>
+                  </select>
+                </div>
+              </div>
+
+              <button type="submit" id="add-user-btn" class="btn-submit-luxury">
+                <span class="btn-text">+ إنشاء الحساب وتفعيله فوراً</span>
+                <span class="btn-loader" style="display: none;">جارٍ إنشاء الحساب...</span>
+              </button>
+
+              <div id="add-user-feedback" class="feedback-banner" style="display: none;"></div>
+            </form>
+          </div>
+        </section>
+
+        <!-- Right/Main: Users Directory & Search Bar -->
+        <section class="directory-panel">
+          
+          <div class="directory-header-bar">
+            <div class="search-input-box">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+              <input type="text" id="user-search-input" placeholder="بحث بالاسم أو البريد الإلكتروني..." />
+            </div>
+
+            <!-- Role Filter Pills -->
+            <div class="filter-pills-bar">
+              <button type="button" class="filter-pill active" data-role="all">الكل</button>
+              <button type="button" class="filter-pill" data-role="sales">مبيعات</button>
+              <button type="button" class="filter-pill" data-role="accountant">محاسبين</button>
+              <button type="button" class="filter-pill" data-role="supervisor">مشرفين</button>
+              <button type="button" class="filter-pill" data-role="admin">إدارة</button>
+            </div>
+          </div>
+
+          <!-- Users Grid -->
+          <div id="users-list" class="users-luxury-grid"></div>
+
+          <!-- Empty / Loading States -->
+          <div id="no-users-message" class="empty-state-luxury">
+            <div class="empty-icon-circle">
+              <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle></svg>
+            </div>
+            <h3>جارٍ تحميل قائمة المستخدمين...</h3>
+            <p>يتم جلب الحسابات المسجلة من قاعدة البيانات</p>
+          </div>
+
+        </section>
+
+        </div>
+      </div>
+
+      <!-- Pane 2: Audit Trail (سجل الرقابة والتدقيق الأمني) -->
+      <div id="pane-audit" class="user-pane" style="display: none;">
+        <!-- Audit KPI Ribbon -->
+        <div class="audit-kpis-grid">
+          <div class="audit-kpi-card">
+            <div class="kpi-icon-box" style="background:#ecfdf5;color:#059669;">🛡️</div>
+            <div>
+              <span class="kpi-lbl">إجمالي العمليات الموثقة</span>
+              <h3 class="kpi-val" id="audit-total-val">0</h3>
+              <span class="kpi-sub">كل حركة مسجلة بالدقيقة والـ IP</span>
+            </div>
+          </div>
+
+          <div class="audit-kpi-card">
+            <div class="kpi-icon-box" style="background:#eff6ff;color:#2563eb;">⚡</div>
+            <div>
+              <span class="kpi-lbl">عمليات اليوم اللحظية</span>
+              <h3 class="kpi-val" id="audit-today-val">0</h3>
+              <span class="kpi-sub">نشاط اليوم النشط</span>
+            </div>
+          </div>
+
+          <div class="audit-kpi-card">
+            <div class="kpi-icon-box" style="background:#fffbeb;color:#b45309;">⚖️</div>
+            <div>
+              <span class="kpi-lbl">العمليات المالية الحساسة</span>
+              <h3 class="kpi-val" id="audit-financial-val">0</h3>
+              <span class="kpi-sub">اعتمادات صرف، شيكات، وتنازلات</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Audit Filters Bar -->
+        <div class="audit-filters-bar">
+          <div class="filter-group">
+            <label>تصفية حسب نوع الكيان:</label>
+            <select id="filter-audit-entity">
+              <option value="all">جميع الكيانات (Projects, Units, Cheques...)</option>
+              <option value="Project">المشروعات (Project)</option>
+              <option value="Unit">الوحدات (Unit)</option>
+              <option value="Reservation">الحجوزات والتعاقدات (Reservation)</option>
+              <option value="BankCheque">محفظة الشيكات (BankCheque)</option>
+              <option value="Invoice">المستخلصات والمقاولين (Invoice)</option>
+              <option value="Treasury">الخزينة والحسابات (Treasury)</option>
+              <option value="User">المستخدمين (User)</option>
+              <option value="JournalEntry">القيود اليومية (JournalEntry)</option>
+            </select>
+          </div>
+
+          <div class="filter-group">
+            <label>نوع العملية (Action):</label>
+            <select id="filter-audit-action">
+              <option value="all">جميع الحركات (All Actions)</option>
+              <option value="CREATE">إنشاء وإضافة (CREATE)</option>
+              <option value="UPDATE">تعديل بيانات (UPDATE)</option>
+              <option value="DELETE">حذف وإلغاء (DELETE)</option>
+              <option value="APPROVE">اعتماد مالي / هندسي (APPROVE)</option>
+              <option value="TRANSFER">تنازل ونقل ملكية (TRANSFER)</option>
+              <option value="BOUNCE">شيك مرتد (BOUNCE)</option>
+              <option value="RESCHEDULE">إعادة جدولة (RESCHEDULE)</option>
+            </select>
+          </div>
+
+          <div class="filter-group" style="flex:1;">
+            <label>بحث في البيان أو اسم المستخدم:</label>
+            <input type="text" id="search-audit-input" placeholder="اكتب للبحث في سجل العمليات..." />
+          </div>
+
+          <button id="refresh-audit-btn" class="btn-action" style="background:#f1f5f9;color:#334155;align-self:flex-end;">
+            🔄 تحديث السجل
+          </button>
+
+          <button id="export-audit-csv-btn" class="btn-action" style="background:#059669;color:#ffffff;align-self:flex-end;" title="تحميل تقرير كامل بصيغة CSV">
+            📥 تصدير تقرير (CSV)
+          </button>
+        </div>
+
+        <!-- Audit Trail Table -->
+        <div class="table-container-luxury">
+          <table class="audit-log-table">
+            <thead>
+              <tr>
+                <th>التاريخ والوقت</th>
+                <th>المستخدم المسؤول</th>
+                <th>نوع الحركة</th>
+                <th>الكيان المستهدف</th>
+                <th>البيان والتفاصيل الإجرائية</th>
+                <th>عنوان IP</th>
+              </tr>
+            </thead>
+            <tbody id="audit-logs-tbody">
+              <!-- Dynamically populated -->
+            </tbody>
+          </table>
+
+          <div id="audit-empty-state" class="empty-state-luxury" style="display: none;">
+            <p>لا توجد حركات تدقيق مطابقة لشروط البحث.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pane 3: Approvals Policy (مصفوفة سلاسل الاعتمادات المالية) -->
+      <div id="pane-policy" class="user-pane" style="display: none;">
+        <div class="policy-hero-card">
+          <div class="policy-icon">🏛️</div>
+          <div>
+            <h3>مصفوفة الحوكمة والاعتمادات المالية متعددة المستويات (Approval Governance Matrix)</h3>
+            <p>تنظيم صلاحيات التوقيع والصرف وتحديد المسؤوليات المالية لكل مستوى إداري منعاً للتجاوزات وضماناً للنزاهة المالية للشركة.</p>
+          </div>
+        </div>
+
+        <div class="approval-tiers-grid">
+          <!-- Tier 1 -->
+          <div class="approval-tier-card tier-site">
+            <div class="tier-header">
+              <span class="tier-badge">المستوى الأول (الميداني)</span>
+              <h4>مهندس الموقع ومدير المشروع</h4>
+            </div>
+            <div class="tier-limit-box">
+              <span class="limit-lbl">الحد الأقصى للصرف المباشر:</span>
+              <strong class="limit-val">حتى 20,000 ج.م</strong>
+            </div>
+            <ul class="tier-permissions-list">
+              <li>✓ اعتماد مشتريات خامات عاجلة للموقع</li>
+              <li>✓ طلب صرف نثريات ووقود معدات</li>
+              <li>✓ تسجيل نسب إنجاز المقاولين الميدانية</li>
+              <li>✕ لا يحق له اعتماد مستخلصات رئيسية أو خصومات بيع</li>
+            </ul>
+          </div>
+
+          <!-- Tier 2 -->
+          <div class="approval-tier-card tier-finance">
+            <div class="tier-header">
+              <span class="tier-badge">المستوى الثاني (المالي)</span>
+              <h4>المدير المالي ورئيس الحسابات</h4>
+            </div>
+            <div class="tier-limit-box">
+              <span class="limit-lbl">حد الاعتماد والصرف:</span>
+              <strong class="limit-val">من 20,000 إلى 100,000 ج.م</strong>
+            </div>
+            <ul class="tier-permissions-list">
+              <li>✓ اعتماد مستخلصات المقاولين الدورية وخصم تأمين 5%</li>
+              <li>✓ تحصيل وتسليم الشيكات البنكية وإيداعها في الخزينة</li>
+              <li>✓ صرف عمولات شركات البروكرز المعتمدة</li>
+              <li>✓ إعادة جدولة أقساط العملاء في حدود اللائحة</li>
+            </ul>
+          </div>
+
+          <!-- Tier 3 -->
+          <div class="approval-tier-card tier-exec">
+            <div class="tier-header">
+              <span class="tier-badge">المستوى الثالث (السيادي)</span>
+              <h4>العضو المنتدب والمدير العام</h4>
+            </div>
+            <div class="tier-limit-box">
+              <span class="limit-lbl">صلاحية الصرف والقرارات:</span>
+              <strong class="limit-val">أكثر من 100,000 ج.م (مفتوح)</strong>
+            </div>
+            <ul class="tier-permissions-list">
+              <li>✓ اعتماد أوامر الصرف الكبرى وتغذية الخزائن الرئيسية</li>
+              <li>✓ اعتماد التنازلات ونقل الملكية وإلغاء التعاقدات</li>
+              <li>✓ منح نسب خصم استثنائية فوق 5% في عقود البيع</li>
+              <li>✓ توقيع عقود مقاولات الأعمال المتكاملة وتحديد خطط السداد</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Edit User Modal (Crystal Glassmorphism) -->
+    <div id="edit-user-modal" class="modal-backdrop-luxury" style="display: none;">
+      <div class="modal-window-luxury">
+        <div class="modal-header-luxury">
+          <div class="modal-title-wrap">
+            <div class="modal-avatar-circle">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+            </div>
+            <div>
+              <h3>تعديل بيانات المستخدم</h3>
+              <p>تحديث الاسم أو الدور أو إعادة تعيين كلمة المرور</p>
+            </div>
+          </div>
+          <button type="button" class="modal-close-x" id="edit-modal-x-btn">&times;</button>
+        </div>
+
+        <form id="edit-user-form" class="modal-body-form">
+          <input type="hidden" id="edit-user-id" />
+
+          <div class="form-field-box">
+            <label for="edit-user-name">الاسم الكامل</label>
+            <input type="text" id="edit-user-name" required />
+          </div>
+
+          <div class="form-field-box">
+            <label for="edit-user-email">البريد الإلكتروني</label>
+            <input type="email" id="edit-user-email" required />
+          </div>
+
+          <div class="form-field-box">
+            <label for="edit-user-role">الصلاحية والدور</label>
+            <select id="edit-user-role" required>
+              <option value="sales">مسؤول مبيعات (Sales)</option>
+              <option value="accountant">محاسب / مسؤول تحصيل (Accountant)</option>
+              <option value="supervisor">مشرف ميداني / مهندس (Supervisor)</option>
+              <option value="admin">مالك / مدير عام (Admin)</option>
+            </select>
+          </div>
+
+          <div class="form-field-box">
+            <label for="edit-user-password">تعيين كلمة سر جديدة (اختياري)</label>
+            <input type="password" id="edit-user-password" placeholder="اتركها فارغة في حال عدم الرغبة بالتغيير" minlength="6" />
+          </div>
+
+          <div id="edit-user-feedback" class="feedback-banner" style="display: none;"></div>
+
+          <div class="modal-actions-bar">
+            <button type="button" id="edit-modal-cancel-btn" class="btn-cancel">إلغاء</button>
+            <button type="submit" id="edit-modal-save-btn" class="btn-save">حفظ التعديلات</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div id="delete-confirm-modal" class="modal-backdrop-luxury" style="display: none;">
+      <div class="modal-window-luxury modal-danger-dialog">
+        <div class="danger-icon-pulse">
+          <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+        </div>
+        <h3>تأكيد حذف المستخدم نهائياً</h3>
+        <p id="modal-text">هل أنت متأكد من حذف هذا الحساب؟ سيتم إلغاء صلاحيات دخوله للنظام فوراً ولا يمكن التراجع عن هذا الإجراء.</p>
+        
+        <div class="modal-actions-bar centered">
+          <button id="modal-cancel-btn" class="btn-cancel">تراجع وإلغاء</button>
+          <button id="modal-confirm-btn" class="btn-confirm-delete">تأكيد الحذف النهائي</button>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</Layout>
+
+<style is:global>
+  * {
+    box-sizing: border-box;
+  }
+
+  /* Auth State */
+  .auth-loading-screen {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    font-family: 'Cairo', system-ui, sans-serif;
+    color: #475569;
+    gap: 1rem;
+    direction: rtl;
+  }
+
+  .auth-spinner {
+    width: 44px;
+    height: 44px;
+    border: 4px solid #e2e8f0;
+    border-top-color: #2563eb;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+
+  /* Main User Page */
+  .user-management-page {
+    direction: rtl;
+    font-family: 'Cairo', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: #f8fafc;
+    min-height: 100vh;
+    padding-bottom: 4rem;
+    color: #0f172a;
+  }
+
+  /* Executive Top Header */
+  .executive-top-header {
+    background: #ffffff;
+    border-bottom: 1px solid #e2e8f0;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.03);
+    position: sticky;
+    top: 0;
+    z-index: 40;
+  }
+
+  .header-inner {
+    max-width: 1550px;
+    margin: 0 auto;
+    padding: 1rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .title-meta {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .meta-icon-badge {
+    width: 46px;
+    height: 46px;
+    border-radius: 14px;
+    background: linear-gradient(135deg, #1e293b, #0f172a);
+    color: #38bdf8;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.15);
+  }
+
+  .title-meta h1 {
+    margin: 0 0 0.15rem 0;
+    font-size: 1.35rem;
+    font-weight: 800;
+    color: #0f172a;
+  }
+
+  .title-meta p {
+    margin: 0;
+    font-size: 0.82rem;
+    color: #64748b;
+  }
+
+  .header-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .btn-action {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.55rem 1.15rem;
+    border-radius: 10px;
+    font-weight: 700;
+    font-size: 0.88rem;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .btn-back {
+    background: #f1f5f9;
+    color: #334155;
+    border: 1px solid #e2e8f0;
+  }
+
+  .btn-back:hover {
+    background: #e2e8f0;
+    color: #0f172a;
+    transform: translateY(-1px);
+  }
+
+  .btn-logout {
+    background: #fee2e2;
+    color: #dc2626;
+  }
+
+  .btn-logout:hover {
+    background: #fecaca;
+    color: #b91c1c;
+  }
+
+  /* Management Container */
+  .management-container {
+    max-width: 1550px;
+    margin: 1.8rem auto 0;
+    padding: 0 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.75rem;
+  }
+
+  /* Metrics Row */
+  .metrics-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.25rem;
+  }
+
+  .stat-glass-card {
+    background: #ffffff;
+    border-radius: 18px;
+    padding: 1.35rem 1.5rem;
+    border: 1px solid #e2e8f0;
+    display: flex;
+    align-items: center;
+    gap: 1.15rem;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.02);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .stat-glass-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 22px rgba(0, 0, 0, 0.05);
+  }
+
+  .stat-icon-pod {
+    width: 52px;
+    height: 52px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .pod-indigo { background: #ede9fe; color: #6366f1; }
+  .pod-emerald { background: #d1fae5; color: #059669; }
+  .pod-amber { background: #fef3c7; color: #d97706; }
+  .pod-blue { background: #dbeafe; color: #2563eb; }
+
+  .stat-details {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .stat-label {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: #64748b;
+  }
+
+  .stat-details h3 {
+    margin: 0.2rem 0;
+    font-size: 1.65rem;
+    font-weight: 900;
+    color: #0f172a;
+    letter-spacing: -0.5px;
+  }
+
+  .stat-footnote {
+    font-size: 0.74rem;
+    color: #94a3b8;
+    font-weight: 600;
+  }
+
+  /* Management Grid: Creation Left, Directory Right */
+  .management-grid {
+    display: grid;
+    grid-template-columns: 420px 1fr;
+    gap: 1.75rem;
+    align-items: start;
+  }
+
+  /* Creation Panel (Left) */
+  .panel-card-crystal {
+    background: #ffffff;
+    border-radius: 20px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+    padding: 1.8rem;
+    position: sticky;
+    top: 5.5rem;
+  }
+
+  .panel-card-header {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    padding-bottom: 1.25rem;
+    border-bottom: 1px solid #f1f5f9;
+    margin-bottom: 1.4rem;
+  }
+
+  .header-icon-pod {
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+    background: #eff6ff;
+    color: #2563eb;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .panel-card-header h2 {
+    margin: 0 0 0.2rem 0;
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: #0f172a;
+  }
+
+  .panel-card-header p {
+    margin: 0;
+    font-size: 0.78rem;
+    color: #64748b;
+  }
+
+  .crystal-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.15rem;
+  }
+
+  .form-field-box {
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+  }
+
+  .form-field-box label {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: #334155;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+  }
+
+  .required-star {
+    color: #ef4444;
+  }
+
+  .input-icon-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+
+  .input-svg {
+    position: absolute;
+    right: 0.85rem;
+    color: #94a3b8;
+    pointer-events: none;
+    display: flex;
+    align-items: center;
+  }
+
+  .input-icon-wrap input,
+  .input-icon-wrap select,
+  .modal-body-form input,
+  .modal-body-form select {
+    width: 100%;
+    padding: 0.75rem 2.6rem 0.75rem 0.95rem;
+    border: 1.5px solid #cbd5e1;
+    border-radius: 12px;
+    font-size: 0.92rem;
+    font-family: inherit;
+    color: #0f172a;
+    background: #ffffff;
+    transition: all 0.2s ease;
+  }
+
+  .modal-body-form input,
+  .modal-body-form select {
+    padding: 0.75rem 1rem;
+  }
+
+  .input-icon-wrap input:focus,
+  .input-icon-wrap select:focus,
+  .modal-body-form input:focus,
+  .modal-body-form select:focus {
+    outline: none;
+    border-color: #2563eb;
+    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.12);
+    background: #ffffff;
+  }
+
+  .btn-submit-luxury {
+    margin-top: 0.5rem;
+    background: linear-gradient(135deg, #1e293b, #0f172a);
+    color: #ffffff;
+    padding: 0.9rem 1.4rem;
+    border-radius: 12px;
+    font-weight: 800;
+    font-size: 0.95rem;
+    border: none;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    box-shadow: 0 4px 14px rgba(15, 23, 42, 0.18);
+  }
+
+  .btn-submit-luxury:hover {
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(37, 99, 235, 0.25);
+  }
+
+  .feedback-banner {
+    padding: 0.75rem 1rem;
+    border-radius: 10px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    text-align: center;
+  }
+
+  .feedback-banner.success {
+    background: #d1fae5;
+    color: #065f46;
+    border: 1px solid #a7f3d0;
+  }
+
+  .feedback-banner.error {
+    background: #fee2e2;
+    color: #991b1b;
+    border: 1px solid #fecaca;
+  }
+
+  /* Directory Panel (Right) */
+  .directory-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 1.35rem;
+  }
+
+  /* Search & Filter Bar */
+  .directory-header-bar {
+    background: #ffffff;
+    border-radius: 18px;
+    padding: 1rem 1.4rem;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.02);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .search-input-box {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    background: #f8fafc;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 0.55rem 1rem;
+    flex: 1;
+    min-width: 250px;
+    color: #64748b;
+  }
+
+  .search-input-box input {
+    border: none;
+    background: transparent;
+    font-family: inherit;
+    font-size: 0.9rem;
+    color: #0f172a;
+    width: 100%;
+    outline: none;
+  }
+
+  .filter-pills-bar {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+  }
+
+  .filter-pill {
+    background: #f1f5f9;
+    color: #475569;
+    border: none;
+    padding: 0.45rem 0.95rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .filter-pill:hover {
+    background: #e2e8f0;
+    color: #0f172a;
+  }
+
+  .filter-pill.active {
+    background: #0f172a;
+    color: #ffffff;
+    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.2);
+  }
+
+  /* Users Luxury Grid */
+  .users-luxury-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(310px, 1fr));
+    gap: 1.25rem;
+  }
+
+  .user-card-luxury {
+    background: #ffffff;
+    border-radius: 18px;
+    border: 1px solid #e2e8f0;
+    padding: 1.4rem;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.02);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    transition: all 0.25s ease;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .user-card-luxury:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.06);
+    border-color: #cbd5e1;
+  }
+
+  .card-top-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.9rem;
+    margin-bottom: 1.15rem;
+  }
+
+  .user-avatar-pod {
+    width: 48px;
+    height: 48px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.3rem;
+    font-weight: 900;
+    color: #ffffff;
+    flex-shrink: 0;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  }
+
+  .avatar-admin { background: linear-gradient(135deg, #1e293b, #0f172a); }
+  .avatar-sales { background: linear-gradient(135deg, #059669, #10b981); }
+  .avatar-accountant { background: linear-gradient(135deg, #d97706, #f59e0b); }
+  .avatar-supervisor { background: linear-gradient(135deg, #4f46e5, #6366f1); }
+  .avatar-default { background: linear-gradient(135deg, #64748b, #94a3b8); }
+
+  .user-primary-info {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .user-primary-info h3 {
+    margin: 0 0 0.2rem 0;
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: #0f172a;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .user-primary-info p {
+    margin: 0;
+    font-size: 0.78rem;
+    color: #64748b;
+    word-break: break-all;
+  }
+
+  .card-role-section {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.85rem 0;
+    border-top: 1px solid #f1f5f9;
+    border-bottom: 1px solid #f1f5f9;
+    margin-bottom: 1.15rem;
+  }
+
+  .role-indicator-tag {
+    font-size: 0.76rem;
+    font-weight: 800;
+    padding: 0.35rem 0.85rem;
+    border-radius: 20px;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+
+  .tag-admin { background: #ede9fe; color: #6366f1; border: 1px solid #ddd6fe; }
+  .tag-sales { background: #d1fae5; color: #047857; border: 1px solid #a7f3d0; }
+  .tag-accountant { background: #fef3c7; color: #b45309; border: 1px solid #fde68a; }
+  .tag-supervisor { background: #dbeafe; color: #1d4ed8; border: 1px solid #bfdbfe; }
+  .tag-default { background: #f1f5f9; color: #475569; }
+
+  .status-live-dot {
+    font-size: 0.74rem;
+    font-weight: 700;
+    color: #10b981;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+
+  .live-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #10b981;
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2);
+  }
+
+  .card-action-btns {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+  }
+
+  .btn-card-edit,
+  .btn-card-delete {
+    flex: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    padding: 0.55rem;
+    border-radius: 10px;
+    font-size: 0.84rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: none;
+  }
+
+  .btn-card-edit {
+    background: #f8fafc;
+    color: #334155;
+    border: 1px solid #e2e8f0;
+  }
+
+  .btn-card-edit:hover {
+    background: #eff6ff;
+    color: #2563eb;
+    border-color: #bfdbfe;
+  }
+
+  .btn-card-delete {
+    background: #fff1f2;
+    color: #e11d48;
+    border: 1px solid #ffe4e6;
+  }
+
+  .btn-card-delete:hover {
+    background: #ffe4e6;
+    color: #be123c;
+  }
+
+  /* Empty State */
+  .empty-state-luxury {
+    background: #ffffff;
+    border-radius: 18px;
+    padding: 3.5rem 2rem;
+    text-align: center;
+    border: 1px dashed #cbd5e1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .empty-icon-circle {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: #f1f5f9;
+    color: #94a3b8;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 0.5rem;
+  }
+
+  .empty-state-luxury h3 {
+    margin: 0;
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: #1e293b;
+  }
+
+  .empty-state-luxury p {
+    margin: 0;
+    font-size: 0.85rem;
+    color: #64748b;
+  }
+
+  /* Luxury Modal Windows */
+  .modal-backdrop-luxury {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.5);
+    backdrop-filter: blur(8px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    padding: 1.5rem;
+    animation: fadeIn 0.2s ease;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  .modal-window-luxury {
+    background: #ffffff;
+    border-radius: 20px;
+    width: 100%;
+    max-width: 480px;
+    padding: 2rem;
+    box-shadow: 0 20px 45px rgba(0, 0, 0, 0.15);
+    border: 1px solid #e2e8f0;
+    animation: slideUp 0.25s ease;
+  }
+
+  @keyframes slideUp {
+    from { transform: translateY(15px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+
+  .modal-header-luxury {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #f1f5f9;
+  }
+
+  .modal-title-wrap {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .modal-avatar-circle {
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+    background: #eff6ff;
+    color: #2563eb;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .modal-title-wrap h3 {
+    margin: 0 0 0.2rem 0;
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: #0f172a;
+  }
+
+  .modal-title-wrap p {
+    margin: 0;
+    font-size: 0.78rem;
+    color: #64748b;
+  }
+
+  .modal-close-x {
+    background: transparent;
+    border: none;
+    font-size: 1.6rem;
+    color: #94a3b8;
+    cursor: pointer;
+    padding: 0;
+    line-height: 1;
+    transition: color 0.15s ease;
+  }
+
+  .modal-close-x:hover {
+    color: #0f172a;
+  }
+
+  .modal-body-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.15rem;
+  }
+
+  .modal-actions-bar {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-top: 0.5rem;
+  }
+
+  .modal-actions-bar.centered {
+    justify-content: center;
+    margin-top: 1.5rem;
+  }
+
+  .btn-save,
+  .btn-confirm-delete,
+  .btn-cancel {
+    padding: 0.75rem 1.4rem;
+    border-radius: 10px;
+    font-size: 0.92rem;
+    font-weight: 700;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s ease;
+  }
+
+  .btn-save {
+    background: #2563eb;
+    color: #ffffff;
+    flex: 1;
+  }
+
+  .btn-save:hover {
+    background: #1d4ed8;
+  }
+
+  .btn-cancel {
+    background: #f1f5f9;
+    color: #475569;
+    border: 1px solid #cbd5e1;
+  }
+
+  .btn-cancel:hover {
+    background: #e2e8f0;
+    color: #0f172a;
+  }
+
+  .btn-confirm-delete {
+    background: #dc2626;
+    color: #ffffff;
+  }
+
+  .btn-confirm-delete:hover {
+    background: #b91c1c;
+  }
+
+  .modal-danger-dialog {
+    text-align: center;
+  }
+
+  .danger-icon-pulse {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: #fee2e2;
+    color: #dc2626;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.25rem;
+  }
+
+  .modal-danger-dialog h3 {
+    margin: 0 0 0.6rem 0;
+    font-size: 1.3rem;
+    font-weight: 800;
+    color: #0f172a;
+  }
+
+  .modal-danger-dialog p {
+    margin: 0;
+    font-size: 0.88rem;
+    color: #64748b;
+    line-height: 1.6;
+  }
+
+  /* Responsive Adjustments */
+  @media (max-width: 1200px) {
+    .metrics-row {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .management-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .panel-card-crystal {
+      position: static;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .metrics-row {
+      grid-template-columns: 1fr;
+    }
+
+    .header-inner {
+      flex-direction: column;
+      gap: 1rem;
+      align-items: stretch;
+    }
+
+    .directory-header-bar {
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    .filter-pills-bar {
+      overflow-x: auto;
+      padding-bottom: 0.25rem;
+    }
+  }
+
+  /* ========================================================
+     PHASE 4: USER TABS, AUDIT TRAIL & APPROVAL POLICY STYLES
+     ======================================================== */
+  .user-tabs-bar {
+    display: flex;
+    gap: 0.75rem;
+    border-bottom: 2px solid #e2e8f0;
+    margin-bottom: 2rem;
+  }
+
+  .user-tab-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.9rem 1.6rem;
+    background: transparent;
+    border: none;
+    border-bottom: 3px solid transparent;
+    font-family: inherit;
+    font-size: 0.95rem;
+    font-weight: 800;
+    color: #64748b;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin-bottom: -2px;
+  }
+
+  .user-tab-btn:hover {
+    color: #2563eb;
+  }
+
+  .user-tab-btn.active {
+    color: #2563eb;
+    border-bottom-color: #2563eb;
+  }
+
+  .user-tab-btn .tab-badge {
+    background: #e2e8f0;
+    color: #334155;
+    padding: 0.15rem 0.55rem;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 800;
+  }
+
+  /* Audit KPIs Ribbon */
+  .audit-kpis-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 1.25rem;
+    margin-bottom: 1.75rem;
+  }
+
+  .audit-kpi-card {
+    background: #ffffff;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 18px;
+    padding: 1.35rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+  }
+
+  .kpi-icon-box {
+    width: 52px;
+    height: 52px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.6rem;
+    flex-shrink: 0;
+  }
+
+  .kpi-lbl { font-size: 0.8rem; color: #64748b; font-weight: 700; display: block; }
+  .kpi-val { font-size: 1.75rem; font-weight: 900; color: #0f172a; margin: 0.2rem 0; }
+  .kpi-sub { font-size: 0.72rem; color: #94a3b8; }
+
+  /* Audit Filters Bar */
+  .audit-filters-bar {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    padding: 1.25rem 1.5rem;
+    display: flex;
+    gap: 1.25rem;
+    align-items: flex-end;
+    flex-wrap: wrap;
+    margin-bottom: 1.5rem;
+  }
+
+  .filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+  }
+
+  .filter-group label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #64748b;
+  }
+
+  .filter-group select,
+  .filter-group input {
+    padding: 0.55rem 0.85rem;
+    border-radius: 10px;
+    border: 1px solid #cbd5e1;
+    font-family: inherit;
+    font-size: 0.85rem;
+  }
+
+  /* Audit Table */
+  .audit-log-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.86rem;
+  }
+
+  .audit-log-table th {
+    background: #f8fafc;
+    color: #475569;
+    font-weight: 800;
+    padding: 0.85rem 1rem;
+    text-align: right;
+    border-bottom: 2px solid #e2e8f0;
+  }
+
+  .audit-log-table td {
+    padding: 0.85rem 1rem;
+    border-bottom: 1px solid #f1f5f9;
+    vertical-align: middle;
+  }
+
+  .audit-badge {
+    display: inline-block;
+    padding: 0.2rem 0.6rem;
+    border-radius: 12px;
+    font-size: 0.72rem;
+    font-weight: 800;
+  }
+  .audit-badge.badge-CREATE { background: #dcfce7; color: #15803d; border: 1px solid #86efac; }
+  .audit-badge.badge-UPDATE { background: #e0f2fe; color: #0369a1; border: 1px solid #7dd3fc; }
+  .audit-badge.badge-DELETE { background: #fee2e2; color: #b91c1c; border: 1px solid #fca5a5; }
+  .audit-badge.badge-APPROVE { background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; }
+  .audit-badge.badge-TRANSFER { background: #fef3c7; color: #b45309; border: 1px solid #fde68a; }
+  .audit-badge.badge-BOUNCE { background: #ffe4e6; color: #be123c; border: 1px solid #fda4af; }
+  .audit-badge.badge-RESCHEDULE { background: #ede9fe; color: #6d28d9; border: 1px solid #c4b5fd; }
+
+  /* Approval Policy Tiers */
+  .policy-hero-card {
+    background: #ffffff;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 18px;
+    padding: 1.5rem 1.75rem;
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    margin-bottom: 1.75rem;
+  }
+  .policy-icon {
+    font-size: 2.2rem;
+    background: #eff6ff;
+    width: 60px;
+    height: 60px;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .policy-hero-card h3 { margin: 0 0 0.3rem 0; font-size: 1.15rem; font-weight: 900; color: #0f172a; }
+  .policy-hero-card p { margin: 0; font-size: 0.88rem; color: #64748b; line-height: 1.6; }
+
+  .approval-tiers-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 1.5rem;
+  }
+
+  .approval-tier-card {
+    background: #ffffff;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 20px;
+    padding: 1.6rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.02);
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .approval-tier-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+  }
+
+  .tier-site { border-top: 4px solid #10b981; }
+  .tier-finance { border-top: 4px solid #f59e0b; }
+  .tier-exec { border-top: 4px solid #6366f1; }
+
+  .tier-header { display: flex; flex-direction: column; gap: 0.4rem; }
+  .tier-badge {
+    display: inline-block;
+    font-size: 0.72rem;
+    font-weight: 800;
+    padding: 0.2rem 0.6rem;
+    border-radius: 10px;
+    background: #f1f5f9;
+    color: #475569;
+    align-self: flex-start;
+  }
+  .tier-header h4 { margin: 0; font-size: 1.15rem; font-weight: 900; color: #0f172a; }
+
+  .tier-limit-box {
+    background: #f8fafc;
+    border-radius: 12px;
+    padding: 0.85rem 1rem;
+    border: 1px solid #e2e8f0;
+  }
+  .limit-lbl { font-size: 0.75rem; color: #64748b; font-weight: 700; display: block; }
+  .limit-val { font-size: 1.2rem; font-weight: 900; color: #0f172a; display: block; margin-top: 0.2rem; }
+
+  .tier-permissions-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+    font-size: 0.84rem;
+    color: #334155;
+    font-weight: 600;
+  }
+</style>
+
+<script>
+  import { checkAuth, logout, getAuthHeaders } from '../../lib/auth.js';
+
+  let adminUser = null;
+  let allUsers = [];
+  let usersCache = {};
+  let currentFilter = 'all';
+  let searchQuery = '';
+
+  document.addEventListener('DOMContentLoaded', async () => {
+    const authLoadingMessage = document.getElementById('auth-loading-message');
+    const loginContainer = document.getElementById('admin-login-container');
+    const pageContent = document.getElementById('page-content');
+
+    try {
+      const user = await checkAuth();
+      if (authLoadingMessage) authLoadingMessage.style.display = 'none';
+
+      if (user && user.role === 'admin') {
+        adminUser = user;
+        if (pageContent) pageContent.style.display = 'block';
+        if (loginContainer) loginContainer.style.display = 'none';
+
+        const logoutButton = document.getElementById('logout-button');
+        if (logoutButton) {
+          logoutButton.addEventListener('click', async () => { await logout(); });
+        }
+
+        initializePage();
+      } else {
+        if (pageContent) pageContent.style.display = 'none';
+        if (loginContainer) loginContainer.style.display = 'block';
+      }
+    } catch (e) {
+      if (authLoadingMessage) authLoadingMessage.style.display = 'none';
+      if (loginContainer) loginContainer.style.display = 'block';
+    }
+  });
+
+  function updateMetrics(users) {
+    const totalElem = document.getElementById('stat-total-users');
+    const salesElem = document.getElementById('stat-sales-users');
+    const accElem = document.getElementById('stat-accountant-users');
+    const supElem = document.getElementById('stat-supervisor-users');
+
+    if (totalElem) totalElem.textContent = users.length;
+    if (salesElem) salesElem.textContent = users.filter(u => u.role === 'sales').length;
+    if (accElem) accElem.textContent = users.filter(u => u.role === 'accountant').length;
+    if (supElem) supElem.textContent = users.filter(u => u.role === 'supervisor' || u.role === 'engineer').length;
+  }
+
+  function renderFilteredUsers() {
+    const usersList = document.getElementById('users-list');
+    const noUsersMessage = document.getElementById('no-users-message');
+
+    let filtered = allUsers.filter(u => u.id !== adminUser?.userId);
+
+    // Filter by role
+    if (currentFilter !== 'all') {
+      filtered = filtered.filter(u => u.role === currentFilter);
+    }
+
+    // Filter by search query
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase();
+      filtered = filtered.filter(u => 
+        (u.name && u.name.toLowerCase().includes(q)) || 
+        (u.email && u.email.toLowerCase().includes(q))
+      );
+    }
+
+    if (filtered.length === 0) {
+      if (noUsersMessage) {
+        noUsersMessage.style.display = 'flex';
+        noUsersMessage.querySelector('h3').textContent = 'لا توجد نتائج مطابقة للبحث';
+        noUsersMessage.querySelector('p').textContent = 'جرّب تغيير عبارة البحث أو اختيار صلاحية أخرى';
+      }
+      usersList.innerHTML = '';
+      return;
+    }
+
+    if (noUsersMessage) noUsersMessage.style.display = 'none';
+
+    usersList.innerHTML = filtered.map(user => {
+      const initial = user.name ? user.name.charAt(0).toUpperCase() : '?';
+      const role = user.role || 'N/A';
+
+      const roleConfig = {
+        sales: { label: 'مسؤول مبيعات (Sales)', tagClass: 'tag-sales', avatarClass: 'avatar-sales' },
+        accountant: { label: 'محاسب / تحصيل (Accountant)', tagClass: 'tag-accountant', avatarClass: 'avatar-accountant' },
+        supervisor: { label: 'مشرف ميداني / مهندس', tagClass: 'tag-supervisor', avatarClass: 'avatar-supervisor' },
+        admin: { label: 'مالك / مدير عام (Admin)', tagClass: 'tag-admin', avatarClass: 'avatar-admin' },
+      }[role] || { label: role, tagClass: 'tag-default', avatarClass: 'avatar-default' };
+
+      return `
+        <div class="user-card-luxury" data-id="${user.id}">
+          <div class="card-top-row">
+            <div class="user-avatar-pod ${roleConfig.avatarClass}">${initial}</div>
+            <div class="user-primary-info">
+              <h3 title="${user.name}">${user.name}</h3>
+              <p title="${user.email || '-'}">${user.email || '-'}</p>
+            </div>
+          </div>
+
+          <div class="card-role-section">
+            <span class="role-indicator-tag ${roleConfig.tagClass}">
+              ${roleConfig.label}
+            </span>
+            <span class="status-live-dot">
+              <span class="live-dot"></span>
+              نشط
+            </span>
+          </div>
+
+          <div class="card-action-btns">
+            <button type="button" class="btn-card-edit edit-btn" title="تعديل المستخدم">
+              <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+              <span>تعديل</span>
+            </button>
+            <button type="button" class="btn-card-delete delete-btn" title="حذف المستخدم">
+              <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+              <span>حذف</span>
+            </button>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  async function fetchAndRenderUsers() {
+    const noUsersMessage = document.getElementById('no-users-message');
+    try {
+      const response = await fetch('/api/users/list', { headers: getAuthHeaders() });
+      const users = await response.json();
+      allUsers = users;
+      usersCache = {};
+      users.forEach(u => { usersCache[u.id] = u; });
+
+      updateMetrics(users);
+      renderFilteredUsers();
+    } catch (error) {
+      console.error("Error fetching users:", error);
+      if (noUsersMessage) {
+        noUsersMessage.style.display = 'flex';
+        noUsersMessage.querySelector('h3').textContent = 'حدث خطأ أثناء تحميل المستخدمين';
+      }
+    }
+  }
+
+  function initializePage() {
+    const addUserForm = document.getElementById('add-user-form');
+    const addUserBtn = document.getElementById('add-user-btn');
+    const feedbackMessage = document.getElementById('add-user-feedback');
+    const usersList = document.getElementById('users-list');
+    const searchInput = document.getElementById('user-search-input');
+    const filterPills = document.querySelectorAll('.filter-pill');
+
+    const deleteModal = document.getElementById('delete-confirm-modal');
+    const modalConfirmBtn = document.getElementById('modal-confirm-btn');
+    const modalCancelBtn = document.getElementById('modal-cancel-btn');
+    let userIdToDelete = null;
+
+    const editModal = document.getElementById('edit-user-modal');
+    const editForm = document.getElementById('edit-user-form');
+    const editCancelBtn = document.getElementById('edit-modal-cancel-btn');
+    const editXBtn = document.getElementById('edit-modal-x-btn');
+    const editSaveBtn = document.getElementById('edit-modal-save-btn');
+    const editFeedback = document.getElementById('edit-user-feedback');
+
+    // Search Input Listener
+    if (searchInput) {
+      searchInput.addEventListener('input', (e) => {
+        searchQuery = e.target.value;
+        renderFilteredUsers();
+      });
+    }
+
+    // Role Filter Pills
+    filterPills.forEach(pill => {
+      pill.addEventListener('click', () => {
+        filterPills.forEach(p => p.classList.remove('active'));
+        pill.classList.add('active');
+        currentFilter = pill.dataset.role;
+        renderFilteredUsers();
+      });
+    });
+
+    // Add User Form Submission
+    addUserForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      addUserBtn.disabled = true;
+      feedbackMessage.style.display = 'none';
+
+      const name = document.getElementById('user-name').value;
+      const email = document.getElementById('user-email').value;
+      const password = document.getElementById('user-password').value;
+      const role = document.getElementById('user-role').value;
+
+      try {
+        const res = await fetch('/api/users/create', {
+          method: 'POST',
+          headers: getAuthHeaders({ 'Content-Type': 'application/json' }),
+          body: JSON.stringify({ name, email, password, role })
+        });
+        const result = await res.json();
+
+        if (res.ok) {
+          feedbackMessage.textContent = '✓ تم إنشاء وتفعيل حساب المستخدم بنجاح!';
+          feedbackMessage.className = 'feedback-banner success';
+          feedbackMessage.style.display = 'block';
+          addUserForm.reset();
+          fetchAndRenderUsers();
+        } else {
+          feedbackMessage.textContent = result.error || 'فشل إنشاء المستخدم.';
+          feedbackMessage.className = 'feedback-banner error';
+          feedbackMessage.style.display = 'block';
+        }
+      } catch (err) {
+        feedbackMessage.textContent = 'حدث خطأ في الاتصال بالخادم.';
+        feedbackMessage.className = 'feedback-banner error';
+        feedbackMessage.style.display = 'block';
+      } finally {
+        addUserBtn.disabled = false;
+        setTimeout(() => { feedbackMessage.style.display = 'none'; }, 6000);
+      }
+    });
+
+    fetchAndRenderUsers();
+
+    // User Cards Click Delegation (Edit / Delete)
+    usersList.addEventListener('click', (e) => {
+      const deleteBtn = e.target.closest('.delete-btn');
+      if (deleteBtn) {
+        userIdToDelete = deleteBtn.closest('.user-card-luxury').dataset.id;
+        deleteModal.style.display = 'flex';
+      }
+
+      const editBtn = e.target.closest('.edit-btn');
+      if (editBtn) {
+        const userId = editBtn.closest('.user-card-luxury').dataset.id;
+        const userData = usersCache[userId];
+        if (userData) {
+          document.getElementById('edit-user-id').value = userId;
+          document.getElementById('edit-user-name').value = userData.name;
+          document.getElementById('edit-user-email').value = userData.email || '';
+          document.getElementById('edit-user-role').value = userData.role;
+          document.getElementById('edit-user-password').value = '';
+          editFeedback.style.display = 'none';
+          editModal.style.display = 'flex';
+        }
+      }
+    });
+
+    // Modal Close Triggers
+    const closeEdit = () => { editModal.style.display = 'none'; };
+    if (editCancelBtn) editCancelBtn.addEventListener('click', closeEdit);
+    if (editXBtn) editXBtn.addEventListener('click', closeEdit);
+
+    if (modalCancelBtn) {
+      modalCancelBtn.addEventListener('click', () => {
+        deleteModal.style.display = 'none';
+        userIdToDelete = null;
+      });
+    }
+
+    // Confirm Delete
+    modalConfirmBtn.addEventListener('click', async () => {
+      if (!userIdToDelete) return;
+      modalConfirmBtn.disabled = true;
+      modalConfirmBtn.textContent = 'جاري الحذف...';
+
+      try {
+        const res = await fetch('/api/users/delete', {
+          method: 'POST',
+          headers: getAuthHeaders({ 'Content-Type': 'application/json' }),
+          body: JSON.stringify({ id: userIdToDelete })
+        });
+        if (res.ok) {
+          fetchAndRenderUsers();
+        } else {
+          const r = await res.json();
+          alert('فشل الحذف: ' + r.error);
+        }
+      } catch (err) {
+        alert('حدث خطأ: ' + err.message);
+      } finally {
+        deleteModal.style.display = 'none';
+        modalConfirmBtn.disabled = false;
+        modalConfirmBtn.textContent = 'تأكيد الحذف النهائي';
+        userIdToDelete = null;
+      }
+    });
+
+    // Save Edit Form
+    editForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      editSaveBtn.disabled = true;
+      editFeedback.style.display = 'none';
+
+      const id = document.getElementById('edit-user-id').value;
+      const name = document.getElementById('edit-user-name').value;
+      const email = document.getElementById('edit-user-email').value;
+      const role = document.getElementById('edit-user-role').value;
+      const password = document.getElementById('edit-user-password').value;
+
+      const payload = { id, name, email, role };
+      if (password) payload.password = password;
+
+      try {
+        const res = await fetch('/api/users/update', {
+          method: 'POST',
+          headers: getAuthHeaders({ 'Content-Type': 'application/json' }),
+          body: JSON.stringify(payload)
+        });
+
+        if (res.ok) {
+          editFeedback.textContent = '✓ تم حفظ التعديلات بنجاح!';
+          editFeedback.className = 'feedback-banner success';
+          editFeedback.style.display = 'block';
+          fetchAndRenderUsers();
+          setTimeout(() => { editModal.style.display = 'none'; }, 1500);
+        } else {
+          const r = await res.json();
+          throw new Error(r.error || 'فشل التحديث');
+        }
+      } catch (err) {
+        editFeedback.textContent = 'فشل: ' + err.message;
+        editFeedback.className = 'feedback-banner error';
+        editFeedback.style.display = 'block';
+      }
+    });
+
+    // ========================================================
+    // PHASE 4: TABS SWITCHING & AUDIT TRAIL LOGIC
+    // ========================================================
+    const userTabs = [
+      { btn: 'tab-btn-users', pane: 'pane-users' },
+      { btn: 'tab-btn-audit', pane: 'pane-audit' },
+      { btn: 'tab-btn-policy', pane: 'pane-policy' }
+    ];
+
+    function switchUserTab(activeBtnId) {
+      userTabs.forEach(t => {
+        const btn = document.getElementById(t.btn);
+        const pane = document.getElementById(t.pane);
+        if (t.btn === activeBtnId) {
+          btn?.classList.add('active');
+          if (pane) pane.style.display = 'block';
+        } else {
+          btn?.classList.remove('active');
+          if (pane) pane.style.display = 'none';
+        }
+      });
+
+      if (activeBtnId === 'tab-btn-audit') {
+        fetchAndRenderAuditLogs();
+      }
+    }
+
+    userTabs.forEach(t => {
+      document.getElementById(t.btn)?.addEventListener('click', () => switchUserTab(t.btn));
+    });
+
+    // Load Audit Logs
+    async function fetchAndRenderAuditLogs() {
+      const entity = document.getElementById('filter-audit-entity')?.value || 'all';
+      const action = document.getElementById('filter-audit-action')?.value || 'all';
+      const search = document.getElementById('search-audit-input')?.value || '';
+
+      const queryParams = new URLSearchParams({ entity, action, search });
+
+      try {
+        const res = await fetch(`/api/erp/audit?${queryParams.toString()}`, {
+          headers: getAuthHeaders()
+        });
+        const data = await res.json();
+        if (data.success) {
+          renderAuditUI(data);
+        }
+      } catch (err) {
+        console.error('Failed to fetch audit logs:', err);
+      }
+    }
+
+    function renderAuditUI(data) {
+      const logs = data.logs || [];
+      const stats = data.stats || { totalCount: 0, todayCount: 0, financialCount: 0 };
+
+      // Update KPI Ribbon
+      const totalEl = document.getElementById('audit-total-val');
+      const todayEl = document.getElementById('audit-today-val');
+      const finEl = document.getElementById('audit-financial-val');
+      const badgeCountEl = document.getElementById('audit-badge-count');
+
+      if (totalEl) totalEl.textContent = stats.totalCount.toString();
+      if (todayEl) todayEl.textContent = stats.todayCount.toString();
+      if (finEl) finEl.textContent = stats.financialCount.toString();
+      if (badgeCountEl) badgeCountEl.textContent = stats.totalCount.toString();
+
+      // Render Table
+      const tbody = document.getElementById('audit-logs-tbody');
+      const emptyState = document.getElementById('audit-empty-state');
+      if (!tbody) return;
+
+      if (logs.length === 0) {
+        tbody.innerHTML = '';
+        if (emptyState) emptyState.style.display = 'block';
+        return;
+      }
+
+      if (emptyState) emptyState.style.display = 'none';
+
+      tbody.innerHTML = logs.map(log => {
+        const timeStr = new Date(log.timestamp).toLocaleString('ar-EG', {
+          year: 'numeric',
+          month: 'short',
+          day: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit'
+        });
+
+        const actionTranslations = {
+          CREATE: 'إنشاء (+)',
+          UPDATE: 'تعديل (✎)',
+          DELETE: 'حذف (✕)',
+          APPROVE: 'اعتماد (✓)',
+          TRANSFER: 'تنازل (⇆)',
+          BOUNCE: 'ارتداد (⚠️)',
+          RESCHEDULE: 'جدولة (🔄)',
+          LOGIN: 'دخول (🔑)'
+        };
+
+        const actionText = actionTranslations[log.action] || log.action;
+
+        return `
+          <tr>
+            <td style="white-space:nowrap;font-size:0.82rem;color:#475569;">${timeStr}</td>
+            <td>
+              <strong>${log.userName || 'مستخدم النظام'}</strong>
+              <span style="font-size:0.75rem;color:#64748b;display:block;">${log.userRole || '-'}</span>
+            </td>
+            <td>
+              <span class="audit-badge badge-${log.action}">
+                ${actionText}
+              </span>
+            </td>
+            <td>
+              <span style="font-size:0.8rem;background:#f1f5f9;padding:0.2rem 0.55rem;border-radius:6px;font-weight:700;color:#334155;">
+                ${log.entity}
+              </span>
+            </td>
+            <td style="max-width:380px;">
+              <span style="font-weight:600;color:#1e293b;">${log.details || '-'}</span>
+            </td>
+            <td>
+              <code style="font-size:0.78rem;background:#f8fafc;padding:0.2rem 0.45rem;border-radius:4px;border:1px solid #e2e8f0;color:#64748b;">
+                ${log.ipAddress || '127.0.0.1'}
+              </code>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    // Audit Filters Event Listeners
+    document.getElementById('filter-audit-entity')?.addEventListener('change', fetchAndRenderAuditLogs);
+    document.getElementById('filter-audit-action')?.addEventListener('change', fetchAndRenderAuditLogs);
+    document.getElementById('search-audit-input')?.addEventListener('input', fetchAndRenderAuditLogs);
+    document.getElementById('refresh-audit-btn')?.addEventListener('click', fetchAndRenderAuditLogs);
+
+    document.getElementById('export-audit-csv-btn')?.addEventListener('click', () => {
+      const entity = document.getElementById('filter-audit-entity')?.value || 'all';
+      const action = document.getElementById('filter-audit-action')?.value || 'all';
+      const search = document.getElementById('search-audit-input')?.value || '';
+      const queryParams = new URLSearchParams({ entity, action, search, export: 'csv' });
+      window.open(`/api/erp/audit?${queryParams.toString()}`, '_blank');
+    });
+
+    // Handle Direct URL Tab Linking (e.g. /crs/users?tab=audit)
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('tab') === 'audit') {
+      switchUserTab('tab-btn-audit');
+    } else {
+      // Initial audit fetch in background
+      fetchAndRenderAuditLogs();
+    }
+  }
+</script>

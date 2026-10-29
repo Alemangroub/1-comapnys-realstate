@@ -1,0 +1,815 @@
+---
+import Layout from '../layouts/Layout.astro';
+import AdminLogin from '../components/AdminLogin.astro';
+---
+
+<Layout title="لوحة تحكم المحاسب والخزينة المركزية | منظومة التطوير العقاري">
+  <div id="auth-loading-message" class="auth-loading-screen">
+    <div class="auth-spinner"></div>
+    <p>جارٍ التحقق من صلاحيات الحسابات والخزينة...</p>
+  </div>
+
+  <div id="admin-login-container" class="auth-container" style="display: none;">
+    <AdminLogin />
+  </div>
+
+  <main id="main-content" class="portal-main-page" style="display: none;">
+    
+    <!-- Top Executive Header -->
+    <header class="role-top-header">
+      <div class="header-inner">
+        <div class="user-profile-badge">
+          <div class="avatar-pod pod-amber" id="user-avatar-initial">A</div>
+          <div>
+            <span class="role-pill pill-amber">محاسب مالي / مسؤول الخزينة</span>
+            <h1 id="user-display-name" class="user-title">الإدارة المالية والخزينة</h1>
+          </div>
+        </div>
+
+        <div class="header-controls">
+          <button id="refresh-data-btn" class="btn-ctrl btn-refresh" title="تحديث البيانات">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+            <span>تحديث</span>
+          </button>
+          <button id="logout-button" class="btn-ctrl btn-logout">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+            <span>تسجيل الخروج</span>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <div class="content-wrapper">
+      
+      <!-- Metrics Ribbon -->
+      <section class="metrics-ribbon">
+        <div class="metric-card">
+          <div class="metric-icon-box box-amber">
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"></rect><line x1="12" y1="8" x2="12" y2="16"></line><line x1="8" y1="12" x2="16" y2="12"></line></svg>
+          </div>
+          <div class="metric-info">
+            <span class="m-label">إجمالي السيولة بالخزائن</span>
+            <h3 id="stat-total-treasury">0 ج.م</h3>
+            <span class="m-sub">أرصدة نقدية متوفرة</span>
+          </div>
+        </div>
+
+        <div class="metric-card">
+          <div class="metric-icon-box box-emerald">
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+          </div>
+          <div class="metric-info">
+            <span class="m-label">أقساط قيد التحصيل</span>
+            <h3 id="stat-pending-installments">0</h3>
+            <span class="m-sub">مستحقة للدفع هذا الشهر</span>
+          </div>
+        </div>
+
+        <div class="metric-card">
+          <div class="metric-icon-box box-red">
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+          </div>
+          <div class="metric-info">
+            <span class="m-label">أقساط متأخرة</span>
+            <h3 id="stat-late-installments">0</h3>
+            <span class="m-sub">تخضع لغرامات التأخير</span>
+          </div>
+        </div>
+
+        <div class="metric-card">
+          <div class="metric-icon-box box-blue">
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="12" y1="18" x2="12" y2="12"></line><line x1="9" y1="15" x2="15" y2="15"></line></svg>
+          </div>
+          <div class="metric-info">
+            <span class="m-label">طلبات صرف المهندسين</span>
+            <h3 id="stat-pending-payouts">0</h3>
+            <span class="m-sub">بانتظار الصرف النقدي</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Navigation Tabs -->
+      <div class="tabs-nav-bar">
+        <button type="button" class="tab-btn active" data-tab="tab-collection">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg>
+          <span>جدول التحصيل وسداد الأقساط</span>
+        </button>
+        <button type="button" class="tab-btn" data-tab="tab-payouts">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+          <span>اعتماد وصرف طلبات الموقع (المصروفات)</span>
+        </button>
+        <button type="button" class="tab-btn" data-tab="tab-treasury">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path></svg>
+          <span>الخزائن وسجل القيود اليومية (Ledger)</span>
+        </button>
+      </div>
+
+      <!-- Tab 1: Collection & Installments -->
+      <section id="tab-collection" class="tab-panel active">
+        <div class="panel-action-bar">
+          <div>
+            <h2>جدول تحصيل الأقساط</h2>
+            <p>تسجيل سداد الأقساط المستحقة، وإصدار إيصالات استلام نقدية معتمدة للعميل</p>
+          </div>
+          <div class="filter-box">
+            <select id="collection-status-filter">
+              <option value="all">جميع الحالات</option>
+              <option value="pending">قيد التحصيل</option>
+              <option value="late">المتأخرات فقط</option>
+              <option value="paid">المسددة</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="leads-table-container">
+          <table class="luxury-table">
+            <thead>
+              <tr>
+                <th>رقم الوحدة</th>
+                <th>المشروع</th>
+                <th>اسم العميل</th>
+                <th>مبلغ القسط</th>
+                <th>تاريخ الاستحقاق</th>
+                <th>الحالة / الغرامة</th>
+                <th>الإجراء</th>
+              </tr>
+            </thead>
+            <tbody id="installments-tbody">
+              <tr><td colspan="7" class="table-loading">جارٍ جلب جدول الأقساط...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Tab 2: Payouts & Expense Approvals -->
+      <section id="tab-payouts" class="tab-panel">
+        <div class="panel-action-bar">
+          <div>
+            <h2>طلبات الصرف المالي الميدانية</h2>
+            <p>مراجعة طلبات مهندسي الموقع واعتماد صرفها فورياً من خزينة المشروع</p>
+          </div>
+        </div>
+
+        <div class="leads-table-container">
+          <table class="luxury-table">
+            <thead>
+              <tr>
+                <th>المشروع</th>
+                <th>بيان الصرف والجهة</th>
+                <th>المبلغ المطلوب</th>
+                <th>تاريخ التقديم</th>
+                <th>الحالة الحالية</th>
+                <th>إجراء المحاسب</th>
+              </tr>
+            </thead>
+            <tbody id="payouts-tbody">
+              <tr><td colspan="6" class="table-loading">جارٍ جلب طلبات الصرف...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Tab 3: Treasuries & Ledger -->
+      <section id="tab-treasury" class="tab-panel">
+        <div class="panel-action-bar">
+          <div>
+            <h2>أرصدة الخزائن النقدية</h2>
+            <p>السيولة المتوفرة بخزينة كل مشروع والخزينة المركزية</p>
+          </div>
+        </div>
+
+        <div id="treasuries-cards-grid" class="treasuries-grid">
+          <!-- Rendered via JS -->
+        </div>
+
+        <div class="panel-action-bar" style="margin-top: 1.5rem;">
+          <div>
+            <h2>سجل القيود والحركات المالية اليومية</h2>
+            <p>توثيق محاسبي آلي لكل إيراد ومصروف بالمبالغ والأرصدة اللحظية</p>
+          </div>
+        </div>
+
+        <div class="leads-table-container">
+          <table class="luxury-table">
+            <thead>
+              <tr>
+                <th>التاريخ والوقت</th>
+                <th>الخزينة</th>
+                <th>نوع القيد</th>
+                <th>المبلغ</th>
+                <th>البيان والتفاصيل</th>
+              </tr>
+            </thead>
+            <tbody id="transactions-tbody">
+              <tr><td colspan="5" class="table-loading">جارٍ جلب سجل القيود...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+    </div>
+
+    <!-- Modal: Pay Installment -->
+    <div id="pay-modal" class="modal-backdrop" style="display: none;">
+      <div class="modal-card">
+        <div class="modal-card-header">
+          <div>
+            <h3>تحصيل قسط وإصدار إيصال قبض</h3>
+            <p id="modal-inst-subtitle">سيتم ترحيل المبلغ فوراً لحساب خزينة المشروع</p>
+          </div>
+          <button type="button" class="close-modal-x" id="close-pay-x">&times;</button>
+        </div>
+        <form id="pay-form" class="modal-card-body">
+          <input type="hidden" id="pay-inst-id" />
+          <div class="unit-highlight-banner" id="pay-banner">
+            <!-- details -->
+          </div>
+
+          <div class="field-row">
+            <div class="field-wrap">
+              <label>المبلغ المطلوب تحصيله (ج.م) *</label>
+              <input type="number" id="pay-amount-input" required />
+            </div>
+            <div class="field-wrap">
+              <label>غرامة تأخير مستحقة (ج.م)</label>
+              <input type="number" id="pay-penalty-input" value="0" />
+            </div>
+          </div>
+
+          <div class="field-wrap">
+            <label>طريقة الدفع والاستلام *</label>
+            <select id="pay-method-select" required>
+              <option value="cash">نقداً (كاش بالخزينة)</option>
+              <option value="bank_transfer">تحويل بنكي</option>
+              <option value="cheque">شيك مصرفي</option>
+              <option value="fawry">فوري / محافظ إلكترونية</option>
+            </select>
+          </div>
+
+          <div class="field-wrap">
+            <label>رقم مرجع السداد أو رقم الشيك (اختياري)</label>
+            <input type="text" id="pay-ref-input" placeholder="مثال: CHQ-88219" />
+          </div>
+
+          <div class="modal-footer-btns">
+            <button type="button" class="btn-cancel" id="cancel-pay-btn">إلغاء</button>
+            <button type="submit" class="btn-save btn-emerald" id="confirm-pay-btn">تأكيد الاستلام وطباعة الإيصال ✓</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Official Printed Receipt View (Hidden until printable) -->
+    <div id="receipt-modal" class="modal-backdrop" style="display: none;">
+      <div class="modal-card modal-receipt">
+        <div class="receipt-paper" id="receipt-paper">
+          <div class="receipt-header">
+            <div>
+              <h2>إيصال استلام نقدية معتمد</h2>
+              <p>منظومة التطوير العقاري والمقاولات</p>
+            </div>
+            <div class="receipt-badge">إلكتروني معتمد</div>
+          </div>
+          <hr class="receipt-hr" />
+          <div class="receipt-details" id="receipt-body-content">
+            <!-- Rendered receipt -->
+          </div>
+          <div class="receipt-footer">
+            <div>المحاسب المسؤول: <strong id="receipt-accountant-name"></strong></div>
+            <div class="receipt-qr">[QR CODE معتمد]</div>
+          </div>
+        </div>
+        <div class="modal-footer-btns">
+          <button type="button" class="btn-cancel" id="close-receipt-btn">إغلاق</button>
+          <button type="button" class="btn-save" id="print-receipt-btn">طباعة الإيصال (PDF) 🖨️</button>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</Layout>
+
+<style is:global>
+  * { box-sizing: border-box; }
+  .portal-main-page {
+    direction: rtl; font-family: 'Cairo', system-ui, sans-serif; background: #f8fafc;
+    min-height: 100vh; padding-bottom: 4rem; color: #0f172a;
+  }
+  .auth-loading-screen {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    min-height: 100vh; font-family: 'Cairo', sans-serif; color: #475569; gap: 1rem; direction: rtl;
+  }
+  .auth-spinner {
+    width: 44px; height: 44px; border: 4px solid #e2e8f0; border-top-color: #d97706; border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .role-top-header {
+    background: #ffffff; border-bottom: 1px solid #e2e8f0; position: sticky; top: 0; z-index: 40;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.03);
+  }
+  .header-inner {
+    max-width: 1550px; margin: 0 auto; padding: 0.9rem 2rem; display: flex; justify-content: space-between; align-items: center;
+  }
+  .user-profile-badge { display: flex; align-items: center; gap: 0.85rem; }
+  .avatar-pod {
+    width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center;
+    font-size: 1.25rem; font-weight: 900; color: #fff;
+  }
+  .pod-amber { background: linear-gradient(135deg, #d97706, #f59e0b); }
+  .role-pill { font-size: 0.72rem; font-weight: 800; padding: 0.15rem 0.55rem; border-radius: 12px; display: inline-block; }
+  .pill-amber { background: #fef3c7; color: #b45309; }
+  .user-title { margin: 0; font-size: 1.15rem; font-weight: 800; color: #0f172a; }
+
+  .header-controls { display: flex; align-items: center; gap: 0.65rem; }
+  .btn-ctrl {
+    display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.55rem 1rem; border-radius: 10px;
+    font-weight: 700; font-size: 0.86rem; cursor: pointer; text-decoration: none; border: none; transition: all 0.2s;
+  }
+  .btn-refresh { background: #f1f5f9; color: #334155; }
+  .btn-refresh:hover { background: #e2e8f0; }
+  .btn-logout { background: #fee2e2; color: #dc2626; }
+  .btn-logout:hover { background: #fecaca; }
+
+  .content-wrapper { max-width: 1550px; margin: 1.6rem auto 0; padding: 0 2rem; display: flex; flex-direction: column; gap: 1.5rem; }
+
+  .metrics-ribbon { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.25rem; }
+  .metric-card {
+    background: #ffffff; border-radius: 16px; padding: 1.25rem 1.4rem; border: 1px solid #e2e8f0;
+    display: flex; align-items: center; gap: 1rem; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+  }
+  .metric-icon-box {
+    width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .box-amber { background: #fef3c7; color: #d97706; }
+  .box-emerald { background: #d1fae5; color: #059669; }
+  .box-red { background: #fee2e2; color: #dc2626; }
+  .box-blue { background: #dbeafe; color: #2563eb; }
+  .metric-info { display: flex; flex-direction: column; min-width: 0; }
+  .m-label { font-size: 0.78rem; font-weight: 700; color: #64748b; }
+  .metric-info h3 { margin: 0.15rem 0; font-size: 1.55rem; font-weight: 900; color: #0f172a; }
+  .m-sub { font-size: 0.72rem; color: #94a3b8; font-weight: 600; }
+
+  .tabs-nav-bar {
+    display: flex; gap: 0.5rem; background: #ffffff; padding: 0.4rem; border-radius: 14px; border: 1px solid #e2e8f0;
+  }
+  .tab-btn {
+    display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.65rem 1.3rem; border-radius: 10px;
+    border: none; background: transparent; color: #64748b; font-weight: 800; font-size: 0.88rem; cursor: pointer; transition: all 0.2s;
+  }
+  .tab-btn:hover { background: #f8fafc; color: #0f172a; }
+  .tab-btn.active { background: #d97706; color: #ffffff; box-shadow: 0 4px 12px rgba(217, 119, 6, 0.25); }
+
+  .tab-panel { display: none; flex-direction: column; gap: 1.25rem; }
+  .tab-panel.active { display: flex; }
+
+  .panel-action-bar {
+    background: #ffffff; border-radius: 16px; padding: 1.25rem 1.6rem; border: 1px solid #e2e8f0;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .panel-action-bar h2 { margin: 0 0 0.15rem 0; font-size: 1.2rem; font-weight: 800; color: #0f172a; }
+  .panel-action-bar p { margin: 0; font-size: 0.82rem; color: #64748b; }
+
+  .treasuries-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.25rem; }
+  .treasury-card-lux {
+    background: #ffffff; border-radius: 16px; border: 1px solid #e2e8f0; padding: 1.4rem;
+    display: flex; flex-direction: column; gap: 0.75rem; box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+  }
+  .treasury-card-lux h4 { margin: 0; font-size: 1.1rem; font-weight: 800; color: #0f172a; }
+  .treasury-bal { font-size: 1.65rem; font-weight: 900; color: #059669; }
+
+  .leads-table-container {
+    background: #ffffff; border-radius: 16px; border: 1px solid #e2e8f0; overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+  }
+  .luxury-table { width: 100%; border-collapse: collapse; text-align: right; }
+  .luxury-table th { background: #f8fafc; padding: 0.9rem 1.2rem; font-size: 0.82rem; font-weight: 800; color: #475569; border-bottom: 1px solid #e2e8f0; }
+  .luxury-table td { padding: 0.9rem 1.2rem; font-size: 0.88rem; border-bottom: 1px solid #f1f5f9; color: #1e293b; }
+  .table-loading { text-align: center; color: #94a3b8; padding: 2.5rem !important; }
+
+  .btn-table-action {
+    padding: 0.4rem 0.9rem; border-radius: 8px; font-weight: 800; font-size: 0.82rem; cursor: pointer; border: none;
+    transition: all 0.2s;
+  }
+  .btn-pay-now { background: #059669; color: #fff; }
+  .btn-pay-now:hover { background: #047857; }
+  .btn-approve-exp { background: #2563eb; color: #fff; }
+  .btn-approve-exp:hover { background: #1d4ed8; }
+
+  /* Modals */
+  .modal-backdrop {
+    position: fixed; inset: 0; background: rgba(15, 23, 42, 0.55); backdrop-filter: blur(6px);
+    display: flex; align-items: center; justify-content: center; z-index: 100; padding: 1.5rem;
+  }
+  .modal-card {
+    background: #ffffff; border-radius: 20px; width: 100%; max-width: 520px; padding: 1.8rem;
+    box-shadow: 0 20px 45px rgba(0,0,0,0.2); border: 1px solid #e2e8f0;
+  }
+  .modal-card-header {
+    display: flex; justify-content: space-between; align-items: flex-start; padding-bottom: 1rem;
+    border-bottom: 1px solid #f1f5f9; margin-bottom: 1.25rem;
+  }
+  .modal-card-header h3 { margin: 0 0 0.2rem 0; font-size: 1.2rem; font-weight: 800; color: #0f172a; }
+  .modal-card-header p { margin: 0; font-size: 0.78rem; color: #64748b; }
+  .close-modal-x { background: transparent; border: none; font-size: 1.5rem; color: #94a3b8; cursor: pointer; }
+
+  .modal-card-body { display: flex; flex-direction: column; gap: 1rem; }
+  .field-wrap { display: flex; flex-direction: column; gap: 0.35rem; }
+  .field-wrap label { font-size: 0.82rem; font-weight: 700; color: #334155; }
+  .field-wrap input, .field-wrap select {
+    width: 100%; padding: 0.65rem 0.9rem; border: 1.5px solid #cbd5e1; border-radius: 10px;
+    font-size: 0.9rem; font-family: inherit; color: #0f172a;
+  }
+  .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+
+  .unit-highlight-banner {
+    background: #fffbeb; border: 1px solid #fde68a; border-radius: 12px; padding: 0.85rem 1rem;
+    font-size: 0.85rem; color: #92400e; display: flex; justify-content: space-between; align-items: center;
+  }
+
+  .modal-footer-btns { display: flex; justify-content: flex-end; gap: 0.65rem; margin-top: 1rem; }
+  .btn-save, .btn-cancel {
+    padding: 0.65rem 1.3rem; border-radius: 10px; font-weight: 800; font-size: 0.88rem; cursor: pointer; border: none;
+  }
+  .btn-save { background: #d97706; color: #fff; }
+  .btn-save.btn-emerald { background: #059669; }
+  .btn-save.btn-emerald:hover { background: #047857; }
+  .btn-cancel { background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; }
+  .btn-cancel:hover { background: #e2e8f0; }
+
+  /* Receipt Modal */
+  .modal-receipt { max-width: 580px; }
+  .receipt-paper {
+    background: #fff; border: 2px dashed #cbd5e1; border-radius: 14px; padding: 1.8rem;
+    box-shadow: inset 0 0 10px rgba(0,0,0,0.02);
+  }
+  .receipt-header { display: flex; justify-content: space-between; align-items: center; }
+  .receipt-header h2 { margin: 0; font-size: 1.25rem; font-weight: 900; color: #0f172a; }
+  .receipt-badge { background: #d1fae5; color: #065f46; font-size: 0.74rem; font-weight: 800; padding: 0.2rem 0.6rem; border-radius: 20px; }
+  .receipt-hr { border: none; border-top: 1px solid #e2e8f0; margin: 1rem 0; }
+  .receipt-details { display: flex; flex-direction: column; gap: 0.65rem; font-size: 0.9rem; }
+  .receipt-row { display: flex; justify-content: space-between; padding: 0.35rem 0; border-bottom: 1px dotted #e2e8f0; }
+  .receipt-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 1.5rem; font-size: 0.85rem; }
+  .receipt-qr { background: #f1f5f9; border: 1px solid #cbd5e1; padding: 0.4rem 0.8rem; border-radius: 6px; font-weight: 800; font-size: 0.75rem; }
+
+  @media (max-width: 960px) {
+    .metrics-ribbon { grid-template-columns: repeat(2, 1fr); }
+    .header-inner { flex-direction: column; gap: 1rem; align-items: stretch; }
+    .field-row { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 600px) {
+    .metrics-ribbon { grid-template-columns: 1fr; }
+    .tabs-nav-bar { flex-direction: column; }
+  }
+</style>
+
+<script>
+  import { checkAuth, logout } from '../lib/auth.js';
+
+  let currentAccountant = null;
+  let collectionData = null;
+  let treasuryData = null;
+  let expenseData = null;
+
+  document.addEventListener('DOMContentLoaded', async () => {
+    const authLoading = document.getElementById('auth-loading-message');
+    const loginContainer = document.getElementById('admin-login-container');
+    const mainContent = document.getElementById('main-content');
+    const logoutBtn = document.getElementById('logout-button');
+
+    try {
+      const user = await checkAuth();
+      if (authLoading) authLoading.style.display = 'none';
+
+      if (user && (user.role === 'accountant' || user.role === 'admin')) {
+        currentAccountant = user;
+        if (mainContent) mainContent.style.display = 'block';
+
+        const nameElem = document.getElementById('user-display-name');
+        const initialElem = document.getElementById('user-avatar-initial');
+        if (nameElem && user.name) nameElem.textContent = user.name;
+        if (initialElem && user.name) initialElem.textContent = user.name.charAt(0).toUpperCase();
+
+        const recAcc = document.getElementById('receipt-accountant-name');
+        if (recAcc) recAcc.textContent = user.name || 'المحاسب المالي';
+
+        if (logoutBtn) {
+          logoutBtn.addEventListener('click', async () => {
+            await logout();
+            window.location.href = '/crs';
+          });
+        }
+
+        initializeAccountingDashboard();
+      } else {
+        window.location.href = '/crs';
+      }
+    } catch (e) {
+      if (authLoading) authLoading.style.display = 'none';
+      if (loginContainer) loginContainer.style.display = 'block';
+    }
+  });
+
+  async function fetchAllAccountingData() {
+    try {
+      const [colRes, trRes, expRes] = await Promise.all([
+        fetch('/api/erp/collection'),
+        fetch('/api/erp/treasury'),
+        fetch('/api/erp/construction')
+      ]);
+
+      collectionData = await colRes.json();
+      treasuryData = await trRes.json();
+      expenseData = await expRes.json();
+
+      renderMetrics();
+      renderInstallments();
+      renderPayouts();
+      renderTreasuries();
+      renderTransactions();
+    } catch (err) {
+      console.error('Error fetching accounting data:', err);
+    }
+  }
+
+  function renderMetrics() {
+    if (treasuryData && treasuryData.treasuries) {
+      const total = treasuryData.treasuries.reduce((sum, t) => sum + (t.balance || 0), 0);
+      document.getElementById('stat-total-treasury').textContent = total.toLocaleString('ar-EG') + ' ج.م';
+    }
+
+    if (collectionData && collectionData.installments) {
+      const pending = collectionData.installments.filter(i => i.status === 'pending').length;
+      const late = collectionData.installments.filter(i => i.status === 'late').length;
+      document.getElementById('stat-pending-installments').textContent = pending;
+      document.getElementById('stat-late-installments').textContent = late;
+    }
+
+    if (expenseData && expenseData.expenseRequests) {
+      const pendingExp = expenseData.expenseRequests.filter(e => e.status === 'pending').length;
+      document.getElementById('stat-pending-payouts').textContent = pendingExp;
+    }
+  }
+
+  function renderInstallments() {
+    const tbody = document.getElementById('installments-tbody');
+    const filterVal = document.getElementById('collection-status-filter').value;
+    if (!collectionData || !collectionData.installments || collectionData.installments.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="7" class="table-loading">لا توجد أقساط مجدولة حالياً.</td></tr>`;
+      return;
+    }
+
+    let filtered = collectionData.installments;
+    if (filterVal !== 'all') {
+      filtered = filtered.filter(i => i.status === filterVal);
+    }
+
+    tbody.innerHTML = filtered.map(inst => {
+      const isLate = inst.status === 'late';
+      const isPaid = inst.status === 'paid';
+      const statusBadge = isPaid
+        ? '<span class="role-pill" style="background:#d1fae5; color:#047857;">تم السداد ✓</span>'
+        : isLate
+        ? `<span class="role-pill" style="background:#fee2e2; color:#b91c1c;">متأخر (+${inst.penalty || 0} ج.م)</span>`
+        : '<span class="role-pill" style="background:#fef3c7; color:#b45309;">مستحق</span>';
+
+      return `
+        <tr>
+          <td><strong>وحدة ${inst.reservation?.unit?.unitNumber || '-'}</strong></td>
+          <td>${inst.reservation?.project?.projectName || '-'}</td>
+          <td>${inst.reservation?.clientName || '-'}</td>
+          <td style="font-weight:800; color:#0f172a;">${inst.amount?.toLocaleString('ar-EG')} ج.م</td>
+          <td>${new Date(inst.dueDate).toLocaleDateString('ar-EG')}</td>
+          <td>${statusBadge}</td>
+          <td>
+            ${!isPaid ? `
+              <button class="btn-table-action btn-pay-now open-pay-btn" data-inst='${JSON.stringify(inst)}'>
+                تحصيل وإيصال ←
+              </button>
+            ` : `
+              <button class="btn-table-action view-receipt-btn" data-inst='${JSON.stringify(inst)}' style="background:#f1f5f9; color:#475569;">
+                عرض الإيصال 📄
+              </button>
+            `}
+          </td>
+        </tr>
+      `;
+    }).join('');
+
+    // Attach listeners
+    document.querySelectorAll('.open-pay-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const inst = JSON.parse(btn.dataset.inst);
+        openPayModal(inst);
+      });
+    });
+
+    document.querySelectorAll('.view-receipt-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const inst = JSON.parse(btn.dataset.inst);
+        showReceipt(inst);
+      });
+    });
+  }
+
+  function renderPayouts() {
+    const tbody = document.getElementById('payouts-tbody');
+    if (!expenseData || !expenseData.expenseRequests || expenseData.expenseRequests.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="6" class="table-loading">لا توجد طلبات صرف ميدانية حالياً.</td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = expenseData.expenseRequests.map(exp => `
+      <tr>
+        <td><strong>${exp.project?.projectName}</strong></td>
+        <td>${exp.description || 'طلب صرف موقع'}</td>
+        <td style="color:#d97706; font-weight:800;">${exp.amount?.toLocaleString('ar-EG')} ج.م</td>
+        <td>${new Date(exp.createdAt).toLocaleDateString('ar-EG')}</td>
+        <td>
+          ${exp.status === 'pending' ? '<span class="role-pill pill-amber">بانتظار الصرف</span>' : exp.status === 'approved' ? '<span class="role-pill" style="background:#d1fae5; color:#065f46;">تم الصرف من الخزينة ✓</span>' : '<span class="role-pill" style="background:#fee2e2; color:#b91c1c;">مرفوض</span>'}
+        </td>
+        <td>
+          ${exp.status === 'pending' ? `
+            <button class="btn-table-action btn-approve-exp approve-exp-btn" data-id="${exp.id}" data-amount="${exp.amount}" data-proj="${exp.projectId}">
+              اعتماد وصرف الخزينة ✓
+            </button>
+          ` : `
+            <span style="font-size:0.8rem; color:#94a3b8;">مكتمل</span>
+          `}
+        </td>
+      </tr>
+    `).join('');
+
+    document.querySelectorAll('.approve-exp-btn').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        if (!confirm('هل توافق على اعتماد وصرف هذا المبلغ وخصمه آلياً من رصيد الخزينة؟')) return;
+        btn.disabled = true;
+        try {
+          const res = await fetch('/api/erp/construction', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'approve_expense_request', requestId: btn.dataset.id })
+          });
+          if (res.ok) {
+            alert('✓ تم اعتماد وصرف المبلغ من خزينة المشروع بنجاح وتسجيل القيد المحاسبي!');
+            fetchAllAccountingData();
+          } else { alert('فشل الصرف'); }
+        } catch (e) { alert('خطأ في الاتصال'); }
+      });
+    });
+  }
+
+  function renderTreasuries() {
+    const container = document.getElementById('treasuries-cards-grid');
+    if (!treasuryData || !treasuryData.treasuries || treasuryData.treasuries.length === 0) {
+      container.innerHTML = `<div style="grid-column: 1/-1; text-align: center; padding: 2.5rem; background: #fff; border-radius: 16px; color: #94a3b8;">لا توجد حسابات خزينة مسجلة بعد.</div>`;
+      return;
+    }
+
+    container.innerHTML = treasuryData.treasuries.map(t => `
+      <div class="treasury-card-lux">
+        <div style="font-size:0.75rem; color:#64748b; font-weight:800;">${t.project ? t.project.projectName : 'الخزينة المركزية'}</div>
+        <h4>${t.name}</h4>
+        <div class="treasury-bal">${(t.balance || 0).toLocaleString('ar-EG')} ج.م</div>
+        <div style="font-size:0.75rem; color:#94a3b8;">حساب نقدي نشط</div>
+      </div>
+    `).join('');
+  }
+
+  function renderTransactions() {
+    const tbody = document.getElementById('transactions-tbody');
+    if (!treasuryData || !treasuryData.recentTransactions || treasuryData.recentTransactions.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="5" class="table-loading">لا توجد حركات مالية مسجلة بعد.</td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = treasuryData.recentTransactions.map(tr => {
+      const isIncome = tr.type === 'income';
+      return `
+        <tr>
+          <td>${new Date(tr.createdAt).toLocaleString('ar-EG')}</td>
+          <td>${tr.treasury?.name || 'الخزينة'}</td>
+          <td>
+            <span class="role-pill" style="${isIncome ? 'background:#d1fae5; color:#047857;' : 'background:#fee2e2; color:#b91c1c;'}">
+              ${isIncome ? 'إيراد وارد +' : 'مصروف منصرف -'}
+            </span>
+          </td>
+          <td style="font-weight:900; color: ${isIncome ? '#059669' : '#dc2626'};">
+            ${isIncome ? '+' : '-'}${tr.amount?.toLocaleString('ar-EG')} ج.م
+          </td>
+          <td>${tr.description || '-'}</td>
+        </tr>
+      `;
+    }).join('');
+  }
+
+  function openPayModal(inst) {
+    const modal = document.getElementById('pay-modal');
+    document.getElementById('pay-inst-id').value = inst.id;
+    document.getElementById('pay-amount-input').value = inst.amount;
+    document.getElementById('pay-penalty-input').value = inst.penalty || 0;
+
+    const banner = document.getElementById('pay-banner');
+    banner.innerHTML = `
+      <div><strong>عميل: ${inst.reservation?.clientName}</strong> · وحدة ${inst.reservation?.unit?.unitNumber}</div>
+      <div>مستحق: <strong>${inst.amount?.toLocaleString('ar-EG')} ج.م</strong></div>
+    `;
+
+    modal.style.display = 'flex';
+  }
+
+  function showReceipt(inst) {
+    const modal = document.getElementById('receipt-modal');
+    const content = document.getElementById('receipt-body-content');
+    content.innerHTML = `
+      <div class="receipt-row"><span>رقم الإيصال:</span><strong>RCP-${inst.id.slice(0, 8).toUpperCase()}</strong></div>
+      <div class="receipt-row"><span>تاريخ السداد:</span><strong>${inst.paidAt ? new Date(inst.paidAt).toLocaleString('ar-EG') : new Date().toLocaleString('ar-EG')}</strong></div>
+      <div class="receipt-row"><span>اسم العميل:</span><strong>${inst.reservation?.clientName}</strong></div>
+      <div class="receipt-row"><span>المشروع والوحدة:</span><strong>${inst.reservation?.project?.projectName} (وحدة ${inst.reservation?.unit?.unitNumber})</strong></div>
+      <div class="receipt-row"><span>المبلغ المسدد:</span><strong style="color:#059669; font-size:1.15rem;">${inst.amount?.toLocaleString('ar-EG')} ج.م</strong></div>
+      <div class="receipt-row"><span>وسيلة الدفع:</span><strong>${inst.paymentMethod === 'cash' ? 'نقداً بالخزينة' : 'تحويل بنكي / شيك'}</strong></div>
+      <div class="receipt-row"><span>حالة التحصيل:</span><strong style="color:#059669;">مسدد ومودع بالخزينة ✓</strong></div>
+    `;
+    modal.style.display = 'flex';
+  }
+
+  function initializeAccountingDashboard() {
+    fetchAllAccountingData();
+
+    // Tab switcher
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById(btn.dataset.tab)?.classList.add('active');
+      });
+    });
+
+    // Refresh
+    document.getElementById('refresh-data-btn')?.addEventListener('click', () => {
+      fetchAllAccountingData();
+    });
+
+    // Collection filter
+    document.getElementById('collection-status-filter')?.addEventListener('change', () => {
+      renderInstallments();
+    });
+
+    // Pay Modal
+    const payModal = document.getElementById('pay-modal');
+    document.getElementById('close-pay-x')?.addEventListener('click', () => { payModal.style.display = 'none'; });
+    document.getElementById('cancel-pay-btn')?.addEventListener('click', () => { payModal.style.display = 'none'; });
+
+    // Pay Form Submit
+    document.getElementById('pay-form')?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const confirmBtn = document.getElementById('confirm-pay-btn');
+      confirmBtn.disabled = true;
+
+      const instId = document.getElementById('pay-inst-id').value;
+      const amountPaid = parseFloat(document.getElementById('pay-amount-input').value);
+      const penalty = parseFloat(document.getElementById('pay-penalty-input').value) || 0;
+      const paymentMethod = document.getElementById('pay-method-select').value;
+      const referenceNumber = document.getElementById('pay-ref-input').value;
+
+      try {
+        const res = await fetch('/api/erp/collection', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'record_payment',
+            installmentId: instId,
+            amountPaid,
+            penalty,
+            paymentMethod,
+            referenceNumber
+          })
+        });
+
+        const result = await res.json();
+        if (res.ok && result.success) {
+          payModal.style.display = 'none';
+          document.getElementById('pay-form').reset();
+          fetchAllAccountingData();
+
+          // Show printed receipt preview
+          if (result.installment) {
+            showReceipt(result.installment);
+          }
+        } else {
+          alert('فشل تسجيل السداد: ' + (result.error || 'خطأ'));
+        }
+      } catch (err) { alert('خطأ في الاتصال'); }
+      finally { confirmBtn.disabled = false; }
+    });
+
+    // Receipt Modal Print & Close
+    const recModal = document.getElementById('receipt-modal');
+    document.getElementById('close-receipt-btn')?.addEventListener('click', () => { recModal.style.display = 'none'; });
+    document.getElementById('print-receipt-btn')?.addEventListener('click', () => {
+      window.print();
+    });
+  }
+</script>

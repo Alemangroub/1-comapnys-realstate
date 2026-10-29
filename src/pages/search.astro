@@ -1,0 +1,204 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import achievements from '../data/achievements.json';
+import info from '../data/info.json';
+
+// Hardcoded services data to fix the build error
+const services = [
+  {
+    "slug": "residential-development",
+    "title": "التطوير السكني",
+    "description": "نصمم ونبني مجتمعات سكنية عصرية تجمع بين فخامة التصميم، جودة البناء، وتوفير كافة سبل الراحة والرفاهية للسكان."
+  },
+  {
+    "slug": "commercial-projects",
+    "title": "المشاريع التجارية",
+    "description": "نبتكر وجهات تجارية وإدارية حيوية في مواقع استراتيجية، مصممة لتعزيز نمو الأعمال وتوفير بيئة عمل ملهمة."
+  },
+  {
+    "slug": "project-management",
+    "title": "إدارة المشاريع",
+    "description": "ندير المشاريع العقارية بكفاءة واحترافية، بدءًا من التخطيط والتصميم ومرورًا بالتنفيذ حتى التسليم."
+  },
+  {
+    "slug": "real-estate-investment",
+    "title": "الاستثمار العقاري",
+    "description": "نوفر فرصًا استثمارية واعدة في قطاع العقارات، مع دراسات جدوى دقيقة وتحليلات للسوق لضمان تحقيق أعلى العوائد."
+  }
+];
+
+const query = Astro.url.searchParams.get('q')?.toLowerCase() || '';
+let searchResults = [];
+
+if (query) {
+    // Filter Services
+    const filteredServices = services.filter(
+        (item) =>
+            item.title.toLowerCase().includes(query) ||
+            item.description.toLowerCase().includes(query)
+    ).map(item => ({ ...item, type: 'خدمة', url: `/services/${item.slug}` }));
+
+    // Filter Achievements
+    const filteredAchievements = achievements.filter(
+        (item) =>
+            item.title.toLowerCase().includes(query) ||
+            item.description.toLowerCase().includes(query)
+    ).map(item => ({ ...item, type: 'إنجاز', url: '/#achievements' }));
+
+    // Filter Info Cards
+    const filteredInfo = info.cards.filter(
+        (item) =>
+            item.title.toLowerCase().includes(query) ||
+            item.description.toLowerCase().includes(query) ||
+            (Array.isArray(item.detailedDescription) && item.detailedDescription.some(p => p.toLowerCase().includes(query)))
+    ).map(item => ({ ...item, type: 'معلومة', url: `/about/${item.slug}` }));
+
+    searchResults = [...filteredServices, ...filteredAchievements, ...filteredInfo];
+}
+---
+
+<Layout title={`نتائج البحث عن: ${query}`}>
+    <Header showMenu={true} />
+    <main class="search-results-main">
+        <div class="container">
+            {query ? (
+                <>
+                    <h1 class="search-title">نتائج البحث عن: <span class="query-term">"{query}"</span></h1>
+                    {searchResults.length > 0 ? (
+                        <div class="results-grid">
+                            {searchResults.map(item => (
+                                <a href={item.url} class="result-card">
+                                    <span class="result-type">{item.type}</span>
+                                    <h3 class="result-title">{item.title}</h3>
+                                    <p class="result-description">{item.description}</p>
+                                </a>
+                            ))}
+                        </div>
+                    ) : (
+                        <p class="search-info">لم يتم العثور على نتائج تطابق بحثك. حاول استخدام كلمات أخرى.</p>
+                    )}
+                    <a href="/" class="back-button">العودة إلى الرئيسية</a>
+                </>
+            ) : (
+                <>
+                    <h1 class="search-title">الرجاء إدخال مصطلح للبحث</h1>
+                    <p class="search-info">يبدو أنك وصلت إلى هذه الصفحة بدون تحديد ما تبحث عنه.</p>
+                    <a href="/" class="back-button">العودة إلى الرئيسية</a>
+                </>
+            )}
+        </div>
+    </main>
+    <Footer />
+</Layout>
+
+<style>
+    .search-results-main {
+        padding: 40px 20px;
+        min-height: 70vh;
+        background-color: #f4f7f6;
+        direction: rtl;
+    }
+
+    .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        text-align: center;
+    }
+
+    .search-title {
+        font-family: 'Cairo', sans-serif;
+        font-size: 2.8rem;
+        color: #2c3e50;
+        margin-bottom: 25px;
+    }
+
+    .query-term {
+        color: #3498db;
+        font-weight: 700;
+    }
+
+    .search-info {
+        font-family: 'Almarai', sans-serif;
+        font-size: 1.3rem;
+        color: #555;
+        margin-bottom: 40px;
+    }
+
+    .results-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 25px;
+        margin-bottom: 40px;
+        text-align: right;
+    }
+
+    .result-card {
+        background-color: #fff;
+        border: 1px solid #e0e0e0;
+        border-radius: 12px;
+        padding: 25px;
+        text-decoration: none;
+        color: inherit;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        display: flex;
+        flex-direction: column;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .result-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    }
+    
+    .result-type {
+        position: absolute;
+        top: 15px;
+        left: 15px;
+        background-color: #3498db;
+        color: white;
+        padding: 4px 10px;
+        border-radius: 15px;
+        font-size: 0.8rem;
+        font-weight: 700;
+        font-family: 'Cairo', sans-serif;
+    }
+
+    .result-title {
+        font-family: 'Cairo', sans-serif;
+        font-size: 1.6rem;
+        color: #2c3e50;
+        margin-bottom: 10px;
+        margin-top: 30px; /* Space for the type badge */
+    }
+
+    .result-description {
+        font-family: 'Almarai', sans-serif;
+        font-size: 1rem;
+        color: #555;
+        line-height: 1.7;
+        flex-grow: 1;
+    }
+
+    .back-button {
+        display: inline-block;
+        background-color: #2c3e50;
+        color: white;
+        padding: 12px 30px;
+        border-radius: 25px;
+        text-decoration: none;
+        font-family: 'Cairo', sans-serif;
+        font-weight: 700;
+        font-size: 1.1rem;
+        transition: background-color 0.3s ease, transform 0.3s ease;
+        margin-top: 20px;
+    }
+
+    .back-button:hover {
+        background-color: #34495e;
+        transform: translateY(-2px);
+    }
+</style>

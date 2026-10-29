@@ -1,0 +1,517 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout title="بوابة العميل وسداد الأقساط أونلاين">
+  <main class="client-portal-page">
+    
+    <!-- Top Client Bar -->
+    <header class="portal-header">
+      <div class="header-content">
+        <div class="portal-brand">
+          <div class="brand-crest">🏢</div>
+          <div>
+            <span class="brand-tag">بوابة العملاء الإلكترونية</span>
+            <h1>شركة الإيمان للاستثمار العقاري</h1>
+          </div>
+        </div>
+        <div class="secure-badge">
+          <span>🔒 سداد آمن 100% ومشفر</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Client Login / Search Section -->
+    <section class="portal-body-container">
+      <div id="search-section" class="portal-login-card">
+        <h2>متابعة وسداد أقساط وحدتك السكنية / التجارية</h2>
+        <p class="search-desc">أدخل رقم الهاتف المسجل به التعاقد للاطلاع على كشف حساب الوحدة والأقساط المستحقة والدفع أونلاين فوراً:</p>
+
+        <form id="client-search-form" class="client-search-form">
+          <div class="search-input-wrap">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+            <input type="text" id="client-phone-input" placeholder="أدخل رقم هاتفك (مثال: 01012345678)" required />
+            <button type="submit" class="btn btn-primary" id="search-btn">عرض بيانات الوحدة ↗</button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Result Container (Hidden until phone search) -->
+      <div id="client-data-container" style="display: none;" class="client-dashboard">
+        
+        <!-- Welcome Card -->
+        <div class="client-welcome-card">
+          <div class="welcome-top">
+            <div>
+              <span class="welcome-tag">حساب العميل المتعاقد</span>
+              <h2 id="client-display-name">أهلاً بك</h2>
+              <p id="client-display-phone">رقم الهاتف: --</p>
+            </div>
+            <button id="reset-search-btn" class="btn btn-sm btn-outline">بحث برقم آخر ↩</button>
+          </div>
+        </div>
+
+        <!-- Reservations List -->
+        <div id="reservations-container">
+          <!-- Rendered via JS -->
+        </div>
+
+      </div>
+    </section>
+
+    <!-- Modal: Pay Online Simulator -->
+    <div id="online-pay-modal" class="modal-backdrop" style="display: none;">
+      <div class="modal-card">
+        <div class="modal-header">
+          <div>
+            <h3>بوابة الدفع الإلكتروني المباشر</h3>
+            <p class="modal-sub">سداد فوري وتسميع تلقائي في الخزينة واستلام إيصال الدفع</p>
+          </div>
+          <button class="close-modal-btn" id="close-online-pay-modal">&times;</button>
+        </div>
+
+        <form id="online-pay-form" class="modal-form">
+          <input type="hidden" id="online-inst-id" />
+          
+          <div class="payment-amount-box">
+            <span>المبلغ المطلوب سداده:</span>
+            <strong id="online-pay-amount">0 ج.م</strong>
+          </div>
+
+          <div class="payment-methods-grid">
+            <label class="method-option active">
+              <input type="radio" name="pay-method-choice" value="visa" checked />
+              <div class="method-card">
+                <span class="method-icon">💳</span>
+                <strong>فيزا / ماستركارد</strong>
+                <small>دفع بنكي آمن ومباشر</small>
+              </div>
+            </label>
+
+            <label class="method-option">
+              <input type="radio" name="pay-method-choice" value="vodafone_cash" />
+              <div class="method-card">
+                <span class="method-icon">📱</span>
+                <strong>محفظة إلكترونية</strong>
+                <small>فودافون كاش / إنستاباي</small>
+              </div>
+            </label>
+
+            <label class="method-option">
+              <input type="radio" name="pay-method-choice" value="fawry" />
+              <div class="method-card">
+                <span class="method-icon">🏪</span>
+                <strong>فوري (Fawry)</strong>
+                <small>كود دفع فوري</small>
+              </div>
+            </label>
+          </div>
+
+          <div class="form-group" id="card-inputs-panel">
+            <label>رقم البطاقة (أدخل للتجربة)</label>
+            <input type="text" placeholder="4152 •••• •••• 1234" value="4152 8899 7766 1234" />
+          </div>
+
+          <div class="form-actions">
+            <button type="submit" class="btn btn-success btn-block" id="confirm-online-pay-btn">
+              تأكيد الدفع وسحب الإيصال الإلكتروني 💳
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Modal: Electronic Receipt View -->
+    <div id="receipt-modal" class="modal-backdrop" style="display: none;">
+      <div class="modal-card receipt-card">
+        <div class="receipt-header">
+          <div class="receipt-stamp">معتمد إلكترونياً ✅</div>
+          <h2>إيصال سداد إلكتروني رسمي</h2>
+          <p>شركة الإيمان للمقاولات والاستثمار العقاري</p>
+        </div>
+
+        <div class="receipt-body">
+          <div class="r-row"><span>رقم الإيصال:</span><strong id="rec-number">--</strong></div>
+          <div class="r-row"><span>اسم العميل:</span><strong id="rec-client">--</strong></div>
+          <div class="r-row"><span>المشروع والوحدة:</span><strong id="rec-unit">--</strong></div>
+          <div class="r-row"><span>المبلغ المدفوع:</span><strong id="rec-amount" class="text-success">0 ج.م</strong></div>
+          <div class="r-row"><span>طريقة الدفع:</span><strong id="rec-method">--</strong></div>
+          <div class="r-row"><span>التاريخ والوقت:</span><strong id="rec-date">--</strong></div>
+        </div>
+
+        <div class="receipt-footer">
+          <button class="btn btn-primary" onclick="window.print()">طباعة الإيصال (PDF) 🖨️</button>
+          <button class="btn btn-secondary" id="close-receipt-btn">إغلاق</button>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</Layout>
+
+<script>
+  let currentReservations = [];
+
+  const searchForm = document.getElementById('client-search-form');
+  const searchSec = document.getElementById('search-section');
+  const dataCont = document.getElementById('client-data-container');
+  const resetBtn = document.getElementById('reset-search-btn');
+
+  if (searchForm) {
+    searchForm.onsubmit = async (e) => {
+      e.preventDefault();
+      const phone = document.getElementById('client-phone-input').value;
+      if (!phone) return;
+
+      const btn = document.getElementById('search-btn');
+      btn.textContent = 'جاري البحث...';
+      btn.disabled = true;
+
+      try {
+        const res = await fetch(`/api/erp/client-portal?phone=${encodeURIComponent(phone.trim())}`);
+        const data = await res.json();
+        btn.textContent = 'عرض بيانات الوحدة ↗';
+        btn.disabled = false;
+
+        if (data.success && data.reservations && data.reservations.length > 0) {
+          currentReservations = data.reservations;
+          searchSec.style.display = 'none';
+          dataCont.style.display = 'block';
+          renderClientData(phone);
+        } else {
+          alert('لم يتم العثور على تعاقدات مسجلة بهذا الرقم. يرجى التأكد من الرقم المسجل في العقد.');
+        }
+      } catch (err) {
+        btn.textContent = 'عرض بيانات الوحدة ↗';
+        btn.disabled = false;
+        alert('حدث خطأ في الاتصال');
+      }
+    };
+  }
+
+  if (resetBtn) {
+    resetBtn.onclick = () => {
+      dataCont.style.display = 'none';
+      searchSec.style.display = 'block';
+    };
+  }
+
+  function renderClientData(phone) {
+    const first = currentReservations[0];
+    document.getElementById('client-display-name').textContent = `أهلاً بك، أستاذ / ${first.clientName}`;
+    document.getElementById('client-display-phone').textContent = `رقم الهاتف المسجل: ${phone}`;
+
+    const container = document.getElementById('reservations-container');
+    if (!container) return;
+
+    container.innerHTML = currentReservations.map(res => {
+      const unit = res.unit || {};
+      const proj = res.project || {};
+      const installments = res.scheduledInstallments || [];
+
+      const paidCount = installments.filter(i => i.status === 'paid').length;
+      const totalCount = installments.length;
+      const paidSum = installments.filter(i => i.status === 'paid').reduce((s, i) => s + (i.paidAmount || i.amount), 0);
+      const remainingSum = (res.totalPrice - res.downPayment) - paidSum;
+
+      // Construction Updates
+      const updates = proj.constructionUpdates || [];
+
+      return `
+        <div class="reservation-unit-card">
+          <div class="res-card-header">
+            <div>
+              <span class="unit-pill">وحدة سكنية / تجارية</span>
+              <h3>${proj.projectName} - وحدة رقم (${unit.unitNumber})</h3>
+              <p class="unit-specs">المساحة: ${unit.area} م² | الدور: ${unit.floor} | السعر الإجمالي: ${res.totalPrice.toLocaleString()} ج.م</p>
+            </div>
+            <div class="financial-progress-pill">
+              <span>مسدد: <strong>${paidCount}</strong> من <strong>${totalCount}</strong> أقساط</span>
+            </div>
+          </div>
+
+          <!-- Financial summary row -->
+          <div class="client-kpi-row">
+            <div class="kpi-box">
+              <span>مقدم التعاقد المدفوع</span>
+              <strong class="text-success">${res.downPayment.toLocaleString()} ج.م</strong>
+            </div>
+            <div class="kpi-box">
+              <span>إجمالي الأقساط المسددة</span>
+              <strong class="text-success">${paidSum.toLocaleString()} ج.م</strong>
+            </div>
+            <div class="kpi-box">
+              <span>المتبقي من ثمن الوحدة</span>
+              <strong class="text-warning">${remainingSum.toLocaleString()} ج.م</strong>
+            </div>
+          </div>
+
+          <!-- Installment Schedule for this unit -->
+          <div class="installments-accordion">
+            <h4>جدول مواعيد الأقساط وإمكانية السداد الإلكتروني:</h4>
+            <div class="table-responsive">
+              <table class="erp-table">
+                <thead>
+                  <tr>
+                    <th>القسط</th>
+                    <th>القيمة المستحقة</th>
+                    <th>تاريخ الاستحقاق</th>
+                    <th>الحالة</th>
+                    <th>الإجراء / الدفع أونلاين</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${installments.map(inst => {
+                    const due = new Date(inst.dueDate).toLocaleDateString('ar-EG');
+                    const isPaid = inst.status === 'paid';
+                    return `
+                      <tr>
+                        <td><strong>${inst.title}</strong></td>
+                        <td><strong>${inst.amount.toLocaleString()} ج.م</strong></td>
+                        <td>${due}</td>
+                        <td>
+                          <span class="status-badge ${isPaid ? 'badge-paid' : 'badge-pending'}">
+                            ${isPaid ? 'تم السداد ✅' : 'مستحق للدفع ⏱️'}
+                          </span>
+                        </td>
+                        <td>
+                          ${!isPaid ? `
+                            <button class="btn btn-sm btn-pay-now open-online-modal-btn" data-id="${inst.id}" data-amount="${inst.amount}">
+                              ادفع الآن بالفيزا / فودافون كاش 💳
+                            </button>
+                          ` : `
+                            <span class="text-muted"><small>إيصال رقم: ${inst.receiptNumber || 'نظامي'}</small></span>
+                          `}
+                        </td>
+                      </tr>
+                    `;
+                  }).join('')}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Construction Live updates for this project -->
+          ${updates.length > 0 ? `
+            <div class="construction-updates-section">
+              <h4>📸 تطورات البناء الميدانية في مشروعك (${proj.projectName}):</h4>
+              <div class="updates-cards-row">
+                ${updates.map(up => `
+                  <div class="update-mini-card">
+                    <h5>${up.title}</h5>
+                    <p>${up.description || 'تم إنجاز مرحلة جديدة بنجاح'}</p>
+                    <small class="text-muted">${new Date(up.publishedAt).toLocaleDateString('ar-EG')}</small>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+          ` : ''}
+
+        </div>
+      `;
+    }).join('');
+
+    // Attach click for online payment buttons
+    document.querySelectorAll('.open-online-modal-btn').forEach(btn => {
+      btn.onclick = (e) => {
+        const id = e.currentTarget.getAttribute('data-id');
+        const amt = e.currentTarget.getAttribute('data-amount');
+        document.getElementById('online-inst-id').value = id;
+        document.getElementById('online-pay-amount').textContent = `${Number(amt).toLocaleString()} ج.م`;
+        const modal = document.getElementById('online-pay-modal');
+        if (modal) modal.style.display = 'flex';
+      };
+    });
+  }
+
+  // Modals
+  const onlinePayModal = document.getElementById('online-pay-modal');
+  const closeOnlineBtn = document.getElementById('close-online-pay-modal');
+  if (closeOnlineBtn) closeOnlineBtn.onclick = () => { if (onlinePayModal) onlinePayModal.style.display = 'none'; };
+
+  const receiptModal = document.getElementById('receipt-modal');
+  const closeReceiptBtn = document.getElementById('close-receipt-btn');
+  if (closeReceiptBtn) closeReceiptBtn.onclick = () => { if (receiptModal) receiptModal.style.display = 'none'; };
+
+  // Online Pay Form Submit
+  const onlinePayForm = document.getElementById('online-pay-form');
+  if (onlinePayForm) {
+    onlinePayForm.onsubmit = async (e) => {
+      e.preventDefault();
+      const installmentId = document.getElementById('online-inst-id').value;
+      const methodChoice = document.querySelector('input[name="pay-method-choice"]:checked')?.value || 'visa';
+
+      const btn = document.getElementById('confirm-online-pay-btn');
+      btn.textContent = 'جاري السداد وتأكيد البنك...';
+      btn.disabled = true;
+
+      try {
+        const res = await fetch('/api/erp/client-portal', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'pay_online', installmentId, paymentMethod: methodChoice })
+        });
+        const data = await res.json();
+        btn.textContent = 'تأكيد الدفع وسحب الإيصال الإلكتروني 💳';
+        btn.disabled = false;
+
+        if (data.success && data.receipt) {
+          if (onlinePayModal) onlinePayModal.style.display = 'none';
+
+          // Show Receipt Modal
+          document.getElementById('rec-number').textContent = data.receipt.receiptNumber;
+          document.getElementById('rec-client').textContent = data.receipt.clientName;
+          document.getElementById('rec-unit').textContent = `${data.receipt.projectName} - وحدة ${data.receipt.unitNumber}`;
+          document.getElementById('rec-amount').textContent = `${data.receipt.amount.toLocaleString()} ج.م`;
+          document.getElementById('rec-method').textContent = data.receipt.method;
+          document.getElementById('rec-date').textContent = new Date(data.receipt.date).toLocaleString('ar-EG');
+
+          if (receiptModal) receiptModal.style.display = 'flex';
+
+          // Re-fetch client data
+          const phoneInput = document.getElementById('client-phone-input');
+          if (phoneInput && phoneInput.value) {
+            const refreshRes = await fetch(`/api/erp/client-portal?phone=${encodeURIComponent(phoneInput.value.trim())}`);
+            const refreshData = await refreshRes.json();
+            if (refreshData.success) {
+              currentReservations = refreshData.reservations;
+              renderClientData(phoneInput.value.trim());
+            }
+          }
+        } else {
+          alert(data.error || 'فشلت عملية الدفع');
+        }
+      } catch (err) {
+        btn.textContent = 'تأكيد الدفع وسحب الإيصال الإلكتروني 💳';
+        btn.disabled = false;
+        alert('حدث خطأ في بوابة الدفع');
+      }
+    };
+  }
+</script>
+
+<style>
+  * { box-sizing: border-box; }
+  .client-portal-page {
+    direction: rtl; font-family: 'Cairo', system-ui, sans-serif;
+    background: #f8fafc; min-height: 100vh; padding-bottom: 4rem;
+  }
+
+  .portal-header {
+    background: white; border-bottom: 1px solid #e2e8f0; padding: 1.25rem 2rem;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
+  }
+  .header-content {
+    max-width: 1100px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center;
+  }
+  .portal-brand { display: flex; align-items: center; gap: 1rem; }
+  .brand-crest { font-size: 2.2rem; }
+  .brand-tag { font-size: 0.78rem; font-weight: 800; color: #0284c7; }
+  .portal-brand h1 { margin: 0; font-size: 1.35rem; font-weight: 900; color: #0f172a; }
+  .secure-badge { background: #eff6ff; color: #1e40af; border: 1px solid #bfdbfe; padding: 0.4rem 0.95rem; border-radius: 20px; font-weight: 700; font-size: 0.8rem; }
+
+  .portal-body-container { max-width: 1100px; margin: 3rem auto 0; padding: 0 1.5rem; }
+
+  /* Login / Search Card */
+  .portal-login-card {
+    background: white; border: 1px solid #e2e8f0; border-radius: 24px; padding: 3rem;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.05); text-align: center; max-width: 650px; margin: 0 auto;
+  }
+  .portal-login-card h2 { margin: 0 0 0.85rem 0; font-size: 1.7rem; font-weight: 900; color: #0f172a; }
+  .search-desc { color: #64748b; font-size: 0.95rem; line-height: 1.6; margin-bottom: 2rem; }
+  .search-input-wrap {
+    display: flex; align-items: center; gap: 0.75rem; background: #f8fafc; border: 2px solid #cbd5e1;
+    border-radius: 16px; padding: 0.5rem 1rem; transition: border-color 0.2s;
+  }
+  .search-input-wrap:focus-within { border-color: #0284c7; background: white; }
+  .search-input-wrap input {
+    flex: 1; border: none; background: transparent; font-family: inherit; font-size: 1.05rem; outline: none; text-align: right;
+  }
+
+  /* Client Dashboard */
+  .client-welcome-card {
+    background: linear-gradient(135deg, #0284c7 0%, #1e40af 100%); color: white;
+    border-radius: 20px; padding: 2rem; margin-bottom: 2rem;
+  }
+  .welcome-top { display: flex; justify-content: space-between; align-items: center; }
+  .welcome-tag { font-size: 0.8rem; background: rgba(255,255,255,0.2); padding: 0.25rem 0.75rem; border-radius: 14px; font-weight: 700; }
+  .welcome-top h2 { margin: 0.35rem 0 0.2rem 0; font-size: 1.6rem; font-weight: 900; }
+  .welcome-top p { margin: 0; color: #e0f2fe; font-size: 0.88rem; }
+
+  .reservation-unit-card {
+    background: white; border: 1px solid #e2e8f0; border-radius: 20px; padding: 2rem;
+    box-shadow: 0 4px 18px rgba(0,0,0,0.03); margin-bottom: 2rem;
+  }
+  .res-card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
+  .unit-pill { font-size: 0.75rem; background: #e0f2fe; color: #0284c7; padding: 0.25rem 0.65rem; border-radius: 10px; font-weight: 800; }
+  .res-card-header h3 { margin: 0.35rem 0 0.25rem 0; font-size: 1.35rem; font-weight: 900; }
+  .unit-specs { margin: 0; color: #64748b; font-size: 0.9rem; }
+  .financial-progress-pill { background: #f8fafc; border: 1px solid #e2e8f0; padding: 0.6rem 1.1rem; border-radius: 14px; font-size: 0.88rem; }
+
+  .client-kpi-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 2rem; }
+  .kpi-box { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 16px; padding: 1.25rem; text-align: center; }
+  .kpi-box span { display: block; font-size: 0.82rem; color: #64748b; margin-bottom: 0.35rem; font-weight: 600; }
+  .kpi-box strong { font-size: 1.35rem; font-weight: 900; }
+
+  .installments-accordion h4 { margin: 0 0 1rem 0; font-size: 1.15rem; font-weight: 800; }
+
+  .erp-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+  .erp-table th, .erp-table td { padding: 0.85rem 1rem; text-align: right; border-bottom: 1px solid #f1f5f9; }
+  .erp-table th { background: #f8fafc; color: #475569; font-weight: 700; }
+
+  .status-badge { padding: 0.25rem 0.65rem; border-radius: 20px; font-size: 0.75rem; font-weight: 700; }
+  .badge-paid { background: #dcfce7; color: #15803d; }
+  .badge-pending { background: #fef3c7; color: #b45309; }
+
+  .btn { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.75rem 1.4rem; border-radius: 12px; font-weight: 700; font-size: 0.95rem; cursor: pointer; border: none; text-decoration: none; }
+  .btn-sm { padding: 0.45rem 0.85rem; font-size: 0.85rem; border-radius: 10px; }
+  .btn-primary { background: #0284c7; color: white; }
+  .btn-success { background: #059669; color: white; }
+  .btn-secondary { background: #f1f5f9; color: #475569; }
+  .btn-outline { background: white; color: #0284c7; border: 1px solid #bae6fd; }
+  .btn-pay-now { background: #2563eb; color: white; font-weight: 800; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3); }
+  .btn-pay-now:hover { background: #1d4ed8; }
+  .btn-block { width: 100%; justify-content: center; padding: 1.1rem; font-size: 1.05rem; }
+
+  /* Construction Updates Section */
+  .construction-updates-section { margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid #f1f5f9; }
+  .construction-updates-section h4 { margin: 0 0 1rem 0; font-size: 1.1rem; }
+  .updates-cards-row { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 1rem; }
+  .update-mini-card { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 14px; padding: 1rem; }
+  .update-mini-card h5 { margin: 0 0 0.35rem 0; font-size: 0.95rem; color: #0f172a; }
+  .update-mini-card p { margin: 0 0 0.5rem 0; font-size: 0.82rem; color: #64748b; line-height: 1.4; }
+
+  /* Payment Modal */
+  .modal-backdrop { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(8px); z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 1.5rem; }
+  .modal-card { background: white; border-radius: 24px; width: 100%; max-width: 550px; padding: 2.25rem; box-shadow: 0 25px 60px rgba(0, 0, 0, 0.25); }
+  .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
+  .modal-header h3 { margin: 0; font-size: 1.35rem; font-weight: 900; }
+  .close-modal-btn { background: #f1f5f9; border: none; width: 34px; height: 34px; border-radius: 50%; cursor: pointer; font-size: 1.4rem; }
+
+  .payment-amount-box { background: #eff6ff; border: 1.5px solid #bfdbfe; border-radius: 16px; padding: 1.25rem; text-align: center; margin-bottom: 1.5rem; }
+  .payment-amount-box span { display: block; font-size: 0.85rem; color: #1e40af; font-weight: 700; margin-bottom: 0.25rem; }
+  .payment-amount-box strong { font-size: 2.1rem; color: #1d4ed8; font-weight: 900; }
+
+  .payment-methods-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.75rem; margin-bottom: 1.5rem; }
+  .method-option input { display: none; }
+  .method-card { border: 1.5px solid #e2e8f0; border-radius: 14px; padding: 1rem 0.5rem; text-align: center; cursor: pointer; transition: all 0.2s; display: flex; flex-direction: column; align-items: center; }
+  .method-icon { font-size: 1.5rem; margin-bottom: 0.35rem; }
+  .method-card strong { font-size: 0.85rem; display: block; }
+  .method-card small { font-size: 0.68rem; color: #64748b; }
+  .method-option input:checked + .method-card { border-color: #0284c7; background: #f0f9ff; box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15); }
+
+  /* Receipt Card */
+  .receipt-card { text-align: center; border-top: 6px solid #10b981; }
+  .receipt-stamp { display: inline-block; background: #dcfce7; color: #15803d; padding: 0.35rem 0.95rem; border-radius: 20px; font-weight: 800; font-size: 0.8rem; margin-bottom: 0.75rem; }
+  .receipt-header h2 { margin: 0 0 0.35rem 0; font-size: 1.5rem; font-weight: 900; }
+  .receipt-header p { margin: 0 0 1.5rem 0; color: #64748b; font-size: 0.88rem; }
+  .receipt-body { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 16px; padding: 1.5rem; margin-bottom: 1.5rem; text-align: right; }
+  .r-row { display: flex; justify-content: space-between; padding: 0.5rem 0; border-bottom: 1px dashed #e2e8f0; font-size: 0.9rem; }
+  .r-row:last-child { border-bottom: none; }
+  .receipt-footer { display: flex; justify-content: center; gap: 0.75rem; }
+
+  @media (max-width: 768px) {
+    .client-kpi-row { grid-template-columns: 1fr; }
+    .payment-methods-grid { grid-template-columns: 1fr; }
+  }
+</style>

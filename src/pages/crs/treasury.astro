@@ -1,0 +1,3090 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import AdminLogin from '../../components/AdminLogin.astro';
+---
+
+<Layout title="الخزنة والحسابات (القلب المالي) | منظومة التطوير العقاري ERP">
+  <div class="treasury-app-root">
+    
+    <!-- Auth Loading State -->
+    <div id="auth-loading-message" class="loading-state">
+      <div class="spinner"></div>
+      <p>جارٍ التحقق من صلاحيات الإدارة المالية...</p>
+    </div>
+
+    <!-- Auth Login Container -->
+    <div id="admin-login-container" style="display: none;">
+      <AdminLogin />
+    </div>
+
+    <!-- Main Container -->
+    <main id="main-content" class="erp-container" style="display: none;">
+      
+      <!-- Top Navigation Header -->
+      <header class="erp-topbar">
+        <div class="brand-crumb">
+          <a href="/crs" class="back-link">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+            الرئيسية
+          </a>
+          <span class="sep">/</span>
+          <span class="active-crumb">الخزنة والحسابات (القلب المالي للمنظومة)</span>
+        </div>
+
+        <div class="topbar-actions">
+          <button id="open-manual-tx-btn" class="btn btn-primary">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+            + تسجيل حركة مالية سريعة
+          </button>
+          <button id="open-manual-journal-btn" class="btn btn-journal-action">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="9" y1="3" x2="9" y2="21"></line></svg>
+            + قيد يومية مزدوج
+          </button>
+          <button id="open-new-account-btn" class="btn btn-secondary">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+            + إضافة حساب مالي
+          </button>
+        </div>
+      </header>
+
+      <!-- Subsystem Executive Banner -->
+      <section class="treasury-hero-banner">
+        <div class="hero-text-wrap">
+          <div class="hero-badge-pill">القلب المالي المركزي 💰</div>
+          <h1>إدارة الخزائن، السيولة النقدية، وموافقات الصرف</h1>
+          <p>متابعة الخزينة المركزية وخزائن المشاريع المستقلة، الرقابة على طلبات الصرف من المواقع، وتسجيل الإيرادات والمصروفات اللحظية بدقة متناهية.</p>
+        </div>
+      </section>
+
+      <!-- ========================================================
+           القسم العلوي: بطاقات الأرصدة (الخزنة الرئيسية + خزائن المشاريع)
+           ======================================================== -->
+      <section class="safes-overview-section">
+        <div class="safes-grid-layout">
+          
+          <!-- بطاقة كبيرة لـ (إجمالي رصيد الشركة في الخزنة الرئيسية) -->
+          <div class="main-safe-card" id="main-safe-card-wrap">
+            <div class="main-safe-header">
+              <div class="safe-crest-icon">🏦</div>
+              <div>
+                <span class="safe-badge-pill">الخزينة المركزية</span>
+                <h3 id="main-safe-name">الخزنة الرئيسية للشركة</h3>
+              </div>
+            </div>
+            <div class="main-safe-body">
+              <span class="balance-sub-label">إجمالي السيولة المتاحة:</span>
+              <div class="balance-big-val" id="main-safe-balance">0 ج.م</div>
+              <p class="safe-hint-text">تغذي حسابات المشروعات الاستثمارية ومصروفات الشركة المركزية</p>
+            </div>
+            <div class="main-safe-footer">
+              <span class="safe-status-indicator">
+                <span class="pulse-dot"></span>
+                حساب نشط وجاهز للتحويلات
+              </span>
+            </div>
+          </div>
+
+          <!-- بطاقات خزائن المشاريع الفرعية على حدة -->
+          <div class="project-safes-scroll-wrap" id="project-safes-container">
+            <!-- Dynamically populated project safes cards -->
+          </div>
+
+        </div>
+      </section>
+
+      <!-- ========================================================
+           قسم التبويبات الرئيسية (سجل الحركات + طلبات الصرف)
+           ======================================================== -->
+      <section class="treasury-tabs-section">
+        
+        <div class="treasury-nav-tabs">
+          <button id="tab-btn-tx" class="tab-nav-item active" data-tab="tab-content-tx">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+            <span>تبويب 1: سجل الحركات المالية (Ledger)</span>
+            <span class="tab-counter-badge" id="tx-counter-badge">0</span>
+          </button>
+
+          <button id="tab-btn-approvals" class="tab-nav-item" data-tab="tab-content-approvals">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 14 14"></polyline></svg>
+            <span>تبويب 2: طلبات الصرف المعلقة (موافقات المدير المالي)</span>
+            <span class="tab-counter-badge badge-alert" id="pending-counter-badge">0</span>
+          </button>
+
+          <button id="tab-btn-coa" class="tab-nav-item" data-tab="tab-content-coa">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="6" y1="3" x2="6" y2="15"></line><circle cx="18" cy="6" r="3"></circle><circle cx="6" cy="18" r="3"></circle><path d="M18 9a9 9 0 0 1-9 9"></path></svg>
+            <span>تبويب 3: شجرة الحسابات (COA)</span>
+            <span class="tab-counter-badge" id="coa-counter-badge">0</span>
+          </button>
+
+          <button id="tab-btn-journal" class="tab-nav-item" data-tab="tab-content-journal">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></svg>
+            <span>تبويب 4: دفتر القيود اليومية (General Journal)</span>
+            <span class="tab-counter-badge" id="journal-counter-badge">0</span>
+          </button>
+
+          <button id="tab-btn-forecast" class="tab-nav-item" data-tab="tab-content-forecast">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg>
+            <span>تبويب 5: توقعات التدفق النقدي (Cash Flow)</span>
+            <span class="tab-counter-badge" style="background:#dcfce7;color:#15803d;font-weight:900">6 أشهر</span>
+          </button>
+        </div>
+
+        <!-- ========================================================
+             تبويب 1: سجل الحركات المالية (إيرادات بالأخضر ومصروفات بالأحمر)
+             ======================================================== -->
+        <div id="tab-content-tx" class="tab-pane-content active">
+          
+          <!-- Filters & Action Bar -->
+          <div class="ledger-filters-toolbar">
+            <div class="filter-controls-row">
+              
+              <!-- Filter by Project -->
+              <div class="filter-box">
+                <label>تصفية حسب المشروع:</label>
+                <select id="filter-tx-project">
+                  <option value="all">جميع المشاريع والخزائن</option>
+                </select>
+              </div>
+
+              <!-- Filter by Type -->
+              <div class="filter-box">
+                <label>نوع الحركة:</label>
+                <select id="filter-tx-type">
+                  <option value="all">الكل (إيرادات ومصروفات)</option>
+                  <option value="income">🟢 إيرادات فقط (+)</option>
+                  <option value="expense">🔴 مصروفات فقط (-)</option>
+                </select>
+              </div>
+
+              <!-- Filter by Category -->
+              <div class="filter-box">
+                <label>تصنيف الحركة:</label>
+                <select id="filter-tx-category">
+                  <option value="all">جميع التصنيفات</option>
+                  <option value="capital_deposit">إيداع رأسمال</option>
+                  <option value="down_payment">مقدم حجز</option>
+                  <option value="installment">قسط عميل</option>
+                  <option value="contractor">مستخلص مقاول</option>
+                  <option value="materials">شراء خامات</option>
+                  <option value="sales_commission">عمولة مبيعات</option>
+                  <option value="general_expense">مصروفات إدارية ونثرية</option>
+                </select>
+              </div>
+
+            </div>
+
+            <div class="toolbar-side-action">
+              <button id="open-quick-deposit-btn" class="btn btn-sm btn-income-action">
+                <span>+ إيداع نقدية مباشر</span>
+              </button>
+              <button id="open-quick-expense-btn" class="btn btn-sm btn-expense-action">
+                <span>- صرف نقدية مباشر</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Transactions Table -->
+          <div class="table-card-container">
+            <table class="erp-financial-table">
+              <thead>
+                <tr>
+                  <th>البيان والتفاصيل</th>
+                  <th>نوع الحركة</th>
+                  <th>المبلغ</th>
+                  <th>الخزينة المودع / المسحوب منها</th>
+                  <th>التصنيف</th>
+                  <th>المسجل للحركة</th>
+                  <th>التاريخ والوقت</th>
+                </tr>
+              </thead>
+              <tbody id="transactions-table-body">
+                <!-- Dynamically rendered -->
+              </tbody>
+            </table>
+
+            <div id="tx-empty-state" class="empty-notice-box" style="display: none;">
+              <p>لا توجد حركات مالية مطابقة لشروط البحث.</p>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- ========================================================
+             تبويب 2: طلبات الصرف المعلقة (موافقات المدير المالي)
+             ======================================================== -->
+        <div id="tab-content-approvals" class="tab-pane-content" style="display: none;">
+          
+          <div class="approvals-notice-banner">
+            <div class="banner-icon-box">⚖️</div>
+            <div class="banner-text">
+              <h4>صلاحية الاعتماد المالي والخصم المباشر</h4>
+              <p>عند النقر على <strong>(موافقة وصرف)</strong>، يقوم النظام تلقائياً بتحديث حالة الطلب إلى "معتمد"، وخصم المبلغ فورياً من خزينة المشروع، وإدراج قيد مصروف جديد في سجل الحركات المالية.</p>
+            </div>
+          </div>
+
+          <!-- Expense Requests Table -->
+          <div class="table-card-container">
+            <table class="erp-financial-table">
+              <thead>
+                <tr>
+                  <th>المشروع</th>
+                  <th>القسم الطالب</th>
+                  <th>سبب الصرف / البيان</th>
+                  <th>مقدم الطلب</th>
+                  <th>المبلغ المطلوب</th>
+                  <th>تاريخ الطلب</th>
+                  <th>الحالة</th>
+                  <th>إجراء الاعتماد المالي</th>
+                </tr>
+              </thead>
+              <tbody id="expense-requests-table-body">
+                <!-- Dynamically rendered -->
+              </tbody>
+            </table>
+
+            <div id="requests-empty-state" class="empty-notice-box" style="display: none;">
+              <p>لا توجد طلبات صرف معلقة حالياً. جميع الطلبات تم البت فيها.</p>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- ========================================================
+             تبويب 3: شجرة الحسابات والدليل المحاسبي (Chart of Accounts)
+             ======================================================== -->
+        <div id="tab-content-coa" class="tab-pane-content" style="display: none;">
+          <!-- Financial Categories Summary Strip -->
+          <div class="coa-summary-cards-grid">
+            <div class="coa-stat-card card-asset">
+              <div class="stat-icon">🏛️</div>
+              <div class="stat-info">
+                <span class="stat-label">الأصول (Assets)</span>
+                <span class="stat-value" id="coa-assets-total">0 ج.م</span>
+                <span class="stat-hint">خزائن، بنوك، أوراق قبض، وأقساط مستحقة</span>
+              </div>
+            </div>
+            <div class="coa-stat-card card-liability">
+              <div class="stat-icon">📋</div>
+              <div class="stat-info">
+                <span class="stat-label">الالتزامات (Liabilities)</span>
+                <span class="stat-value" id="coa-liabilities-total">0 ج.م</span>
+                <span class="stat-hint">دفعات مقدمة، تأمينات ضمان أعمال 5%</span>
+              </div>
+            </div>
+            <div class="coa-stat-card card-equity">
+              <div class="stat-icon">💎</div>
+              <div class="stat-info">
+                <span class="stat-label">حقوق الملكية (Equity)</span>
+                <span class="stat-value" id="coa-equity-total">0 ج.م</span>
+                <span class="stat-hint">رأس المال المدفوع والأرباح المرحلة</span>
+              </div>
+            </div>
+            <div class="coa-stat-card card-revenue">
+              <div class="stat-icon">📈</div>
+              <div class="stat-info">
+                <span class="stat-label">إيرادات النشاط (Revenue)</span>
+                <span class="stat-value" id="coa-revenue-total">0 ج.م</span>
+                <span class="stat-hint">مبيعات الوحدات ورسوم التنازل</span>
+              </div>
+            </div>
+            <div class="coa-stat-card card-expense">
+              <div class="stat-icon">📉</div>
+              <div class="stat-info">
+                <span class="stat-label">المصروفات والتكاليف (Expenses)</span>
+                <span class="stat-value" id="coa-expense-total">0 ج.م</span>
+                <span class="stat-hint">مستخلصات المقاولين والخامات والتشغيل</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- COA Toolbar -->
+          <div class="ledger-filters-toolbar">
+            <div class="filter-controls-row">
+              <div class="filter-box">
+                <label>تصفية حسب التصنيف المالي:</label>
+                <select id="filter-coa-type">
+                  <option value="all">جميع الحسابات (شجرة كاملة)</option>
+                  <option value="asset">الأصول (1)</option>
+                  <option value="liability">الالتزامات (2)</option>
+                  <option value="equity">حقوق الملكية (3)</option>
+                  <option value="revenue">الإيرادات (4)</option>
+                  <option value="expense">المصروفات والتكاليف (5)</option>
+                </select>
+              </div>
+
+              <div class="filter-box">
+                <label>بحث برقم الكود أو الاسم:</label>
+                <input type="text" id="search-coa-input" placeholder="مثال: 1101 أو شيكات..." style="padding:0.5rem 0.85rem;border-radius:10px;border:1px solid #cbd5e1;font-size:0.85rem;" />
+              </div>
+            </div>
+
+            <div class="toolbar-side-action">
+              <button id="open-new-account-btn2" class="btn btn-sm btn-primary">
+                + إضافة حساب جديد للشجرة
+              </button>
+            </div>
+          </div>
+
+          <!-- COA Table -->
+          <div class="table-card-container">
+            <table class="erp-financial-table">
+              <thead>
+                <tr>
+                  <th>كود الحساب</th>
+                  <th>اسم الحساب المحاسبي</th>
+                  <th>التصنيف المالي</th>
+                  <th>الحساب الأب</th>
+                  <th>طبيعة الحساب</th>
+                  <th>الرصيد الفعلي المعتمد</th>
+                </tr>
+              </thead>
+              <tbody id="coa-table-body">
+                <!-- Dynamically populated -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- ========================================================
+             تبويب 4: دفتر القيود اليومية (General Journal)
+             ======================================================== -->
+        <div id="tab-content-journal" class="tab-pane-content" style="display: none;">
+          <div class="journal-hero-strip">
+            <div class="hero-strip-text">
+              <h4>دفتر القيود اليومية العامة المزدوجة (Double-Entry Ledger)</h4>
+              <p>تسجيل العمليات المالية بدقة القيود المزدوجة مع فرض التوازن الحسابي التام (إجمالي المدين = إجمالي الدائن).</p>
+            </div>
+            <button id="open-manual-journal-btn2" class="btn btn-primary">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+              + إنشاء قيد محاسبي جديد
+            </button>
+          </div>
+
+          <!-- Journal Filters -->
+          <div class="ledger-filters-toolbar">
+            <div class="filter-controls-row">
+              <div class="filter-box">
+                <label>بحث في القيود (البيان / المرجع):</label>
+                <input type="text" id="search-journal-input" placeholder="بحث بالبيان أو رقم المرجع..." style="padding:0.5rem 0.85rem;border-radius:10px;border:1px solid #cbd5e1;font-size:0.85rem;" />
+              </div>
+            </div>
+          </div>
+
+          <!-- Journal Entries Table -->
+          <div class="table-card-container">
+            <table class="erp-financial-table">
+              <thead>
+                <tr>
+                  <th>رقم القيد</th>
+                  <th>تاريخ القيد</th>
+                  <th>البيان والتفاصيل</th>
+                  <th>المرجع / المستند</th>
+                  <th>إجمالي المدين</th>
+                  <th>إجمالي الدائن</th>
+                  <th>حالة التوازن</th>
+                  <th>تفاصيل الأطراف</th>
+                </tr>
+              </thead>
+              <tbody id="journal-table-body">
+                <!-- Dynamically rendered -->
+              </tbody>
+            </table>
+
+            <div id="journal-empty-state" class="empty-notice-box" style="display: none;">
+              <p>لا توجد قيود يومية مسجلة بعد. يمكنك إنشاء قيدك المحاسبي الأول الآن.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- ========================================================
+             تبويب 5: توقعات التدفق النقدي والسيولة (Cash Flow Forecast)
+             ======================================================== -->
+        <div id="tab-content-forecast" class="tab-pane-content" style="display: none;">
+          <!-- Forecast Top Strip -->
+          <div class="forecast-metrics-strip">
+            <div class="forecast-metric-card metric-current-liquidity">
+              <div class="m-icon">💰</div>
+              <div>
+                <span class="m-label">السيولة النقدية المتوفرة حالياً بالخزائن:</span>
+                <h3 class="m-val" id="forecast-current-liquidity">0 ج.م</h3>
+                <span class="m-sub">جاهزة لتغطية المستحقات الفورية</span>
+              </div>
+            </div>
+
+            <div class="forecast-metric-card metric-projected-inflow">
+              <div class="m-icon">📥</div>
+              <div>
+                <span class="m-label">إجمالي التدفقات المتوقعة (6 أشهر):</span>
+                <h3 class="m-val" id="forecast-total-inflows">0 ج.م</h3>
+                <span class="m-sub">أقساط بيع مستحقة وشيكات قيد التحصيل</span>
+              </div>
+            </div>
+
+            <div class="forecast-metric-card metric-projected-outflow">
+              <div class="m-icon">📤</div>
+              <div>
+                <span class="m-label">إجمالي الالتزامات المتوقعة (6 أشهر):</span>
+                <h3 class="m-val" id="forecast-total-outflows">0 ج.م</h3>
+                <span class="m-sub">مستخلصات مقاولين وتكاليف تطوير</span>
+              </div>
+            </div>
+
+            <div class="forecast-metric-card metric-projected-net">
+              <div class="m-icon">📊</div>
+              <div>
+                <span class="m-label">صافي السيولة التراكمية المتوقعة:</span>
+                <h3 class="m-val" id="forecast-final-liquidity">0 ج.م</h3>
+                <span class="m-sub">الرصيد التقديري في نهاية الشهر السادس</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Forecast Guidance Notice -->
+          <div class="approvals-notice-banner" style="background:#eff6ff;border-color:#bfdbfe;margin-bottom:1.5rem;">
+            <div class="banner-icon-box" style="background:#dbeafe;color:#2563eb;">🔮</div>
+            <div class="banner-text">
+              <h4 style="color:#1e40af;">محرك التنبؤ المالي الذكي (Real Estate Predictive Engine)</h4>
+              <p style="color:#3b82f6;">يقوم النظام بمقارنة تواريخ استحقاق أقساط حجز الوحدات والشيكات البنكية في الخزينة مع تواريخ استحقاق مستخلصات المقاولين المعتمدة، لحساب التدفق النقدي الصافي ومحفظة السيولة لكل شهر مقبل بدقة استباقية.</p>
+            </div>
+          </div>
+
+          <!-- 6-Month Cards Grid -->
+          <div class="forecast-months-grid" id="forecast-months-cards-container">
+            <!-- Dynamically populated cards -->
+          </div>
+        </div>
+
+      </section>
+
+    </main>
+
+    <!-- ========================================================
+         MODAL: تسجيل حركة مالية يدوية (إيداع أو صرف)
+         ======================================================== -->
+    <div id="tx-modal" class="modal-backdrop" style="display: none;">
+      <div class="modal-card">
+        <div class="modal-header">
+          <div class="modal-title-wrap">
+            <div class="pod-icon icon-tx">💵</div>
+            <div>
+              <h3>تسجيل حركة مالية يدوية</h3>
+              <p>إيداع رأسمال أو صرف مباشر مع تحديث رصيد الخزنة فورا</p>
+            </div>
+          </div>
+          <button class="close-modal-btn" id="close-tx-modal">&times;</button>
+        </div>
+
+        <form id="manual-tx-form" class="modal-form-body">
+          <div class="form-group">
+            <label>الخزنة المستهدفة *</label>
+            <select id="modal-treasury-id" required>
+              <!-- Populated dynamically -->
+            </select>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>نوع الحركة *</label>
+              <select id="modal-tx-type" required>
+                <option value="income">🟢 إيداع / إيراد نقدية (+)</option>
+                <option value="expense">🔴 سحب / صرف نقدية (-)</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label>المبلغ (جنيه مصري) *</label>
+              <input type="number" id="modal-tx-amount" min="1" step="any" placeholder="مثال: 50000" required />
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>تصنيف الحركة *</label>
+              <select id="modal-tx-category" required>
+                <option value="capital_deposit">إيداع رأسمال وتغذية</option>
+                <option value="down_payment">مقدم حجز وتعاقد</option>
+                <option value="installment">قسط عميل</option>
+                <option value="contractor">مستخلص مقاول</option>
+                <option value="materials">شراء خامات ومواد</option>
+                <option value="sales_commission">عمولة مبيعات</option>
+                <option value="general_expense">مصروفات نثرية وإدارية</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label>المشروع المرتبط (اختياري)</label>
+              <select id="modal-tx-project">
+                <option value="">-- بدون ارتباط بمشروع --</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>البيان والتفاصيل *</label>
+            <input type="text" id="modal-tx-desc" placeholder="مثال: إيداع دفعة تشغيل نقدية لحساب المشروع" required />
+          </div>
+
+          <div class="modal-form-actions">
+            <button type="submit" class="btn btn-primary" id="save-tx-btn">تأكيد وقيد الحركة</button>
+            <button type="button" class="btn btn-secondary" id="cancel-tx-btn">إلغاء</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- ========================================================
+         MODAL: تأكيد الموافقة أو الرفض لطلب الصرف (بدون window.confirm المزعج)
+         ======================================================== -->
+    <div id="expense-action-modal" class="modal-backdrop" style="display: none;">
+      <div class="modal-card action-confirm-card">
+        <div class="modal-header" id="expense-modal-header">
+          <div class="modal-title-wrap">
+            <div class="pod-icon" id="expense-modal-icon">⚖️</div>
+            <div>
+              <h3 id="expense-modal-title">تأكيد اعتماد وصرف الطلب</h3>
+              <p id="expense-modal-subtitle">الموافقة المالية والخصم المباشر من خزينة المشروع</p>
+            </div>
+          </div>
+          <button class="close-modal-btn" id="close-expense-modal">&times;</button>
+        </div>
+
+        <div class="modal-form-body">
+          <div class="expense-details-box">
+            <div class="detail-row">
+              <span class="detail-lbl">المشروع المستهدف:</span>
+              <strong id="modal-req-project" class="detail-val">-</strong>
+            </div>
+            <div class="detail-row">
+              <span class="detail-lbl">القسم ومقدم الطلب:</span>
+              <span id="modal-req-requester" class="detail-val">-</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-lbl">المبلغ المطلوب صرفه:</span>
+              <strong id="modal-req-amount" class="detail-val amount-highlight">-</strong>
+            </div>
+            <div class="detail-row">
+              <span class="detail-lbl">بيان وسبب الصرف:</span>
+              <span id="modal-req-title" class="detail-val">-</span>
+            </div>
+          </div>
+
+          <div id="expense-modal-notice" class="modal-action-notice notice-approve">
+            <p id="expense-notice-text">💡 <strong>أثر الاعتماد المالي:</strong> سيتم خصم هذا المبلغ فورياً من خزينة المشروع، وتسجيل قيد مصروف رسمي في جدول الحركات المالية وتحديث الأرصدة لحظياً.</p>
+          </div>
+
+          <div class="modal-form-actions">
+            <button type="button" class="btn btn-primary" id="confirm-expense-btn">تأكيد الموافقة والصرف فوراً ✓</button>
+            <button type="button" class="btn btn-secondary" id="cancel-expense-btn">إلغاء وتراجع</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========================================================
+         MODAL: إضافة حساب جديد لشجرة الحسابات (COA)
+         ======================================================== -->
+    <div id="account-modal" class="modal-backdrop" style="display: none;">
+      <div class="modal-card">
+        <div class="modal-header">
+          <div class="modal-title-wrap">
+            <div class="pod-icon" style="background:#f0fdf4;color:#16a34a;">🏛️</div>
+            <div>
+              <h3>إضافة حساب مالي جديد إلى الدليل المحاسبي</h3>
+              <p>توسيع شجرة الحسابات ومراكز التكلفة</p>
+            </div>
+          </div>
+          <button class="close-modal-btn" id="close-account-modal">&times;</button>
+        </div>
+
+        <form id="new-account-form" class="modal-form-body">
+          <div class="form-row">
+            <div class="form-group">
+              <label>كود الحساب (Code) *</label>
+              <input type="text" id="acc-modal-code" placeholder="مثال: 1105" required />
+            </div>
+
+            <div class="form-group">
+              <label>التصنيف المالي *</label>
+              <select id="acc-modal-type" required>
+                <option value="asset">أصول (Assets - 1)</option>
+                <option value="liability">الالتزامات (Liabilities - 2)</option>
+                <option value="equity">حقوق الملكية (Equity - 3)</option>
+                <option value="revenue">الإيرادات (Revenue - 4)</option>
+                <option value="expense">المصروفات والتكاليف (Expenses - 5)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>اسم الحساب المحاسبي بالعربية *</label>
+            <input type="text" id="acc-modal-name" placeholder="مثال: حساب البنك التجاري الدولي CIB" required />
+          </div>
+
+          <div class="form-group">
+            <label>الحساب الأب (المستوى الأعلى - اختياري)</label>
+            <select id="acc-modal-parent">
+              <option value="">-- بدون حساب أب (حساب رئيسي) --</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>الوصف / الملاحظات</label>
+            <input type="text" id="acc-modal-desc" placeholder="وصف استخدامات الحساب ومحدداته" />
+          </div>
+
+          <div class="modal-form-actions">
+            <button type="submit" class="btn btn-primary" id="save-account-btn">حفظ وتثبيت الحساب في الدليل</button>
+            <button type="button" class="btn btn-secondary" id="cancel-account-btn">إلغاء</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- ========================================================
+         MODAL: إنشاء قيد يومية محاسبي مزدوج (Double-Entry Journal)
+         ======================================================== -->
+    <div id="journal-modal" class="modal-backdrop" style="display: none;">
+      <div class="modal-card" style="max-width: 900px; width: 95%;">
+        <div class="modal-header">
+          <div class="modal-title-wrap">
+            <div class="pod-icon" style="background:#eff6ff;color:#2563eb;">⚖️</div>
+            <div>
+              <h3>إنشاء قيد يومية محاسبي مزدوج متزن</h3>
+              <p>تسجيل أطراف القيد مع التحقق التلقائي من توازن المدين والدائن</p>
+            </div>
+          </div>
+          <button class="close-modal-btn" id="close-journal-modal">&times;</button>
+        </div>
+
+        <form id="new-journal-form" class="modal-form-body">
+          <div class="form-row">
+            <div class="form-group" style="flex:1;">
+              <label>تاريخ القيد *</label>
+              <input type="date" id="journal-modal-date" required />
+            </div>
+
+            <div class="form-group" style="flex:1;">
+              <label>المرجع / رقم الإشعار المستندي</label>
+              <input type="text" id="journal-modal-ref" placeholder="مثال: فاتورة-2026/088 أو شيك #55" />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>البيان العام للقيد *</label>
+            <input type="text" id="journal-modal-desc" placeholder="مثال: إثبات استحقاق مستخلص رقم 4 لمشروع الأندلس بعد استقطاع ضمان الأعمال" required />
+          </div>
+
+          <!-- Dynamic Lines Section -->
+          <div class="journal-lines-wrapper">
+            <div class="lines-head-row">
+              <h4>أطراف القيد المحاسبي (المدين والدائن)</h4>
+              <button type="button" id="add-journal-line-btn" class="btn btn-sm btn-secondary">
+                + إضافة طرف قيد جديد
+              </button>
+            </div>
+
+            <div class="journal-lines-table-wrap">
+              <table class="journal-lines-table">
+                <thead>
+                  <tr>
+                    <th style="width: 38%;">الحساب المحاسبي</th>
+                    <th style="width: 20%;">مدين (جنيه)</th>
+                    <th style="width: 20%;">دائن (جنيه)</th>
+                    <th style="width: 17%;">ملاحظة الطرف</th>
+                    <th style="width: 5%;">حذف</th>
+                  </tr>
+                </thead>
+                <tbody id="journal-lines-tbody">
+                  <!-- Populated dynamically via JS -->
+                </tbody>
+                <tfoot>
+                  <tr class="totals-foot-row">
+                    <td><strong>الإجمالي والتوازن:</strong></td>
+                    <td><strong id="journal-total-debit-val">0.00</strong> ج.م</td>
+                    <td><strong id="journal-total-credit-val">0.00</strong> ج.م</td>
+                    <td colspan="2">
+                      <span id="journal-balance-indicator" class="balance-tag unbalanced">⚠️ غير متوازن (0.00)</span>
+                    </td>
+                  </tr>
+                </tfoot>
+              </table>
+            </div>
+          </div>
+
+          <div class="modal-form-actions">
+            <button type="submit" class="btn btn-primary" id="save-journal-btn" disabled>
+              تأكيد وترحيل القيد اليومي ✓
+            </button>
+            <button type="button" class="btn btn-secondary" id="cancel-journal-btn">إلغاء</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Toast Notification Banner -->
+    <div id="treasury-toast" class="treasury-toast" style="display: none;">
+      <span class="toast-icon" id="toast-icon">✅</span>
+      <span class="toast-text" id="toast-text">تمت العملية بنجاح</span>
+    </div>
+
+  </div>
+</Layout>
+
+<style is:global>
+  * {
+    box-sizing: border-box;
+  }
+
+  .treasury-app-root {
+    direction: rtl;
+    font-family: 'Cairo', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background-color: #f8fafc;
+    min-height: 100vh;
+    color: #0f172a;
+    padding-bottom: 4rem;
+  }
+
+  /* Loading State */
+  .loading-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 80vh;
+    gap: 1rem;
+    color: #475569;
+  }
+
+  .spinner {
+    width: 44px;
+    height: 44px;
+    border: 4px solid #e2e8f0;
+    border-top-color: #059669;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+
+  /* Header Topbar */
+  .erp-topbar {
+    background: #ffffff;
+    border-bottom: 1px solid #e2e8f0;
+    padding: 1rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    z-index: 40;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+  }
+
+  .brand-crumb {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    font-size: 0.9rem;
+    font-weight: 700;
+  }
+
+  .back-link {
+    color: #475569;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    transition: color 0.2s;
+  }
+
+  .back-link:hover {
+    color: #059669;
+  }
+
+  .sep { color: #cbd5e1; }
+  .active-crumb { color: #0f172a; font-weight: 800; }
+
+  /* Buttons */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.65rem 1.25rem;
+    border-radius: 10px;
+    font-size: 0.88rem;
+    font-weight: 800;
+    cursor: pointer;
+    border: none;
+    text-decoration: none;
+    font-family: inherit;
+    transition: all 0.2s ease;
+  }
+
+  .btn-primary {
+    background: linear-gradient(135deg, #059669 0%, #047857 100%);
+    color: #ffffff;
+    box-shadow: 0 4px 12px rgba(5, 150, 105, 0.25);
+  }
+
+  .btn-primary:hover {
+    background: linear-gradient(135deg, #047857 0%, #065f46 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(5, 150, 105, 0.35);
+  }
+
+  .btn-secondary {
+    background: #f1f5f9;
+    color: #475569;
+  }
+
+  .btn-sm {
+    padding: 0.45rem 0.85rem;
+    font-size: 0.8rem;
+  }
+
+  .btn-income-action {
+    background: #ecfdf5;
+    color: #059669;
+    border: 1px solid #a7f3d0;
+  }
+  .btn-income-action:hover {
+    background: #d1fae5;
+  }
+
+  .btn-expense-action {
+    background: #fef2f2;
+    color: #dc2626;
+    border: 1px solid #fecaca;
+  }
+  .btn-expense-action:hover {
+    background: #fee2e2;
+  }
+
+  /* Subsystem Hero Banner */
+  .treasury-hero-banner {
+    background: linear-gradient(135deg, #064e3b 0%, #0f172a 100%);
+    color: #ffffff;
+    padding: 2.25rem 2.5rem;
+    border-radius: 0 0 24px 24px;
+    box-shadow: 0 10px 30px rgba(6, 78, 59, 0.15);
+    margin-bottom: 2rem;
+  }
+
+  .hero-badge-pill {
+    display: inline-block;
+    padding: 0.3rem 0.85rem;
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.15);
+    font-size: 0.78rem;
+    font-weight: 800;
+    margin-bottom: 0.75rem;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+  }
+
+  .hero-text-wrap h1 {
+    margin: 0 0 0.5rem 0;
+    font-size: 1.85rem;
+    font-weight: 900;
+  }
+
+  .hero-text-wrap p {
+    margin: 0;
+    font-size: 0.95rem;
+    color: #a7f3d0;
+    line-height: 1.6;
+    max-width: 800px;
+  }
+
+  /* ========================================================
+     القسم العلوي: بطاقات الأرصدة
+     ======================================================== */
+  .safes-overview-section {
+    padding: 0 2rem;
+    margin-bottom: 2.5rem;
+  }
+
+  .safes-grid-layout {
+    display: grid;
+    grid-template-columns: 380px 1fr;
+    gap: 1.5rem;
+    align-items: stretch;
+  }
+
+  /* Main Safe Card (بطاقة الخزنة الرئيسية الكبيرة) */
+  .main-safe-card {
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+    border-radius: 22px;
+    padding: 1.8rem;
+    color: #ffffff;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    box-shadow: 0 12px 30px rgba(15, 23, 42, 0.15);
+    border: 1.5px solid rgba(255, 255, 255, 0.1);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .main-safe-card::before {
+    content: "";
+    position: absolute;
+    top: -50px;
+    left: -50px;
+    width: 150px;
+    height: 150px;
+    background: radial-gradient(circle, rgba(16, 185, 129, 0.25) 0%, transparent 70%);
+  }
+
+  .main-safe-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .safe-crest-icon {
+    width: 52px;
+    height: 52px;
+    border-radius: 16px;
+    background: rgba(16, 185, 129, 0.2);
+    border: 1.5px solid rgba(16, 185, 129, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.6rem;
+  }
+
+  .safe-badge-pill {
+    display: inline-block;
+    padding: 0.2rem 0.65rem;
+    border-radius: 20px;
+    background: rgba(16, 185, 129, 0.25);
+    color: #6ee7b7;
+    font-size: 0.72rem;
+    font-weight: 800;
+  }
+
+  .main-safe-header h3 {
+    margin: 0.25rem 0 0 0;
+    font-size: 1.25rem;
+    font-weight: 900;
+  }
+
+  .balance-sub-label {
+    font-size: 0.8rem;
+    color: #94a3b8;
+    font-weight: 700;
+  }
+
+  .balance-big-val {
+    font-size: 2.2rem;
+    font-weight: 900;
+    color: #34d399;
+    letter-spacing: -0.5px;
+    margin: 0.25rem 0 0.5rem 0;
+  }
+
+  .safe-hint-text {
+    margin: 0;
+    font-size: 0.8rem;
+    color: #94a3b8;
+    line-height: 1.5;
+  }
+
+  .main-safe-footer {
+    margin-top: 1.5rem;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .safe-status-indicator {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.76rem;
+    color: #6ee7b7;
+    font-weight: 700;
+  }
+
+  .pulse-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: #10b981;
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.3);
+  }
+
+  /* Project Safes Cards (بطاقات خزائن المشاريع الفرعية) */
+  .project-safes-scroll-wrap {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.25rem;
+  }
+
+  .project-safe-card {
+    background: #ffffff;
+    border-radius: 20px;
+    padding: 1.5rem;
+    border: 1.5px solid #e2e8f0;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.03);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 1rem;
+    transition: all 0.25s ease;
+  }
+
+  .project-safe-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.06);
+    border-color: #a7f3d0;
+  }
+
+  .proj-safe-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+  }
+
+  .proj-safe-title {
+    margin: 0;
+    font-size: 1.15rem;
+    font-weight: 900;
+    color: #0f172a;
+  }
+
+  .proj-safe-sub {
+    margin: 0.15rem 0 0 0;
+    font-size: 0.78rem;
+    color: #64748b;
+    font-weight: 700;
+  }
+
+  .safe-type-tag {
+    font-size: 0.7rem;
+    font-weight: 800;
+    padding: 0.2rem 0.6rem;
+    border-radius: 12px;
+    background: #ecfdf5;
+    color: #047857;
+    border: 1px solid #a7f3d0;
+  }
+
+  .proj-safe-balance-box {
+    background: #f8fafc;
+    border-radius: 12px;
+    padding: 0.85rem 1rem;
+    border: 1px solid #f1f5f9;
+  }
+
+  .proj-safe-balance-box .lbl {
+    font-size: 0.74rem;
+    color: #64748b;
+    font-weight: 700;
+    display: block;
+  }
+
+  .proj-safe-balance-box .val {
+    font-size: 1.45rem;
+    font-weight: 900;
+    color: #0f172a;
+    display: block;
+    margin-top: 0.2rem;
+  }
+
+  /* Mini Financial Stats Row (إيرادات، مصروفات، صافي) */
+  .proj-mini-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    background: #f8fafc;
+    border-radius: 10px;
+    padding: 0.6rem 0.4rem;
+    text-align: center;
+    border: 1px solid #f1f5f9;
+  }
+
+  .stat-cell {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+  }
+  .stat-cell:not(:last-child) {
+    border-left: 1px solid #e2e8f0;
+  }
+
+  .stat-cell .s-lbl {
+    font-size: 0.68rem;
+    color: #64748b;
+    font-weight: 700;
+  }
+
+  .stat-cell .s-val {
+    font-size: 0.82rem;
+    font-weight: 800;
+  }
+
+  .val-income { color: #16a34a; }
+  .val-expense { color: #dc2626; }
+  .val-profit { color: #2563eb; }
+
+  /* ========================================================
+     قسم التبويبات (Tabs)
+     ======================================================== */
+  .treasury-tabs-section {
+    padding: 0 2rem;
+  }
+
+  .treasury-nav-tabs {
+    display: flex;
+    gap: 0.75rem;
+    border-bottom: 2px solid #e2e8f0;
+    margin-bottom: 1.75rem;
+  }
+
+  .tab-nav-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.65rem;
+    padding: 1rem 1.75rem;
+    background: transparent;
+    border: none;
+    border-bottom: 3px solid transparent;
+    font-family: inherit;
+    font-size: 0.95rem;
+    font-weight: 800;
+    color: #64748b;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin-bottom: -2px;
+  }
+
+  .tab-nav-item:hover {
+    color: #059669;
+  }
+
+  .tab-nav-item.active {
+    color: #059669;
+    border-bottom-color: #059669;
+  }
+
+  .tab-counter-badge {
+    background: #e2e8f0;
+    color: #334155;
+    padding: 0.15rem 0.55rem;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 800;
+  }
+
+  .tab-counter-badge.badge-alert {
+    background: #fef3c7;
+    color: #b45309;
+    border: 1px solid #fde68a;
+  }
+
+  /* Filters Toolbar */
+  .ledger-filters-toolbar {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    padding: 1.25rem 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+  }
+
+  .filter-controls-row {
+    display: flex;
+    gap: 1.25rem;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
+  .filter-box {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+  }
+
+  .filter-box label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #64748b;
+  }
+
+  .filter-box select {
+    padding: 0.45rem 0.85rem;
+    border-radius: 8px;
+    border: 1px solid #cbd5e1;
+    font-family: inherit;
+    font-size: 0.85rem;
+    font-weight: 600;
+    background: #ffffff;
+    color: #0f172a;
+    min-width: 170px;
+  }
+
+  .toolbar-side-action {
+    display: flex;
+    gap: 0.65rem;
+  }
+
+  /* Financial Tables */
+  .table-card-container {
+    background: #ffffff;
+    border-radius: 18px;
+    border: 1px solid #e2e8f0;
+    overflow-x: auto;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.02);
+  }
+
+  .erp-financial-table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: right;
+  }
+
+  .erp-financial-table th {
+    background: #f8fafc;
+    padding: 1rem 1.25rem;
+    font-size: 0.82rem;
+    font-weight: 800;
+    color: #475569;
+    border-bottom: 1px solid #e2e8f0;
+    white-space: nowrap;
+  }
+
+  .erp-financial-table td {
+    padding: 1rem 1.25rem;
+    font-size: 0.88rem;
+    color: #1e293b;
+    border-bottom: 1px solid #f1f5f9;
+    vertical-align: middle;
+  }
+
+  .erp-financial-table tr:hover td {
+    background-color: #fafafa;
+  }
+
+  /* Transaction Badges */
+  .tx-type-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.25rem 0.65rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 800;
+  }
+
+  .tx-income {
+    background: #dcfce7;
+    color: #15803d;
+    border: 1px solid #bbf7d0;
+  }
+
+  .tx-expense {
+    background: #fee2e2;
+    color: #b91c1c;
+    border: 1px solid #fecaca;
+  }
+
+  .tx-amount-str {
+    font-size: 1.05rem;
+    font-weight: 900;
+    letter-spacing: -0.3px;
+  }
+
+  .tx-amount-income {
+    color: #16a34a;
+  }
+
+  .tx-amount-expense {
+    color: #dc2626;
+  }
+
+  .category-pill {
+    display: inline-block;
+    padding: 0.2rem 0.6rem;
+    border-radius: 6px;
+    font-size: 0.74rem;
+    font-weight: 700;
+    background: #f1f5f9;
+    color: #475569;
+  }
+
+  /* Approvals Tab Notice Banner */
+  .approvals-notice-banner {
+    background: #eff6ff;
+    border: 1px solid #bfdbfe;
+    border-radius: 14px;
+    padding: 1.25rem 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .banner-icon-box {
+    width: 46px;
+    height: 46px;
+    border-radius: 12px;
+    background: #dbeafe;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    flex-shrink: 0;
+  }
+
+  .banner-text h4 {
+    margin: 0 0 0.25rem 0;
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: #1e40af;
+  }
+
+  .banner-text p {
+    margin: 0;
+    font-size: 0.88rem;
+    color: #3b82f6;
+    line-height: 1.5;
+  }
+
+  /* Request Status Pills */
+  .req-status-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.3rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.76rem;
+    font-weight: 800;
+  }
+
+  .req-pending {
+    background: #fef3c7;
+    color: #b45309;
+    border: 1px solid #fde68a;
+  }
+
+  .req-approved {
+    background: #dcfce7;
+    color: #15803d;
+    border: 1px solid #bbf7d0;
+  }
+
+  .req-rejected {
+    background: #fee2e2;
+    color: #b91c1c;
+    border: 1px solid #fecaca;
+  }
+
+  .dept-badge {
+    display: inline-block;
+    padding: 0.2rem 0.55rem;
+    border-radius: 6px;
+    font-size: 0.74rem;
+    font-weight: 800;
+    background: #f3e8ff;
+    color: #7e22ce;
+  }
+
+  /* Actions Buttons inside Table */
+  .action-buttons-group {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+  }
+
+  .btn-approve {
+    background: #059669;
+    color: #ffffff;
+    border: none;
+    padding: 0.38rem 0.85rem;
+    border-radius: 8px;
+    font-size: 0.78rem;
+    font-weight: 800;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .btn-approve:hover {
+    background: #047857;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(5, 150, 105, 0.25);
+  }
+
+  .btn-reject {
+    background: #fee2e2;
+    color: #dc2626;
+    border: 1px solid #fecaca;
+    padding: 0.38rem 0.75rem;
+    border-radius: 8px;
+    font-size: 0.78rem;
+    font-weight: 800;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .btn-reject:hover {
+    background: #fecaca;
+  }
+
+  .empty-notice-box {
+    padding: 3rem 2rem;
+    text-align: center;
+    color: #64748b;
+    font-size: 0.92rem;
+    font-weight: 600;
+  }
+
+  /* ========================================================
+     MODAL STYLING
+     ======================================================== */
+  .modal-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(15, 23, 42, 0.6);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 1.5rem;
+  }
+
+  .modal-card {
+    background: #ffffff;
+    border-radius: 20px;
+    width: 100%;
+    max-width: 540px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+    overflow: hidden;
+    animation: modalPop 0.25s ease-out;
+  }
+
+  @keyframes modalPop {
+    from { transform: scale(0.96); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+  }
+
+  .modal-header {
+    background: #f8fafc;
+    border-bottom: 1px solid #e2e8f0;
+    padding: 1.25rem 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .modal-title-wrap {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+  }
+
+  .pod-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.35rem;
+  }
+  .icon-tx { background: #d1fae5; }
+
+  .modal-title-wrap h3 {
+    margin: 0 0 0.15rem 0;
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: #0f172a;
+  }
+
+  .modal-title-wrap p {
+    margin: 0;
+    font-size: 0.8rem;
+    color: #64748b;
+  }
+
+  .close-modal-btn {
+    background: transparent;
+    border: none;
+    font-size: 1.8rem;
+    cursor: pointer;
+    color: #94a3b8;
+    line-height: 1;
+  }
+  .close-modal-btn:hover { color: #0f172a; }
+
+  .modal-form-body {
+    padding: 1.75rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.15rem;
+  }
+
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    flex: 1;
+  }
+
+  .form-group label {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: #334155;
+  }
+
+  .form-group input,
+  .form-group select {
+    padding: 0.65rem 0.85rem;
+    border-radius: 10px;
+    border: 1.5px solid #cbd5e1;
+    font-family: inherit;
+    font-size: 0.9rem;
+    color: #0f172a;
+    background: #ffffff;
+    transition: border-color 0.2s;
+  }
+
+  .form-group input:focus,
+  .form-group select:focus {
+    outline: none;
+    border-color: #059669;
+    box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.12);
+  }
+
+  .form-row {
+    display: flex;
+    gap: 1rem;
+  }
+
+  .modal-form-actions {
+    display: flex;
+    gap: 0.75rem;
+    justify-content: flex-end;
+    margin-top: 0.5rem;
+  }
+
+  /* Responsive Adjustments */
+  @media (max-width: 1024px) {
+    .safes-grid-layout {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .form-row { flex-direction: column; }
+    .ledger-filters-toolbar { flex-direction: column; align-items: stretch; }
+    .treasury-nav-tabs { flex-direction: column; }
+    .safes-overview-section, .treasury-tabs-section { padding: 0 1rem; }
+  }
+
+  /* Confirmation Modal & Expense Action Styles */
+  .action-confirm-card {
+    max-width: 520px;
+  }
+
+  .expense-details-box {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 1.1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .detail-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.88rem;
+  }
+
+  .detail-lbl {
+    color: #64748b;
+    font-weight: 600;
+  }
+
+  .detail-val {
+    color: #0f172a;
+    font-weight: 700;
+  }
+
+  .amount-highlight {
+    font-size: 1.25rem;
+    color: #059669;
+  }
+
+  .modal-action-notice {
+    padding: 0.9rem 1rem;
+    border-radius: 10px;
+    font-size: 0.82rem;
+    line-height: 1.5;
+  }
+
+  .notice-approve {
+    background: #ecfdf5;
+    border: 1px solid #a7f3d0;
+    color: #065f46;
+  }
+
+  .notice-reject {
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    color: #991b1b;
+  }
+
+  .btn-danger {
+    background: #dc2626 !important;
+    color: white !important;
+  }
+  .btn-danger:hover {
+    background: #b91c1c !important;
+  }
+
+  /* Toast Notification */
+  .treasury-toast {
+    position: fixed;
+    top: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #0f172a;
+    color: #ffffff;
+    padding: 0.85rem 1.6rem;
+    border-radius: 50px;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-weight: 700;
+    font-size: 0.92rem;
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.25);
+    z-index: 10000;
+    animation: toastSlideDown 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .treasury-toast.toast-success {
+    background: #065f46;
+    border: 1px solid #10b981;
+  }
+
+  .treasury-toast.toast-error {
+    background: #991b1b;
+    border: 1px solid #ef4444;
+  }
+
+  /* ========================================================
+     PHASE 3: COA, JOURNAL & FORECAST STYLES
+     ======================================================== */
+  .btn-journal-action {
+    background: linear-gradient(135deg, #4f46e5 0%, #3730a3 100%);
+    color: #ffffff;
+    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.25);
+  }
+  .btn-journal-action:hover {
+    background: linear-gradient(135deg, #4338ca 0%, #312e81 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(79, 70, 229, 0.35);
+  }
+
+  /* COA Summary Cards */
+  .coa-summary-cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+    gap: 1.1rem;
+    margin-bottom: 1.75rem;
+  }
+
+  .coa-stat-card {
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 1.25rem;
+    border: 1.5px solid #e2e8f0;
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .coa-stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 18px rgba(0, 0, 0, 0.05);
+  }
+
+  .coa-stat-card .stat-icon {
+    font-size: 1.8rem;
+    background: #f8fafc;
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    flex-shrink: 0;
+  }
+
+  .coa-stat-card.card-asset { border-right: 4px solid #10b981; }
+  .coa-stat-card.card-liability { border-right: 4px solid #f59e0b; }
+  .coa-stat-card.card-equity { border-right: 4px solid #6366f1; }
+  .coa-stat-card.card-revenue { border-right: 4px solid #059669; }
+  .coa-stat-card.card-expense { border-right: 4px solid #ef4444; }
+
+  .stat-info { display: flex; flex-direction: column; gap: 0.2rem; }
+  .stat-label { font-size: 0.8rem; color: #64748b; font-weight: 700; }
+  .stat-value { font-size: 1.35rem; font-weight: 900; color: #0f172a; }
+  .stat-hint { font-size: 0.72rem; color: #94a3b8; line-height: 1.3; }
+
+  /* Account Badges & Styling */
+  .account-code-badge {
+    display: inline-block;
+    padding: 0.2rem 0.6rem;
+    background: #f1f5f9;
+    color: #1e293b;
+    border-radius: 6px;
+    font-family: monospace;
+    font-size: 0.82rem;
+    font-weight: 800;
+    border: 1px solid #cbd5e1;
+  }
+
+  .account-type-pill {
+    display: inline-block;
+    padding: 0.2rem 0.65rem;
+    border-radius: 12px;
+    font-size: 0.74rem;
+    font-weight: 800;
+  }
+  .account-type-pill.type-asset { background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; }
+  .account-type-pill.type-liability { background: #fffbeb; color: #b45309; border: 1px solid #fde68a; }
+  .account-type-pill.type-equity { background: #eef2ff; color: #4338ca; border: 1px solid #c7d2fe; }
+  .account-type-pill.type-revenue { background: #ecfdf5; color: #065f46; border: 1px solid #6ee7b7; }
+  .account-type-pill.type-expense { background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; }
+
+  /* Journal Section & Modal */
+  .journal-hero-strip {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    padding: 1.25rem 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+  .hero-strip-text h4 { margin: 0 0 0.3rem 0; font-size: 1.1rem; font-weight: 800; color: #0f172a; }
+  .hero-strip-text p { margin: 0; font-size: 0.82rem; color: #64748b; }
+
+  .journal-lines-wrapper {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    padding: 1.1rem;
+    margin: 1.25rem 0;
+  }
+  .lines-head-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.85rem;
+  }
+  .lines-head-row h4 { margin: 0; font-size: 0.92rem; font-weight: 800; color: #1e293b; }
+
+  .journal-lines-table-wrap { overflow-x: auto; }
+  .journal-lines-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.85rem;
+  }
+  .journal-lines-table th {
+    text-align: right;
+    padding: 0.55rem;
+    color: #475569;
+    font-weight: 700;
+    border-bottom: 2px solid #cbd5e1;
+  }
+  .journal-lines-table td {
+    padding: 0.55rem;
+    vertical-align: middle;
+  }
+  .journal-lines-table select,
+  .journal-lines-table input {
+    width: 100%;
+    padding: 0.45rem 0.65rem;
+    border-radius: 8px;
+    border: 1px solid #cbd5e1;
+    font-family: inherit;
+    font-size: 0.82rem;
+  }
+
+  .totals-foot-row td {
+    border-top: 2px solid #cbd5e1;
+    padding-top: 0.85rem;
+  }
+
+  .balance-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.35rem 0.85rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 800;
+  }
+  .balance-tag.balanced { background: #dcfce7; color: #15803d; border: 1px solid #86efac; }
+  .balance-tag.unbalanced { background: #fee2e2; color: #b91c1c; border: 1px solid #fca5a5; }
+
+  .btn-remove-line {
+    background: transparent;
+    color: #ef4444;
+    border: none;
+    font-size: 1.1rem;
+    cursor: pointer;
+    padding: 0.2rem 0.4rem;
+    border-radius: 6px;
+  }
+  .btn-remove-line:hover { background: #fee2e2; }
+
+  .journal-sublines-wrap {
+    background: #f8fafc;
+    border-radius: 10px;
+    padding: 0.85rem;
+    border: 1px solid #e2e8f0;
+    margin-top: 0.5rem;
+  }
+  .journal-sublines-table {
+    width: 100%;
+    font-size: 0.8rem;
+    border-collapse: collapse;
+  }
+  .journal-sublines-table th {
+    color: #64748b;
+    font-weight: 700;
+    border-bottom: 1px solid #cbd5e1;
+    padding: 0.35rem;
+    text-align: right;
+  }
+  .journal-sublines-table td {
+    padding: 0.35rem;
+  }
+
+  /* Forecast Section Styles */
+  .forecast-metrics-strip {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1.25rem;
+    margin-bottom: 1.75rem;
+  }
+
+  .forecast-metric-card {
+    background: #ffffff;
+    border-radius: 18px;
+    padding: 1.35rem;
+    border: 1.5px solid #e2e8f0;
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+  }
+  .forecast-metric-card .m-icon {
+    font-size: 2rem;
+    width: 52px;
+    height: 52px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f1f5f9;
+    flex-shrink: 0;
+  }
+  .forecast-metric-card .m-label { font-size: 0.8rem; color: #64748b; font-weight: 700; }
+  .forecast-metric-card .m-val { margin: 0.2rem 0; font-size: 1.55rem; font-weight: 900; color: #0f172a; }
+  .forecast-metric-card .m-sub { font-size: 0.72rem; color: #94a3b8; }
+
+  .forecast-months-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.25rem;
+  }
+
+  .forecast-month-card {
+    background: #ffffff;
+    border-radius: 18px;
+    padding: 1.35rem;
+    border: 1.5px solid #e2e8f0;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 1rem;
+    transition: all 0.2s;
+  }
+  .forecast-month-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
+    border-color: #93c5fd;
+  }
+
+  .f-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #f1f5f9;
+    padding-bottom: 0.75rem;
+  }
+  .f-month-title { font-size: 1.05rem; font-weight: 800; color: #0f172a; margin: 0; }
+  .f-month-badge {
+    font-size: 0.72rem;
+    padding: 0.2rem 0.6rem;
+    border-radius: 12px;
+    background: #eff6ff;
+    color: #2563eb;
+    font-weight: 800;
+  }
+
+  .f-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.84rem;
+  }
+  .f-row .f-lbl { color: #64748b; font-weight: 700; }
+  .f-row .f-val { font-weight: 800; }
+
+  .f-cumulative-box {
+    background: #f8fafc;
+    border-radius: 12px;
+    padding: 0.85rem;
+    border: 1px solid #e2e8f0;
+  }
+  .f-cumulative-box .c-lbl { font-size: 0.72rem; color: #64748b; font-weight: 700; display: block; }
+  .f-cumulative-box .c-val { font-size: 1.25rem; font-weight: 900; color: #0f172a; margin-top: 0.2rem; display: block; }
+</style>
+
+<script>
+  import { checkAuth } from '../../lib/auth.js';
+
+  let treasuryData = {
+    treasuries: [],
+    transactions: [],
+    financialSummary: [],
+    expenseRequests: [],
+    projects: []
+  };
+
+  const authLoading = document.getElementById('auth-loading-message');
+  const loginContainer = document.getElementById('admin-login-container');
+  const mainContent = document.getElementById('main-content');
+
+  // Verify Admin or Finance Auth
+  (async () => {
+    try {
+      const user = await checkAuth();
+      if (authLoading) authLoading.style.display = 'none';
+
+      if (user && (user.role === 'admin' || user.role === 'finance' || user.role === 'accountant')) {
+        if (mainContent) mainContent.style.display = 'block';
+        await loadTreasuryData();
+      } else {
+        if (loginContainer) loginContainer.style.display = 'block';
+      }
+    } catch (e) {
+      if (authLoading) authLoading.style.display = 'none';
+      if (loginContainer) loginContainer.style.display = 'block';
+    }
+  })();
+
+  // Fetch Full Treasury Data
+  async function loadTreasuryData() {
+    try {
+      const res = await fetch('/api/erp/treasury');
+      const data = await res.json();
+      if (data.success) {
+        treasuryData = data;
+        renderSafesOverview();
+        populateFilterDropdowns();
+        renderTransactions();
+        renderExpenseRequests();
+        await loadAccountingData();
+      } else {
+        alert(data.error || 'فشل تحميل بيانات الخزينة');
+      }
+    } catch (err) {
+      console.error('Failed to load treasury data:', err);
+    }
+  }
+
+  // Render Safes Overview (القسم العلوي: بطاقات الأرصدة)
+  function renderSafesOverview() {
+    const treasuries = treasuryData.treasuries || [];
+    const summaries = treasuryData.financialSummary || [];
+
+    // 1. Main Safe (الخزنة الرئيسية)
+    const mainSafe = treasuries.find(t => t.isMain || !t.projectId) || treasuries[0];
+    if (mainSafe) {
+      document.getElementById('main-safe-name').textContent = mainSafe.name;
+      document.getElementById('main-safe-balance').textContent = (mainSafe.balance || 0).toLocaleString('ar-EG') + ' ج.م';
+    }
+
+    // 2. Project Safes (خزائن المشروعات الفرعية)
+    const projectSafesContainer = document.getElementById('project-safes-container');
+    if (!projectSafesContainer) return;
+
+    if (summaries.length === 0) {
+      projectSafesContainer.innerHTML = `
+        <div class="empty-notice-box">
+          <p>لا توجد مشاريع مسجلة بعد لعرض خزائنها.</p>
+        </div>
+      `;
+      return;
+    }
+
+    projectSafesContainer.innerHTML = summaries.map(s => {
+      return `
+        <div class="project-safe-card">
+          <div class="proj-safe-head">
+            <div>
+              <h4 class="proj-safe-title">${s.safeName}</h4>
+              <p class="proj-safe-sub">مشروع: ${s.projectName}</p>
+            </div>
+            <span class="safe-type-tag">خزينة فرعية</span>
+          </div>
+
+          <div class="proj-safe-balance-box">
+            <span class="lbl">الرصيد النقدي المتوفر:</span>
+            <span class="val">${(s.currentBalance || 0).toLocaleString('ar-EG')} ج.م</span>
+          </div>
+
+          <div class="proj-mini-stats-grid">
+            <div class="stat-cell">
+              <span class="s-lbl">إجمالي الإيرادات</span>
+              <span class="s-val val-income">+${(s.totalIncome || 0).toLocaleString('ar-EG')}</span>
+            </div>
+            <div class="stat-cell">
+              <span class="s-lbl">إجمالي المصروفات</span>
+              <span class="s-val val-expense">-${(s.totalExpense || 0).toLocaleString('ar-EG')}</span>
+            </div>
+            <div class="stat-cell">
+              <span class="s-lbl">صافي الرصيد</span>
+              <span class="s-val val-profit">${(s.netProfit || 0).toLocaleString('ar-EG')}</span>
+            </div>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  // Populate Filter Selects
+  function populateFilterDropdowns() {
+    const projFilter = document.getElementById('filter-tx-project');
+    const modalTreasury = document.getElementById('modal-treasury-id');
+    const modalProject = document.getElementById('modal-tx-project');
+
+    const treasuries = treasuryData.treasuries || [];
+    const projects = treasuryData.projects || [];
+
+    // Filter project dropdown
+    if (projFilter) {
+      projFilter.innerHTML = `<option value="all">جميع المشاريع والخزائن</option>` + 
+        projects.map(p => `<option value="${p.id}">مشروع: ${p.name}</option>`).join('');
+    }
+
+    // Modal treasury dropdown
+    if (modalTreasury) {
+      modalTreasury.innerHTML = treasuries.map(t => `
+        <option value="${t.id}">${t.isMain ? '🏦 [رئيسية] ' : '🏢 [فرعية] '} ${t.name} (رصيد: ${(t.balance || 0).toLocaleString('ar-EG')} ج.م)</option>
+      `).join('');
+    }
+
+    // Modal project dropdown
+    if (modalProject) {
+      modalProject.innerHTML = `<option value="">-- بدون ارتباط بمشروع --</option>` +
+        projects.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
+    }
+  }
+
+  // Filter & Render Transactions (تبويب 1: سجل الحركات المالية)
+  function renderTransactions() {
+    const projFilter = document.getElementById('filter-tx-project')?.value || 'all';
+    const typeFilter = document.getElementById('filter-tx-type')?.value || 'all';
+    const catFilter = document.getElementById('filter-tx-category')?.value || 'all';
+
+    const txs = (treasuryData.transactions || []).filter(tx => {
+      if (projFilter !== 'all' && tx.projectId !== projFilter) return false;
+      if (typeFilter !== 'all' && tx.type !== typeFilter) return false;
+      if (catFilter !== 'all' && tx.category !== catFilter) return false;
+      return true;
+    });
+
+    const tbody = document.getElementById('transactions-table-body');
+    const emptyBox = document.getElementById('tx-empty-state');
+    const counterBadge = document.getElementById('tx-counter-badge');
+
+    if (counterBadge) counterBadge.textContent = txs.length;
+
+    if (txs.length === 0) {
+      if (tbody) tbody.innerHTML = '';
+      if (emptyBox) emptyBox.style.display = 'block';
+      return;
+    }
+
+    if (emptyBox) emptyBox.style.display = 'none';
+
+    const categoryNames = {
+      capital_deposit: 'إيداع رأسمال',
+      down_payment: 'مقدم حجز',
+      installment: 'قسط عميل',
+      contractor: 'مستخلص مقاول',
+      materials: 'شراء خامات',
+      sales_commission: 'عمولة مبيعات',
+      general_expense: 'مصروفات ونثريات',
+      operational: 'مصروفات تشغيلية'
+    };
+
+    if (tbody) {
+      tbody.innerHTML = txs.map(tx => {
+        const isIncome = tx.type === 'income';
+        const typeBadge = isIncome 
+          ? `<span class="tx-type-tag tx-income">🟢 إيراد (+)</span>` 
+          : `<span class="tx-type-tag tx-expense">🔴 مصروف (-)</span>`;
+
+        const amountClass = isIncome ? 'tx-amount-income' : 'tx-amount-expense';
+        const amountSign = isIncome ? '+' : '-';
+        const safeName = tx.treasury ? tx.treasury.name : 'الخزينة';
+
+        const dateStr = new Date(tx.createdAt).toLocaleDateString('ar-EG', {
+          year: 'numeric',
+          month: 'short',
+          day: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit'
+        });
+
+        return `
+          <tr>
+            <td><strong>${tx.description}</strong></td>
+            <td>${typeBadge}</td>
+            <td><span class="tx-amount-str ${amountClass}">${amountSign}${(tx.amount || 0).toLocaleString('ar-EG')} ج.م</span></td>
+            <td>🏦 ${safeName}</td>
+            <td><span class="category-pill">${categoryNames[tx.category] || tx.category}</span></td>
+            <td>${tx.recordedBy || 'المحاسب'}</td>
+            <td>${dateStr}</td>
+          </tr>
+        `;
+      }).join('');
+    }
+  }
+
+  // Render Expense Requests (تبويب 2: طلبات الصرف المعلقة)
+  function renderExpenseRequests() {
+    const requests = treasuryData.expenseRequests || [];
+    const tbody = document.getElementById('expense-requests-table-body');
+    const emptyBox = document.getElementById('requests-empty-state');
+    const badge = document.getElementById('pending-counter-badge');
+
+    const pendingCount = requests.filter(r => r.status === 'pending').length;
+    if (badge) badge.textContent = `${pendingCount} معلق`;
+
+    if (requests.length === 0) {
+      if (tbody) tbody.innerHTML = '';
+      if (emptyBox) emptyBox.style.display = 'block';
+      return;
+    }
+
+    if (emptyBox) emptyBox.style.display = 'none';
+
+    const deptLabels = {
+      construction: '🏗️ إنشاءات',
+      sales: '💼 مبيعات',
+      management: '🏛️ إدارة'
+    };
+
+    if (tbody) {
+      tbody.innerHTML = requests.map(req => {
+        const isPending = req.status === 'pending';
+        let statusPill = '';
+        if (req.status === 'pending') statusPill = `<span class="req-status-pill req-pending">🟡 قيد المراجعة</span>`;
+        else if (req.status === 'approved') statusPill = `<span class="req-status-pill req-approved">🟢 معتمد وتم الصرف</span>`;
+        else if (req.status === 'rejected') statusPill = `<span class="req-status-pill req-rejected">🔴 مرفوض</span>`;
+
+        const dateStr = new Date(req.createdAt).toLocaleDateString('ar-EG', {
+          year: 'numeric',
+          month: 'short',
+          day: 'numeric'
+        });
+
+        const actionsHtml = isPending ? `
+          <div class="action-buttons-group">
+            <button class="btn-approve approve-action-btn" data-req-id="${req.id}">
+              موافقة وصرف ✓
+            </button>
+            <button class="btn-reject reject-action-btn" data-req-id="${req.id}">
+              رفض ✕
+            </button>
+          </div>
+        ` : `<span style="font-size: 0.8rem; color: #94a3b8; font-weight: 700;">تمت المعالجة</span>`;
+
+        return `
+          <tr>
+            <td><strong>${req.project ? req.project.projectName : 'مشروع عام'}</strong></td>
+            <td><span class="dept-badge">${deptLabels[req.department] || req.department}</span></td>
+            <td>
+              <strong>${req.title}</strong>
+              ${req.description ? `<br><small style="color: #64748b;">${req.description}</small>` : ''}
+            </td>
+            <td>${req.requesterName || 'مقدم الطلب'}</td>
+            <td><strong style="font-size: 1.05rem; color: #dc2626;">${(req.amount || 0).toLocaleString('ar-EG')} ج.م</strong></td>
+            <td>${dateStr}</td>
+            <td>${statusPill}</td>
+            <td>${actionsHtml}</td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    // Attach Approve & Reject Listeners via Event Delegation on table body
+    if (tbody && !tbody.dataset.eventsBound) {
+      tbody.dataset.eventsBound = 'true';
+      tbody.addEventListener('click', (e) => {
+        const approveBtn = e.target.closest('.approve-action-btn');
+        if (approveBtn) {
+          const reqId = approveBtn.getAttribute('data-req-id');
+          openExpenseActionModal(reqId, 'approve');
+          return;
+        }
+
+        const rejectBtn = e.target.closest('.reject-action-btn');
+        if (rejectBtn) {
+          const reqId = rejectBtn.getAttribute('data-req-id');
+          openExpenseActionModal(reqId, 'reject');
+          return;
+        }
+      });
+    }
+  }
+
+  // Toast Notification System
+  let toastTimer = null;
+  function showToast(message, type = 'success') {
+    const toast = document.getElementById('treasury-toast');
+    const toastIcon = document.getElementById('toast-icon');
+    const toastText = document.getElementById('toast-text');
+    if (!toast) return;
+
+    if (toastTimer) clearTimeout(toastTimer);
+
+    toast.className = 'treasury-toast ' + (type === 'success' ? 'toast-success' : 'toast-error');
+    if (toastIcon) toastIcon.textContent = type === 'success' ? '✅' : '⚠️';
+    if (toastText) toastText.textContent = message;
+
+    toast.style.display = 'flex';
+    toastTimer = setTimeout(() => {
+      toast.style.display = 'none';
+    }, 4000);
+  }
+
+  // Active Request State for Modal
+  let activeExpenseReq = null;
+  let activeExpenseAction = 'approve';
+
+  const actionModal = document.getElementById('expense-action-modal');
+  const confirmActionBtn = document.getElementById('confirm-expense-btn');
+  const closeActionBtn = document.getElementById('close-expense-modal');
+  const cancelActionBtn = document.getElementById('cancel-expense-btn');
+
+  function openExpenseActionModal(requestId, actionType) {
+    const req = (treasuryData.expenseRequests || []).find(r => r.id === requestId);
+    if (!req) return;
+
+    activeExpenseReq = req;
+    activeExpenseAction = actionType;
+
+    const modalTitle = document.getElementById('expense-modal-title');
+    const modalSubtitle = document.getElementById('expense-modal-subtitle');
+    const modalIcon = document.getElementById('expense-modal-icon');
+    const noticeBox = document.getElementById('expense-modal-notice');
+    const noticeText = document.getElementById('expense-notice-text');
+
+    document.getElementById('modal-req-project').textContent = req.project ? req.project.projectName : 'مشروع عام';
+    document.getElementById('modal-req-requester').textContent = `${req.requesterName || 'مقدم الطلب'} (${req.department})`;
+    document.getElementById('modal-req-amount').textContent = (req.amount || 0).toLocaleString('ar-EG') + ' ج.م';
+    document.getElementById('modal-req-title').textContent = req.title + (req.description ? ` (${req.description})` : '');
+
+    if (actionType === 'approve') {
+      if (modalTitle) modalTitle.textContent = 'تأكيد اعتماد وصرف الطلب';
+      if (modalSubtitle) modalSubtitle.textContent = 'الموافقة المالية والخصم المباشر من خزينة المشروع';
+      if (modalIcon) modalIcon.textContent = '⚖️';
+      if (noticeBox) {
+        noticeBox.className = 'modal-action-notice notice-approve';
+      }
+      if (noticeText) {
+        noticeText.innerHTML = '💡 <strong>أثر الاعتماد المالي:</strong> سيتم خصم هذا المبلغ فورياً من خزينة المشروع، وتسجيل قيد مصروف رسمي في جدول الحركات المالية وتحديث الأرصدة لحظياً.';
+      }
+      if (confirmActionBtn) {
+        confirmActionBtn.textContent = 'تأكيد الموافقة والصرف فوراً ✓';
+        confirmActionBtn.className = 'btn btn-primary';
+      }
+    } else {
+      if (modalTitle) modalTitle.textContent = 'تأكيد رفض طلب الصرف';
+      if (modalSubtitle) modalSubtitle.textContent = 'لن يتم صرف المبلغ أو خصمه من رصيد الخزينة';
+      if (modalIcon) modalIcon.textContent = '🚫';
+      if (noticeBox) {
+        noticeBox.className = 'modal-action-notice notice-reject';
+      }
+      if (noticeText) {
+        noticeText.innerHTML = '⚠️ <strong>تنبيه:</strong> سيتم تحويل حالة الطلب إلى (مرفوض)، ولن يتم خصم أي مبالغ من خزينة المشروع.';
+      }
+      if (confirmActionBtn) {
+        confirmActionBtn.textContent = 'تأكيد رفض الطلب ✕';
+        confirmActionBtn.className = 'btn btn-danger';
+      }
+    }
+
+    if (actionModal) actionModal.style.display = 'flex';
+  }
+
+  function closeExpenseActionModal() {
+    if (actionModal) actionModal.style.display = 'none';
+    activeExpenseReq = null;
+  }
+
+  closeActionBtn?.addEventListener('click', closeExpenseActionModal);
+  cancelActionBtn?.addEventListener('click', closeExpenseActionModal);
+
+  // Confirm Expense Action (Approve or Reject)
+  confirmActionBtn?.addEventListener('click', async () => {
+    if (!activeExpenseReq) return;
+
+    const originalBtnText = confirmActionBtn.textContent;
+    confirmActionBtn.textContent = 'جارٍ التنفيذ...';
+    confirmActionBtn.disabled = true;
+
+    try {
+      const isApprove = activeExpenseAction === 'approve';
+      const actionName = isApprove ? 'approve_expense_request' : 'reject_expense_request';
+
+      const res = await fetch('/api/erp/treasury', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: actionName,
+          requestId: activeExpenseReq.id
+        })
+      });
+
+      const data = await res.json();
+      if (data.success) {
+        const reqAmount = activeExpenseReq ? activeExpenseReq.amount : 0;
+        closeExpenseActionModal();
+        if (isApprove) {
+          showToast(`✅ تم اعتماد الصرف بنجاح! تم خصم ${(reqAmount || 0).toLocaleString('ar-EG')} ج.م من خزينة المشروع وقيد المصروف.`, 'success');
+        } else {
+          showToast(`⚠️ تم رفض طلب الصرف بنجاح وتحديث حالته إلى (مرفوض).`, 'success');
+        }
+        await loadTreasuryData();
+      } else {
+        showToast(data.error || 'فشلت معالجة الطلب', 'error');
+      }
+    } catch (err) {
+      console.error('Expense action error:', err);
+      showToast('حدث خطأ في الاتصال بالخادم', 'error');
+    } finally {
+      confirmActionBtn.textContent = originalBtnText;
+      confirmActionBtn.disabled = false;
+    }
+  });
+
+  // Filter Listeners
+  document.getElementById('filter-tx-project')?.addEventListener('change', renderTransactions);
+  document.getElementById('filter-tx-type')?.addEventListener('change', renderTransactions);
+  document.getElementById('filter-tx-category')?.addEventListener('change', renderTransactions);
+
+  // ========================================================
+  // Tabs Switching (5 Tabs: Ledger, Approvals, COA, Journal, Forecast)
+  // ========================================================
+  const tabConfigs = [
+    { btn: 'tab-btn-tx', pane: 'tab-content-tx' },
+    { btn: 'tab-btn-approvals', pane: 'tab-content-approvals' },
+    { btn: 'tab-btn-coa', pane: 'tab-content-coa' },
+    { btn: 'tab-btn-journal', pane: 'tab-content-journal' },
+    { btn: 'tab-btn-forecast', pane: 'tab-content-forecast' }
+  ];
+
+  function switchTab(activeBtnId) {
+    tabConfigs.forEach(tab => {
+      const btnEl = document.getElementById(tab.btn);
+      const paneEl = document.getElementById(tab.pane);
+      if (tab.btn === activeBtnId) {
+        btnEl?.classList.add('active');
+        if (paneEl) paneEl.style.display = 'block';
+      } else {
+        btnEl?.classList.remove('active');
+        if (paneEl) paneEl.style.display = 'none';
+      }
+    });
+  }
+
+  tabConfigs.forEach(tab => {
+    document.getElementById(tab.btn)?.addEventListener('click', () => switchTab(tab.btn));
+  });
+
+  // ========================================================
+  // Phase 3: Accounting Data State & Handlers
+  // ========================================================
+  let accountingData = {
+    accounts: [],
+    journalEntries: [],
+    forecast: { currentLiquidity: 0, months: [] }
+  };
+
+  async function loadAccountingData() {
+    try {
+      const res = await fetch('/api/erp/accounting');
+      const data = await res.json();
+      if (data.success) {
+        accountingData = data;
+        renderCOASummary();
+        renderCOATable();
+        populateParentAccountSelect();
+        renderJournalEntries();
+        renderCashFlowForecast();
+      }
+    } catch (err) {
+      console.error('Accounting data fetch error:', err);
+    }
+  }
+
+  // 1. Render COA Summary Cards & Badges
+  function renderCOASummary() {
+    const accounts = accountingData.accounts || [];
+    
+    // Group totals by type
+    const totals = { asset: 0, liability: 0, equity: 0, revenue: 0, expense: 0 };
+    accounts.forEach(acc => {
+      if (!acc.isParent && acc.balance) {
+        const type = acc.accountType;
+        if (totals[type] !== undefined) {
+          totals[type] += acc.balance;
+        }
+      }
+    });
+
+    const formatEgp = num => (num || 0).toLocaleString('ar-EG') + ' ج.م';
+    const elAsset = document.getElementById('coa-assets-total');
+    const elLiab = document.getElementById('coa-liabilities-total');
+    const elEq = document.getElementById('coa-equity-total');
+    const elRev = document.getElementById('coa-revenue-total');
+    const elExp = document.getElementById('coa-expense-total');
+    const elBadge = document.getElementById('coa-counter-badge');
+
+    if (elAsset) elAsset.textContent = formatEgp(totals.asset);
+    if (elLiab) elLiab.textContent = formatEgp(totals.liability);
+    if (elEq) elEq.textContent = formatEgp(totals.equity);
+    if (elRev) elRev.textContent = formatEgp(totals.revenue);
+    if (elExp) elExp.textContent = formatEgp(totals.expense);
+    if (elBadge) elBadge.textContent = accounts.length.toString();
+  }
+
+  // 2. Render COA Table with Filter & Search
+  function renderCOATable() {
+    const tbody = document.getElementById('coa-table-body');
+    if (!tbody) return;
+
+    const typeFilter = document.getElementById('filter-coa-type')?.value || 'all';
+    const searchVal = document.getElementById('search-coa-input')?.value?.toLowerCase().trim() || '';
+
+    const parentLookup = {};
+    (accountingData.accounts || []).forEach(a => {
+      parentLookup[a.id] = a.nameAr;
+    });
+
+    const filtered = (accountingData.accounts || []).filter(acc => {
+      if (typeFilter !== 'all' && acc.accountType !== typeFilter) return false;
+      if (searchVal) {
+        const matchCode = acc.code.toLowerCase().includes(searchVal);
+        const matchName = acc.nameAr.toLowerCase().includes(searchVal);
+        if (!matchCode && !matchName) return false;
+      }
+      return true;
+    });
+
+    const typeNames = {
+      asset: 'أصول (Asset)',
+      liability: 'التزامات (Liability)',
+      equity: 'حقوق ملكية (Equity)',
+      revenue: 'إيرادات (Revenue)',
+      expense: 'مصروفات (Expense)'
+    };
+
+    if (filtered.length === 0) {
+      tbody.innerHTML = `
+        <tr>
+          <td colspan="6" style="text-align:center;padding:2rem;color:#64748b;">
+            لا توجد حسابات مطابقة لشروط البحث.
+          </td>
+        </tr>
+      `;
+      return;
+    }
+
+    tbody.innerHTML = filtered.map(acc => {
+      const parentName = acc.parentId ? (parentLookup[acc.parentId] || 'حساب أب') : '— رئيسي —';
+      const isDebit = acc.accountType === 'asset' || acc.accountType === 'expense';
+      const natureText = isDebit ? '<span style="color:#059669;font-weight:700;">مدين (Debit)</span>' : '<span style="color:#2563eb;font-weight:700;">دائن (Credit)</span>';
+      const balanceVal = (acc.balance || 0).toLocaleString('ar-EG') + ' ج.م';
+
+      return `
+        <tr style="${acc.isParent ? 'background:#f8fafc;font-weight:800;' : ''}">
+          <td>
+            <span class="account-code-badge">${acc.code}</span>
+          </td>
+          <td>
+            <span style="${acc.isParent ? 'font-size:0.95rem;color:#0f172a;' : 'color:#334155;'}">
+              ${acc.isParent ? '📁 ' : '📄 '} ${acc.nameAr}
+            </span>
+          </td>
+          <td>
+            <span class="account-type-pill type-${acc.accountType}">
+              ${typeNames[acc.accountType] || acc.accountType}
+            </span>
+          </td>
+          <td style="color:#64748b;font-size:0.8rem;">
+            ${parentName}
+          </td>
+          <td>
+            ${natureText}
+          </td>
+          <td>
+            <strong style="color:#0f172a;font-size:0.95rem;">${balanceVal}</strong>
+          </td>
+        </tr>
+      `;
+    }).join('');
+  }
+
+  // 3. Populate Parent Account Dropdown
+  function populateParentAccountSelect() {
+    const sel = document.getElementById('acc-modal-parent');
+    if (!sel) return;
+    const accounts = accountingData.accounts || [];
+    sel.innerHTML = '<option value="">-- بدون حساب أب (حساب رئيسي) --</option>' +
+      accounts.map(a => `<option value="${a.id}">[${a.code}] ${a.nameAr}</option>`).join('');
+  }
+
+  // 4. Render Journal Entries with Nested Line Details
+  function renderJournalEntries() {
+    const tbody = document.getElementById('journal-table-body');
+    const emptyState = document.getElementById('journal-empty-state');
+    const counterBadge = document.getElementById('journal-counter-badge');
+    if (!tbody) return;
+
+    const searchVal = document.getElementById('search-journal-input')?.value?.toLowerCase().trim() || '';
+    const entries = (accountingData.journalEntries || []).filter(e => {
+      if (searchVal) {
+        const descMatch = (e.description || '').toLowerCase().includes(searchVal);
+        const refMatch = (e.reference || '').toLowerCase().includes(searchVal);
+        const numMatch = (e.entryNumber || '').toLowerCase().includes(searchVal);
+        if (!descMatch && !refMatch && !numMatch) return false;
+      }
+      return true;
+    });
+
+    if (counterBadge) counterBadge.textContent = (accountingData.journalEntries || []).length.toString();
+
+    if (entries.length === 0) {
+      tbody.innerHTML = '';
+      if (emptyState) emptyState.style.display = 'block';
+      return;
+    }
+
+    if (emptyState) emptyState.style.display = 'none';
+
+    tbody.innerHTML = entries.map(e => {
+      const formattedDate = new Date(e.entryDate).toLocaleDateString('ar-EG', { year: 'numeric', month: 'short', day: 'numeric' });
+      const debitStr = (e.totalDebit || 0).toLocaleString('ar-EG') + ' ج.م';
+      const creditStr = (e.totalCredit || 0).toLocaleString('ar-EG') + ' ج.م';
+      const numCode = e.entryNumber || `JV-${e.id.substring(0, 6).toUpperCase()}`;
+
+      const linesHtml = (e.lines || []).map(l => `
+        <tr>
+          <td><span class="account-code-badge" style="font-size:0.75rem;">${l.account?.code || '-'}</span> ${l.account?.nameAr || '-'}</td>
+          <td style="color:#059669;font-weight:700;">${l.debit > 0 ? (l.debit.toLocaleString('ar-EG') + ' ج.م') : '-'}</td>
+          <td style="color:#2563eb;font-weight:700;">${l.credit > 0 ? (l.credit.toLocaleString('ar-EG') + ' ج.م') : '-'}</td>
+          <td style="color:#64748b;">${l.memo || '-'}</td>
+        </tr>
+      `).join('');
+
+      return `
+        <tr>
+          <td><strong style="color:#4f46e5;">#${numCode}</strong></td>
+          <td style="white-space:nowrap;">${formattedDate}</td>
+          <td>
+            <strong>${e.description}</strong>
+          </td>
+          <td>
+            <span style="color:#64748b;font-size:0.82rem;">${e.reference || '—'}</span>
+          </td>
+          <td><strong style="color:#059669;">${debitStr}</strong></td>
+          <td><strong style="color:#2563eb;">${creditStr}</strong></td>
+          <td>
+            <span class="balance-tag balanced" style="font-size:0.72rem;">متزن ⚖️</span>
+          </td>
+          <td>
+            <button class="btn btn-sm btn-secondary toggle-lines-btn" data-entry-id="${e.id}" style="font-size:0.75rem;padding:0.25rem 0.6rem;">
+              عرض الأطراف (${(e.lines || []).length}) ▾
+            </button>
+          </td>
+        </tr>
+        <tr id="lines-row-${e.id}" style="display:none;background:#f8fafc;">
+          <td colspan="8" style="padding:0.75rem 1.5rem;">
+            <div class="journal-sublines-wrap">
+              <table class="journal-sublines-table">
+                <thead>
+                  <tr>
+                    <th>الحساب المحاسبي</th>
+                    <th>مدين</th>
+                    <th>دائن</th>
+                    <th>البيان والملاحظات</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${linesHtml}
+                </tbody>
+              </table>
+            </div>
+          </td>
+        </tr>
+      `;
+    }).join('');
+
+    // Attach expand toggles
+    document.querySelectorAll('.toggle-lines-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const entryId = btn.getAttribute('data-entry-id');
+        const row = document.getElementById(`lines-row-${entryId}`);
+        if (row) {
+          const isShown = row.style.display !== 'none';
+          row.style.display = isShown ? 'none' : 'table-row';
+          btn.textContent = isShown ? `عرض الأطراف ▾` : `إخفاء الأطراف ▴`;
+        }
+      });
+    });
+  }
+
+  // 5. Render Cash Flow Forecasting (6 Months)
+  function renderCashFlowForecast() {
+    const forecast = accountingData.forecast || { currentLiquidity: 0, months: [] };
+    const curLiqEl = document.getElementById('forecast-current-liquidity');
+    const totalInflowsEl = document.getElementById('forecast-total-inflows');
+    const totalOutflowsEl = document.getElementById('forecast-total-outflows');
+    const finalLiqEl = document.getElementById('forecast-final-liquidity');
+    const cardsContainer = document.getElementById('forecast-months-cards-container');
+
+    const curLiq = forecast.currentLiquidity || 0;
+    if (curLiqEl) curLiqEl.textContent = curLiq.toLocaleString('ar-EG') + ' ج.م';
+
+    const months = forecast.months || [];
+    const totalIn = months.reduce((s, m) => s + (m.expectedInflow || 0), 0);
+    const totalOut = months.reduce((s, m) => s + (m.expectedOutflow || 0), 0);
+    const finalLiq = months.length > 0 ? (months[months.length - 1].cumulativePosition || 0) : curLiq;
+
+    if (totalInflowsEl) totalInflowsEl.textContent = totalIn.toLocaleString('ar-EG') + ' ج.م';
+    if (totalOutflowsEl) totalOutflowsEl.textContent = totalOut.toLocaleString('ar-EG') + ' ج.م';
+    if (finalLiqEl) {
+      finalLiqEl.textContent = finalLiq.toLocaleString('ar-EG') + ' ج.م';
+      finalLiqEl.style.color = finalLiq >= 0 ? '#059669' : '#dc2626';
+    }
+
+    if (!cardsContainer) return;
+
+    if (months.length === 0) {
+      cardsContainer.innerHTML = '<div class="empty-notice-box"><p>لا توجد بيانات كافية لإجراء التنبؤ المالي حالياً.</p></div>';
+      return;
+    }
+
+    cardsContainer.innerHTML = months.map(m => {
+      const isPositive = m.netFlow >= 0;
+      const netColor = isPositive ? '#16a34a' : '#dc2626';
+      const cumColor = m.cumulativePosition >= 0 ? '#0f172a' : '#b91c1c';
+
+      return `
+        <div class="forecast-month-card">
+          <div class="f-head">
+            <h4 class="f-month-title">${m.monthName}</h4>
+            <span class="f-month-badge">الشهر ${m.monthIndex}</span>
+          </div>
+
+          <div style="display:flex;flex-direction:column;gap:0.6rem;">
+            <div class="f-row">
+              <span class="f-lbl">📥 التدفقات الداخلة (أقساط وشيكات):</span>
+              <span class="f-val" style="color:#16a34a;">+ ${(m.expectedInflow || 0).toLocaleString('ar-EG')} ج.م</span>
+            </div>
+            <div class="f-row">
+              <span class="f-lbl">📤 الالتزامات الخارجة (مستخلصات):</span>
+              <span class="f-val" style="color:#dc2626;">- ${(m.expectedOutflow || 0).toLocaleString('ar-EG')} ج.م</span>
+            </div>
+            <div class="f-row" style="border-top:1px dashed #e2e8f0;padding-top:0.5rem;">
+              <span class="f-lbl">📊 صافي التدفق الشهري:</span>
+              <span class="f-val" style="color:${netColor};font-weight:900;">
+                ${isPositive ? '+' : ''}${(m.netFlow || 0).toLocaleString('ar-EG')} ج.م
+              </span>
+            </div>
+          </div>
+
+          <div class="f-cumulative-box">
+            <span class="c-lbl">الرصيد التراكمي في نهاية الشهر:</span>
+            <span class="c-val" style="color:${cumColor};">
+              ${(m.cumulativePosition || 0).toLocaleString('ar-EG')} ج.م
+            </span>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  // Filter Listeners for COA and Journal
+  document.getElementById('filter-coa-type')?.addEventListener('change', renderCOATable);
+  document.getElementById('search-coa-input')?.addEventListener('input', renderCOATable);
+  document.getElementById('search-journal-input')?.addEventListener('input', renderJournalEntries);
+
+  // ========================================================
+  // Phase 3 Modals: Account & Journal Entries
+  // ========================================================
+  const accountModal = document.getElementById('account-modal');
+  const journalModal = document.getElementById('journal-modal');
+
+  // Open Account Modal
+  function openAccountModal() {
+    populateParentAccountSelect();
+    if (accountModal) accountModal.style.display = 'flex';
+  }
+  function closeAccountModal() {
+    if (accountModal) accountModal.style.display = 'none';
+  }
+
+  document.getElementById('open-new-account-btn')?.addEventListener('click', openAccountModal);
+  document.getElementById('open-new-account-btn2')?.addEventListener('click', openAccountModal);
+  document.getElementById('close-account-modal')?.addEventListener('click', closeAccountModal);
+  document.getElementById('cancel-account-btn')?.addEventListener('click', closeAccountModal);
+
+  // Submit New Account Form
+  document.getElementById('new-account-form')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const saveBtn = document.getElementById('save-account-btn');
+    if (saveBtn) saveBtn.textContent = 'جارٍ الحفظ...';
+
+    const code = document.getElementById('acc-modal-code').value.trim();
+    const nameAr = document.getElementById('acc-modal-name').value.trim();
+    const accountType = document.getElementById('acc-modal-type').value;
+    const parentId = document.getElementById('acc-modal-parent').value;
+    const description = document.getElementById('acc-modal-desc').value.trim();
+
+    try {
+      const res = await fetch('/api/erp/accounting', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'create_account',
+          code,
+          nameAr,
+          accountType,
+          parentId: parentId || null,
+          description
+        })
+      });
+      const data = await res.json();
+      if (data.success) {
+        closeAccountModal();
+        document.getElementById('new-account-form').reset();
+        showToast('✅ تم إضافة الحساب بنجاح إلى شجرة الحسابات', 'success');
+        await loadAccountingData();
+      } else {
+        showToast(data.error || 'فشلت إضافة الحساب', 'error');
+      }
+    } catch (err) {
+      console.error(err);
+      showToast('حدث خطأ في الاتصال بالخادم', 'error');
+    } finally {
+      if (saveBtn) saveBtn.textContent = 'حفظ وتثبيت الحساب في الدليل';
+    }
+  });
+
+  // Dynamic Journal Lines Builder State
+  let currentJournalLines = [
+    { accountId: '', debit: 0, credit: 0, memo: '' },
+    { accountId: '', debit: 0, credit: 0, memo: '' }
+  ];
+
+  function openJournalModal() {
+    const dateInput = document.getElementById('journal-modal-date');
+    if (dateInput) dateInput.value = new Date().toISOString().split('T')[0];
+    currentJournalLines = [
+      { accountId: '', debit: 0, credit: 0, memo: '' },
+      { accountId: '', debit: 0, credit: 0, memo: '' }
+    ];
+    renderJournalLinesTable();
+    if (journalModal) journalModal.style.display = 'flex';
+  }
+
+  function closeJournalModal() {
+    if (journalModal) journalModal.style.display = 'none';
+  }
+
+  document.getElementById('open-manual-journal-btn')?.addEventListener('click', openJournalModal);
+  document.getElementById('open-manual-journal-btn2')?.addEventListener('click', openJournalModal);
+  document.getElementById('close-journal-modal')?.addEventListener('click', closeJournalModal);
+  document.getElementById('cancel-journal-btn')?.addEventListener('click', closeJournalModal);
+
+  // Render Dynamic Lines for Journal Modal
+  function renderJournalLinesTable() {
+    const tbody = document.getElementById('journal-lines-tbody');
+    if (!tbody) return;
+
+    const accounts = accountingData.accounts || [];
+    const accOptionsHtml = accounts.map(a => `
+      <option value="${a.id}">[${a.code}] ${a.nameAr} (${a.accountType})</option>
+    `).join('');
+
+    tbody.innerHTML = currentJournalLines.map((line, idx) => `
+      <tr>
+        <td>
+          <select class="line-acc-select" data-idx="${idx}" required>
+            <option value="">-- اختر الحساب --</option>
+            ${accOptionsHtml}
+          </select>
+        </td>
+        <td>
+          <input type="number" step="any" min="0" class="line-debit-input" data-idx="${idx}" value="${line.debit || ''}" placeholder="0.00" />
+        </td>
+        <td>
+          <input type="number" step="any" min="0" class="line-credit-input" data-idx="${idx}" value="${line.credit || ''}" placeholder="0.00" />
+        </td>
+        <td>
+          <input type="text" class="line-memo-input" data-idx="${idx}" value="${line.memo || ''}" placeholder="ملاحظة..." />
+        </td>
+        <td style="text-align:center;">
+          ${currentJournalLines.length > 2 ? `
+            <button type="button" class="btn-remove-line" data-idx="${idx}">&times;</button>
+          ` : '<span style="color:#cbd5e1;">-</span>'}
+        </td>
+      </tr>
+    `).join('');
+
+    // Set selected accounts
+    document.querySelectorAll('.line-acc-select').forEach(sel => {
+      const idx = sel.getAttribute('data-idx');
+      sel.value = currentJournalLines[idx].accountId;
+      sel.addEventListener('change', (e) => {
+        currentJournalLines[idx].accountId = e.target.value;
+      });
+    });
+
+    // Attach debit listeners
+    document.querySelectorAll('.line-debit-input').forEach(inp => {
+      const idx = inp.getAttribute('data-idx');
+      inp.addEventListener('input', (e) => {
+        currentJournalLines[idx].debit = parseFloat(e.target.value) || 0;
+        if (currentJournalLines[idx].debit > 0) {
+          currentJournalLines[idx].credit = 0;
+          const crInp = document.querySelector(`.line-credit-input[data-idx="${idx}"]`);
+          if (crInp) crInp.value = '';
+        }
+        recalcJournalTotals();
+      });
+    });
+
+    // Attach credit listeners
+    document.querySelectorAll('.line-credit-input').forEach(inp => {
+      const idx = inp.getAttribute('data-idx');
+      inp.addEventListener('input', (e) => {
+        currentJournalLines[idx].credit = parseFloat(e.target.value) || 0;
+        if (currentJournalLines[idx].credit > 0) {
+          currentJournalLines[idx].debit = 0;
+          const dbInp = document.querySelector(`.line-debit-input[data-idx="${idx}"]`);
+          if (dbInp) dbInp.value = '';
+        }
+        recalcJournalTotals();
+      });
+    });
+
+    // Attach memo listeners
+    document.querySelectorAll('.line-memo-input').forEach(inp => {
+      const idx = inp.getAttribute('data-idx');
+      inp.addEventListener('input', (e) => {
+        currentJournalLines[idx].memo = e.target.value;
+      });
+    });
+
+    // Attach delete listeners
+    document.querySelectorAll('.btn-remove-line').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const idx = parseInt(btn.getAttribute('data-idx'));
+        currentJournalLines.splice(idx, 1);
+        renderJournalLinesTable();
+        recalcJournalTotals();
+      });
+    });
+
+    recalcJournalTotals();
+  }
+
+  // Add Line Button
+  document.getElementById('add-journal-line-btn')?.addEventListener('click', () => {
+    currentJournalLines.push({ accountId: '', debit: 0, credit: 0, memo: '' });
+    renderJournalLinesTable();
+  });
+
+  // Recalculate Journal Totals & Validation
+  function recalcJournalTotals() {
+    let totalDebit = 0;
+    let totalCredit = 0;
+
+    currentJournalLines.forEach(l => {
+      totalDebit += (l.debit || 0);
+      totalCredit += (l.credit || 0);
+    });
+
+    const diff = Math.abs(totalDebit - totalCredit);
+    const isBalanced = (diff < 0.001) && (totalDebit > 0);
+
+    const debEl = document.getElementById('journal-total-debit-val');
+    const crEl = document.getElementById('journal-total-credit-val');
+    const indEl = document.getElementById('journal-balance-indicator');
+    const saveBtn = document.getElementById('save-journal-btn');
+
+    if (debEl) debEl.textContent = totalDebit.toLocaleString('ar-EG', { minimumFractionDigits: 2 });
+    if (crEl) crEl.textContent = totalCredit.toLocaleString('ar-EG', { minimumFractionDigits: 2 });
+
+    if (indEl) {
+      if (isBalanced) {
+        indEl.className = 'balance-tag balanced';
+        indEl.textContent = 'متوازن تماماً ✓';
+      } else {
+        indEl.className = 'balance-tag unbalanced';
+        indEl.textContent = `⚠️ غير متوازن (الفارق: ${diff.toLocaleString('ar-EG', { minimumFractionDigits: 2 })} ج.م)`;
+      }
+    }
+
+    if (saveBtn) {
+      saveBtn.disabled = !isBalanced;
+    }
+  }
+
+  // Submit Journal Form
+  document.getElementById('new-journal-form')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const saveBtn = document.getElementById('save-journal-btn');
+    if (saveBtn) saveBtn.textContent = 'جارٍ ترحيل القيد...';
+
+    const entryDate = document.getElementById('journal-modal-date').value;
+    const description = document.getElementById('journal-modal-desc').value.trim();
+    const reference = document.getElementById('journal-modal-ref').value.trim();
+
+    // Filter valid lines
+    const validLines = currentJournalLines.filter(l => l.accountId && (l.debit > 0 || l.credit > 0));
+
+    try {
+      const res = await fetch('/api/erp/accounting', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'create_journal_entry',
+          entryDate,
+          description,
+          reference: reference || null,
+          lines: validLines
+        })
+      });
+
+      const data = await res.json();
+      if (data.success) {
+        closeJournalModal();
+        document.getElementById('new-journal-form').reset();
+        showToast('✅ تم تسجيل وترحيل القيد المحاسبي بنجاح في الدفتر العام', 'success');
+        await loadAccountingData();
+      } else {
+        showToast(data.error || 'فشل حفظ القيد اليومي', 'error');
+      }
+    } catch (err) {
+      console.error(err);
+      showToast('حدث خطأ أثناء حفظ القيد', 'error');
+    } finally {
+      if (saveBtn) saveBtn.textContent = 'تأكيد وترحيل القيد اليومي ✓';
+    }
+  });
+
+  // Modal Handlers
+  const modal = document.getElementById('tx-modal');
+  const openModalBtn = document.getElementById('open-manual-tx-btn');
+  const closeModalBtn = document.getElementById('close-tx-modal');
+  const cancelModalBtn = document.getElementById('cancel-tx-btn');
+
+  function openModal(defaultType = 'income') {
+    const typeSelect = document.getElementById('modal-tx-type');
+    if (typeSelect) typeSelect.value = defaultType;
+    if (modal) modal.style.display = 'flex';
+  }
+
+  openModalBtn?.addEventListener('click', () => openModal('income'));
+  document.getElementById('open-quick-deposit-btn')?.addEventListener('click', () => openModal('income'));
+  document.getElementById('open-quick-expense-btn')?.addEventListener('click', () => openModal('expense'));
+
+  closeModalBtn?.addEventListener('click', () => { if (modal) modal.style.display = 'none'; });
+  cancelModalBtn?.addEventListener('click', () => { if (modal) modal.style.display = 'none'; });
+
+  // Submit Manual Transaction Form
+  document.getElementById('manual-tx-form')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const saveBtn = document.getElementById('save-tx-btn');
+    if (saveBtn) saveBtn.textContent = 'جارٍ تسجيل الحركة...';
+
+    const treasuryId = document.getElementById('modal-treasury-id').value;
+    const type = document.getElementById('modal-tx-type').value;
+    const amount = document.getElementById('modal-tx-amount').value;
+    const category = document.getElementById('modal-tx-category').value;
+    const projectId = document.getElementById('modal-tx-project').value;
+    const description = document.getElementById('modal-tx-desc').value;
+
+    try {
+      const res = await fetch('/api/erp/treasury', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'manual_transaction',
+          treasuryId,
+          type,
+          amount,
+          category,
+          projectId: projectId || null,
+          description
+        })
+      });
+
+      const data = await res.json();
+      if (data.success) {
+        if (modal) modal.style.display = 'none';
+        document.getElementById('manual-tx-form').reset();
+        await loadTreasuryData();
+      } else {
+        alert(data.error || 'فشل تسجيل الحركة المالية');
+      }
+    } catch (err) {
+      console.error('Error recording transaction:', err);
+    } finally {
+      if (saveBtn) saveBtn.textContent = 'تأكيد وقيد الحركة';
+    }
+  });
+</script>

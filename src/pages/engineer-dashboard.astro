@@ -1,0 +1,901 @@
+---
+import Layout from '../layouts/Layout.astro';
+import AdminLogin from '../components/AdminLogin.astro';
+---
+
+<Layout title="لوحة تحكم المهندس الميداني | منظومة التطوير العقاري">
+  <div id="auth-loading-message" class="auth-loading-screen">
+    <div class="auth-spinner"></div>
+    <p>جارٍ التحقق من صلاحيات الموقع والإنشاءات...</p>
+  </div>
+
+  <div id="admin-login-container" class="auth-container" style="display: none;">
+    <AdminLogin />
+  </div>
+
+  <main id="main-content" class="portal-main-page" style="display: none;">
+    
+    <!-- Top Executive Header -->
+    <header class="role-top-header">
+      <div class="header-inner">
+        <div class="user-profile-badge">
+          <div class="avatar-pod pod-blue" id="user-avatar-initial">E</div>
+          <div>
+            <span class="role-pill pill-blue">مهندس موقع / مشرف معتمد</span>
+            <h1 id="user-display-name" class="user-title">المهندس الميداني</h1>
+          </div>
+        </div>
+
+        <div class="header-controls">
+          <button id="refresh-data-btn" class="btn-ctrl btn-refresh" title="تحديث البيانات">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+            <span>تحديث</span>
+          </button>
+          <a href="/portal" target="_blank" class="btn-ctrl btn-portal-preview">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+            <span>معاينة بث العميل</span>
+          </a>
+          <button id="logout-button" class="btn-ctrl btn-logout">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+            <span>تسجيل الخروج</span>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <div class="content-wrapper">
+      
+      <!-- Metrics Ribbon -->
+      <section class="metrics-ribbon">
+        <div class="metric-card">
+          <div class="metric-icon-box box-blue">
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 20h20"></path><path d="M5 20V8l7-5 7 5v12"></path><rect x="9" y="12" width="6" height="8"></rect></svg>
+          </div>
+          <div class="metric-info">
+            <span class="m-label">المراحل الإنشائية بالموقع</span>
+            <h3 id="stat-stages-count">0</h3>
+            <span class="m-sub">مراحل قيد التنفيذ والمتابعة</span>
+          </div>
+        </div>
+
+        <div class="metric-card">
+          <div class="metric-icon-box box-amber">
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+          </div>
+          <div class="metric-info">
+            <span class="m-label">طلبات الصرف الميداني المعلقة</span>
+            <h3 id="stat-pending-expenses">0</h3>
+            <span class="m-sub">بانتظار اعتماد وصرف الخزينة</span>
+          </div>
+        </div>
+
+        <div class="metric-card">
+          <div class="metric-icon-box box-purple">
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="3" width="15" height="13"></rect><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon><circle cx="5.5" cy="18.5" r="2.5"></circle><circle cx="18.5" cy="18.5" r="2.5"></circle></svg>
+          </div>
+          <div class="metric-info">
+            <span class="m-label">أصناف مخزن المواد</span>
+            <h3 id="stat-stocks-count">0</h3>
+            <span class="m-sub">حديد، أسمنت، ومواد بناء</span>
+          </div>
+        </div>
+
+        <div class="metric-card">
+          <div class="metric-icon-box box-emerald">
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path></svg>
+          </div>
+          <div class="metric-info">
+            <span class="m-label">المقاولون والموردون النشطون</span>
+            <h3 id="stat-contractors-count">0</h3>
+            <span class="m-sub">يعملون بالمشروعات حالياً</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Navigation Tabs -->
+      <div class="tabs-nav-bar">
+        <button type="button" class="tab-btn active" data-tab="tab-stages">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+          <span>مراحل التنفيذ ونسب الإنجاز</span>
+        </button>
+        <button type="button" class="tab-btn" data-tab="tab-expenses">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"></rect><line x1="12" y1="8" x2="12" y2="16"></line><line x1="8" y1="12" x2="16" y2="12"></line></svg>
+          <span>طلبات الصرف الميداني (للخزينة)</span>
+        </button>
+        <button type="button" class="tab-btn" data-tab="tab-warehouse">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path></svg>
+          <span>مخزن مواد البناء</span>
+        </button>
+        <button type="button" class="tab-btn" data-tab="tab-broadcast">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M8.56 2.75c4.37 6 6 9.42 8 17.72"></path><path d="M19.14 7.5c-6.84 2-10.42 4.14-15.7 6.64"></path></svg>
+          <span>بث التحديثات وصور البناء للعملاء</span>
+        </button>
+      </div>
+
+      <!-- Tab 1: Construction Stages -->
+      <section id="tab-stages" class="tab-panel active">
+        <div class="panel-action-bar">
+          <div>
+            <h2>مراحل التنفيذ ونسب الإنجاز الميداني</h2>
+            <p>تحكم فوري بنسب إنجاز الحفر، الخرسانات، المباني، والتشطيبات</p>
+          </div>
+          <button id="open-stage-modal-btn" class="btn-primary-luxury">
+            <span>+ إضافة مرحلة بناء جديدة</span>
+          </button>
+        </div>
+
+        <div id="stages-cards-container" class="stages-grid">
+          <!-- Rendered via JS -->
+        </div>
+      </section>
+
+      <!-- Tab 2: Expense Requests -->
+      <section id="tab-expenses" class="tab-panel">
+        <div class="panel-action-bar">
+          <div>
+            <h2>طلبات الصرف المالي الميداني</h2>
+            <p>إرسال طلب صرف لأجور عمالة أو مواد عاجلة لتصرفها الخزينة والمحاسب مباشرة</p>
+          </div>
+          <button id="open-expense-modal-btn" class="btn-primary-luxury">
+            <span>+ طلب صرف جديد</span>
+          </button>
+        </div>
+
+        <div class="leads-table-container">
+          <table class="luxury-table">
+            <thead>
+              <tr>
+                <th>المشروع</th>
+                <th>البند والبيان</th>
+                <th>المبلغ المطلوب</th>
+                <th>تاريخ الطلب</th>
+                <th>حالة الاعتماد</th>
+              </tr>
+            </thead>
+            <tbody id="expenses-tbody">
+              <tr><td colspan="5" class="table-loading">جارٍ جلب طلبات الصرف...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Tab 3: Materials Warehouse -->
+      <section id="tab-warehouse" class="tab-panel">
+        <div class="panel-action-bar">
+          <div>
+            <h2>مخزون مواد البناء الميداني</h2>
+            <p>متابعة كميات الأسمنت، حديد التسليح، الطوب، ومواد التشطيب</p>
+          </div>
+          <button id="open-stock-modal-btn" class="btn-primary-luxury">
+            <span>+ تسجيل مادة جديدة بالمخزن</span>
+          </button>
+        </div>
+
+        <div id="stocks-cards-container" class="stocks-grid">
+          <!-- Rendered via JS -->
+        </div>
+      </section>
+
+      <!-- Tab 4: Site Photo Broadcast -->
+      <section id="tab-broadcast" class="tab-panel">
+        <div class="panel-action-bar">
+          <div>
+            <h2>بث التحديثات الميدانية للملاك</h2>
+            <p>نشر صور مراحل التنفيذ والتقارير الميدانية لظهورها فوراً في بوابة العملاء</p>
+          </div>
+          <button id="open-broadcast-modal-btn" class="btn-primary-luxury">
+            <span>+ بث تحديث ميداني جديد</span>
+          </button>
+        </div>
+
+        <div id="broadcasts-container" class="broadcasts-grid">
+          <!-- Rendered via JS -->
+        </div>
+      </section>
+
+    </div>
+
+    <!-- Modal 1: New Stage -->
+    <div id="stage-modal" class="modal-backdrop" style="display: none;">
+      <div class="modal-card">
+        <div class="modal-card-header">
+          <h3>إضافة مرحلة تنفيذية جديدة</h3>
+          <button type="button" class="close-modal-x" id="close-stage-x">&times;</button>
+        </div>
+        <form id="stage-form" class="modal-card-body">
+          <div class="field-wrap">
+            <label>المشروع المستهدف *</label>
+            <select id="stage-project-select" required></select>
+          </div>
+          <div class="field-wrap">
+            <label>اسم المرحلة *</label>
+            <input type="text" id="stage-name-input" placeholder="مثال: صب سقف الدور الثالث" required />
+          </div>
+          <div class="field-row">
+            <div class="field-wrap">
+              <label>تاريخ البدء</label>
+              <input type="date" id="stage-start-date" />
+            </div>
+            <div class="field-wrap">
+              <label>تاريخ الانتهاء المتوقع</label>
+              <input type="date" id="stage-end-date" />
+            </div>
+          </div>
+          <div class="modal-footer-btns">
+            <button type="button" class="btn-cancel" id="cancel-stage-btn">إلغاء</button>
+            <button type="submit" class="btn-save" id="save-stage-btn">حفظ المرحلة</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Modal 2: New Expense Request -->
+    <div id="expense-modal" class="modal-backdrop" style="display: none;">
+      <div class="modal-card">
+        <div class="modal-card-header">
+          <div>
+            <h3>تقديم طلب صرف مالي ميداني</h3>
+            <p>يتم إرساله للمحاسب والخزينة للصرف الفوري</p>
+          </div>
+          <button type="button" class="close-modal-x" id="close-exp-x">&times;</button>
+        </div>
+        <form id="expense-form" class="modal-card-body">
+          <div class="field-wrap">
+            <label>المشروع المستهدف *</label>
+            <select id="exp-project-select" required></select>
+          </div>
+          <div class="field-row">
+            <div class="field-wrap">
+              <label>المبلغ المطلوب (ج.م) *</label>
+              <input type="number" id="exp-amount" placeholder="5000" required />
+            </div>
+            <div class="field-wrap">
+              <label>تصنيف الصرف *</label>
+              <select id="exp-category" required>
+                <option value="labor">أجور ونثرية عمالة</option>
+                <option value="materials">شراء مواد عاجلة</option>
+                <option value="equipment">إيجار معدات وآلات</option>
+                <option value="site_expenses">مصاريف موقع وتشغيل</option>
+              </select>
+            </div>
+          </div>
+          <div class="field-wrap">
+            <label>وصف وبيان سبب الصرف *</label>
+            <textarea id="exp-desc" rows="3" placeholder="اكتب تفاصيل البند بدقة لسرعة اعتماد الصرف من الخزينة..." required></textarea>
+          </div>
+          <div class="modal-footer-btns">
+            <button type="button" class="btn-cancel" id="cancel-exp-btn">إلغاء</button>
+            <button type="submit" class="btn-save btn-emerald" id="save-exp-btn">إرسال الطلب للخزينة ←</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Modal 3: New Stock Item -->
+    <div id="stock-modal" class="modal-backdrop" style="display: none;">
+      <div class="modal-card">
+        <div class="modal-card-header">
+          <h3>تسجيل مادة جديدة بمخزن الموقع</h3>
+          <button type="button" class="close-modal-x" id="close-stock-x">&times;</button>
+        </div>
+        <form id="stock-form" class="modal-card-body">
+          <div class="field-wrap">
+            <label>المشروع التابع له المخزن *</label>
+            <select id="stock-project-select" required></select>
+          </div>
+          <div class="field-row">
+            <div class="field-wrap">
+              <label>اسم المادة *</label>
+              <input type="text" id="stock-name" placeholder="مثال: حديد تسليح 12 مم" required />
+            </div>
+            <div class="field-wrap">
+              <label>وحدة القياس *</label>
+              <input type="text" id="stock-unit" placeholder="طن، شيكارة، م³، ألف طوبة" required />
+            </div>
+          </div>
+          <div class="field-row">
+            <div class="field-wrap">
+              <label>الكمية المستلمة *</label>
+              <input type="number" id="stock-quantity" placeholder="25" step="any" required />
+            </div>
+            <div class="field-wrap">
+              <label>سعر الوحدة التقديري (ج.م)</label>
+              <input type="number" id="stock-unit-price" placeholder="42000" step="any" />
+            </div>
+          </div>
+          <div class="modal-footer-btns">
+            <button type="button" class="btn-cancel" id="cancel-stock-btn">إلغاء</button>
+            <button type="submit" class="btn-save" id="save-stock-btn">إضافة للمخزن</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Modal 4: New Broadcast -->
+    <div id="broadcast-modal" class="modal-backdrop" style="display: none;">
+      <div class="modal-card">
+        <div class="modal-card-header">
+          <h3>بث تحديث وصور ميدانية للعملاء</h3>
+          <button type="button" class="close-modal-x" id="close-broad-x">&times;</button>
+        </div>
+        <form id="broadcast-form" class="modal-card-body">
+          <div class="field-wrap">
+            <label>المشروع المعني *</label>
+            <select id="broad-project-select" required></select>
+          </div>
+          <div class="field-wrap">
+            <label>عنوان التحديث الميداني *</label>
+            <input type="text" id="broad-title" placeholder="مثال: الانتهاء من صب خرسانة القواعد المسلحة" required />
+          </div>
+          <div class="field-wrap">
+            <label>رابط الصورة الميدانية (URL) أو وصف الإنجاز</label>
+            <input type="url" id="broad-photo-url" placeholder="https://example.com/site-photo.jpg" />
+          </div>
+          <div class="field-wrap">
+            <label>تفاصيل وتقرير الإنجاز للملاك</label>
+            <textarea id="broad-desc" rows="3" placeholder="اكتب تقريراً موجزاً يوضح ما تم إنجازه في الموقع اليوم..."></textarea>
+          </div>
+          <div class="modal-footer-btns">
+            <button type="button" class="btn-cancel" id="cancel-broad-btn">إلغاء</button>
+            <button type="submit" class="btn-save btn-emerald" id="save-broad-btn">نشر البث الفوري للملاك</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+  </main>
+</Layout>
+
+<style is:global>
+  * { box-sizing: border-box; }
+  .portal-main-page {
+    direction: rtl; font-family: 'Cairo', system-ui, sans-serif; background: #f8fafc;
+    min-height: 100vh; padding-bottom: 4rem; color: #0f172a;
+  }
+  .auth-loading-screen {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    min-height: 100vh; font-family: 'Cairo', sans-serif; color: #475569; gap: 1rem; direction: rtl;
+  }
+  .auth-spinner {
+    width: 44px; height: 44px; border: 4px solid #e2e8f0; border-top-color: #2563eb; border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .role-top-header {
+    background: #ffffff; border-bottom: 1px solid #e2e8f0; position: sticky; top: 0; z-index: 40;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.03);
+  }
+  .header-inner {
+    max-width: 1550px; margin: 0 auto; padding: 0.9rem 2rem; display: flex; justify-content: space-between; align-items: center;
+  }
+  .user-profile-badge { display: flex; align-items: center; gap: 0.85rem; }
+  .avatar-pod {
+    width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center;
+    font-size: 1.25rem; font-weight: 900; color: #fff;
+  }
+  .pod-blue { background: linear-gradient(135deg, #1d4ed8, #2563eb); }
+  .role-pill { font-size: 0.72rem; font-weight: 800; padding: 0.15rem 0.55rem; border-radius: 12px; display: inline-block; }
+  .pill-blue { background: #dbeafe; color: #1d4ed8; }
+  .user-title { margin: 0; font-size: 1.15rem; font-weight: 800; color: #0f172a; }
+
+  .header-controls { display: flex; align-items: center; gap: 0.65rem; }
+  .btn-ctrl {
+    display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.55rem 1rem; border-radius: 10px;
+    font-weight: 700; font-size: 0.86rem; cursor: pointer; text-decoration: none; border: none; transition: all 0.2s;
+  }
+  .btn-refresh { background: #f1f5f9; color: #334155; }
+  .btn-refresh:hover { background: #e2e8f0; }
+  .btn-portal-preview { background: #e0f2fe; color: #0369a1; }
+  .btn-portal-preview:hover { background: #bae6fd; }
+  .btn-logout { background: #fee2e2; color: #dc2626; }
+  .btn-logout:hover { background: #fecaca; }
+
+  .content-wrapper { max-width: 1550px; margin: 1.6rem auto 0; padding: 0 2rem; display: flex; flex-direction: column; gap: 1.5rem; }
+
+  .metrics-ribbon { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.25rem; }
+  .metric-card {
+    background: #ffffff; border-radius: 16px; padding: 1.25rem 1.4rem; border: 1px solid #e2e8f0;
+    display: flex; align-items: center; gap: 1rem; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+  }
+  .metric-icon-box {
+    width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .box-blue { background: #dbeafe; color: #2563eb; }
+  .box-amber { background: #fef3c7; color: #d97706; }
+  .box-purple { background: #ede9fe; color: #7c3aed; }
+  .box-emerald { background: #d1fae5; color: #059669; }
+  .metric-info { display: flex; flex-direction: column; min-width: 0; }
+  .m-label { font-size: 0.78rem; font-weight: 700; color: #64748b; }
+  .metric-info h3 { margin: 0.15rem 0; font-size: 1.55rem; font-weight: 900; color: #0f172a; }
+  .m-sub { font-size: 0.72rem; color: #94a3b8; font-weight: 600; }
+
+  .tabs-nav-bar {
+    display: flex; gap: 0.5rem; background: #ffffff; padding: 0.4rem; border-radius: 14px; border: 1px solid #e2e8f0;
+  }
+  .tab-btn {
+    display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.65rem 1.3rem; border-radius: 10px;
+    border: none; background: transparent; color: #64748b; font-weight: 800; font-size: 0.88rem; cursor: pointer; transition: all 0.2s;
+  }
+  .tab-btn:hover { background: #f8fafc; color: #0f172a; }
+  .tab-btn.active { background: #2563eb; color: #ffffff; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25); }
+
+  .tab-panel { display: none; flex-direction: column; gap: 1.25rem; }
+  .tab-panel.active { display: flex; }
+
+  .panel-action-bar {
+    background: #ffffff; border-radius: 16px; padding: 1.25rem 1.6rem; border: 1px solid #e2e8f0;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .panel-action-bar h2 { margin: 0 0 0.15rem 0; font-size: 1.2rem; font-weight: 800; color: #0f172a; }
+  .panel-action-bar p { margin: 0; font-size: 0.82rem; color: #64748b; }
+
+  .btn-primary-luxury {
+    background: linear-gradient(135deg, #1d4ed8, #2563eb); color: #fff; border: none; padding: 0.65rem 1.3rem;
+    border-radius: 10px; font-weight: 800; font-size: 0.9rem; cursor: pointer; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+    transition: all 0.2s;
+  }
+  .btn-primary-luxury:hover { transform: translateY(-1px); box-shadow: 0 6px 16px rgba(37, 99, 235, 0.35); }
+
+  /* Stages Grid & Cards */
+  .stages-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 1.25rem; }
+  .stage-card-lux {
+    background: #ffffff; border-radius: 16px; border: 1px solid #e2e8f0; padding: 1.4rem;
+    display: flex; flex-direction: column; gap: 1.15rem; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+  }
+  .stage-card-header { display: flex; justify-content: space-between; align-items: flex-start; }
+  .stage-card-header h4 { margin: 0; font-size: 1.1rem; font-weight: 800; color: #0f172a; }
+  .stage-proj-name { font-size: 0.78rem; color: #64748b; font-weight: 700; margin-top: 0.15rem; }
+  .stage-pct-tag { font-size: 1.1rem; font-weight: 900; color: #2563eb; }
+
+  .stage-slider-wrap { display: flex; flex-direction: column; gap: 0.5rem; }
+  .stage-slider-wrap label { font-size: 0.78rem; font-weight: 700; color: #475569; display: flex; justify-content: space-between; }
+  .stage-range-slider { width: 100%; accent-color: #2563eb; cursor: pointer; }
+
+  .stage-progress-bar {
+    width: 100%; height: 8px; background: #f1f5f9; border-radius: 10px; overflow: hidden;
+  }
+  .stage-progress-fill { height: 100%; background: linear-gradient(90deg, #3b82f6, #10b981); border-radius: 10px; transition: width 0.3s; }
+
+  /* Stocks Grid */
+  .stocks-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.25rem; }
+  .stock-card-lux {
+    background: #ffffff; border-radius: 16px; border: 1px solid #e2e8f0; padding: 1.3rem;
+    display: flex; flex-direction: column; gap: 0.75rem; box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+  }
+  .stock-card-lux h4 { margin: 0; font-size: 1.1rem; font-weight: 800; color: #0f172a; }
+  .stock-val-row { display: flex; justify-content: space-between; align-items: baseline; }
+  .stock-qty { font-size: 1.6rem; font-weight: 900; color: #0f172a; }
+  .stock-unit { font-size: 0.85rem; color: #64748b; font-weight: 700; }
+
+  /* Broadcasts Grid */
+  .broadcasts-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 1.25rem; }
+  .broadcast-card-lux {
+    background: #ffffff; border-radius: 16px; border: 1px solid #e2e8f0; overflow: hidden;
+    display: flex; flex-direction: column; box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+  }
+  .broadcast-photo { width: 100%; height: 180px; object-fit: cover; background: #e2e8f0; }
+  .broadcast-body { padding: 1.25rem; display: flex; flex-direction: column; gap: 0.5rem; }
+  .broadcast-body h4 { margin: 0; font-size: 1.05rem; font-weight: 800; color: #0f172a; }
+  .broadcast-body p { margin: 0; font-size: 0.84rem; color: #64748b; line-height: 1.5; }
+  .broadcast-meta { font-size: 0.72rem; color: #94a3b8; font-weight: 600; margin-top: 0.25rem; }
+
+  /* Table styling */
+  .leads-table-container {
+    background: #ffffff; border-radius: 16px; border: 1px solid #e2e8f0; overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+  }
+  .luxury-table { width: 100%; border-collapse: collapse; text-align: right; }
+  .luxury-table th { background: #f8fafc; padding: 0.9rem 1.2rem; font-size: 0.82rem; font-weight: 800; color: #475569; border-bottom: 1px solid #e2e8f0; }
+  .luxury-table td { padding: 0.9rem 1.2rem; font-size: 0.88rem; border-bottom: 1px solid #f1f5f9; color: #1e293b; }
+  .table-loading { text-align: center; color: #94a3b8; padding: 2.5rem !important; }
+
+  /* Modals */
+  .modal-backdrop {
+    position: fixed; inset: 0; background: rgba(15, 23, 42, 0.55); backdrop-filter: blur(6px);
+    display: flex; align-items: center; justify-content: center; z-index: 100; padding: 1.5rem;
+  }
+  .modal-card {
+    background: #ffffff; border-radius: 20px; width: 100%; max-width: 520px; padding: 1.8rem;
+    box-shadow: 0 20px 45px rgba(0,0,0,0.2); border: 1px solid #e2e8f0;
+  }
+  .modal-card-header {
+    display: flex; justify-content: space-between; align-items: flex-start; padding-bottom: 1rem;
+    border-bottom: 1px solid #f1f5f9; margin-bottom: 1.25rem;
+  }
+  .modal-card-header h3 { margin: 0 0 0.2rem 0; font-size: 1.2rem; font-weight: 800; color: #0f172a; }
+  .modal-card-header p { margin: 0; font-size: 0.78rem; color: #64748b; }
+  .close-modal-x { background: transparent; border: none; font-size: 1.5rem; color: #94a3b8; cursor: pointer; }
+
+  .modal-card-body { display: flex; flex-direction: column; gap: 1rem; }
+  .field-wrap { display: flex; flex-direction: column; gap: 0.35rem; }
+  .field-wrap label { font-size: 0.82rem; font-weight: 700; color: #334155; }
+  .field-wrap input, .field-wrap select, .field-wrap textarea {
+    width: 100%; padding: 0.65rem 0.9rem; border: 1.5px solid #cbd5e1; border-radius: 10px;
+    font-size: 0.9rem; font-family: inherit; color: #0f172a;
+  }
+  .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+
+  .modal-footer-btns { display: flex; justify-content: flex-end; gap: 0.65rem; margin-top: 0.5rem; }
+  .btn-save, .btn-cancel {
+    padding: 0.65rem 1.3rem; border-radius: 10px; font-weight: 800; font-size: 0.88rem; cursor: pointer; border: none;
+  }
+  .btn-save { background: #2563eb; color: #fff; }
+  .btn-save:hover { background: #1d4ed8; }
+  .btn-save.btn-emerald { background: #059669; }
+  .btn-save.btn-emerald:hover { background: #047857; }
+  .btn-cancel { background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; }
+  .btn-cancel:hover { background: #e2e8f0; }
+
+  @media (max-width: 960px) {
+    .metrics-ribbon { grid-template-columns: repeat(2, 1fr); }
+    .header-inner { flex-direction: column; gap: 1rem; align-items: stretch; }
+    .field-row { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 600px) {
+    .metrics-ribbon { grid-template-columns: 1fr; }
+    .tabs-nav-bar { flex-direction: column; }
+  }
+</style>
+
+<script>
+  import { checkAuth, logout } from '../lib/auth.js';
+
+  let currentEngineer = null;
+  let constructionData = null;
+
+  document.addEventListener('DOMContentLoaded', async () => {
+    const authLoading = document.getElementById('auth-loading-message');
+    const loginContainer = document.getElementById('admin-login-container');
+    const mainContent = document.getElementById('main-content');
+    const logoutBtn = document.getElementById('logout-button');
+
+    try {
+      const user = await checkAuth();
+      if (authLoading) authLoading.style.display = 'none';
+
+      if (user && (user.role === 'supervisor' || user.role === 'engineer' || user.role === 'admin')) {
+        currentEngineer = user;
+        if (mainContent) mainContent.style.display = 'block';
+
+        const nameElem = document.getElementById('user-display-name');
+        const initialElem = document.getElementById('user-avatar-initial');
+        if (nameElem && user.name) nameElem.textContent = user.name;
+        if (initialElem && user.name) initialElem.textContent = user.name.charAt(0).toUpperCase();
+
+        if (logoutBtn) {
+          logoutBtn.addEventListener('click', async () => {
+            await logout();
+            window.location.href = '/crs';
+          });
+        }
+
+        initializeEngineerDashboard();
+      } else {
+        window.location.href = '/crs';
+      }
+    } catch (e) {
+      if (authLoading) authLoading.style.display = 'none';
+      if (loginContainer) loginContainer.style.display = 'block';
+    }
+  });
+
+  async function fetchConstructionData() {
+    try {
+      const res = await fetch('/api/erp/construction');
+      const data = await res.json();
+      if (data.success) {
+        constructionData = data;
+        renderMetrics();
+        renderStages();
+        renderExpenses();
+        renderWarehouse();
+        renderBroadcasts();
+        populateModals();
+      }
+    } catch (err) {
+      console.error('Error fetching construction data:', err);
+    }
+  }
+
+  function renderMetrics() {
+    if (!constructionData) return;
+    document.getElementById('stat-stages-count').textContent = constructionData.stages?.length || 0;
+    const pendingExp = constructionData.expenseRequests?.filter(e => e.status === 'pending') || [];
+    document.getElementById('stat-pending-expenses').textContent = pendingExp.length;
+    document.getElementById('stat-stocks-count').textContent = constructionData.warehouseStocks?.length || 0;
+    document.getElementById('stat-contractors-count').textContent = constructionData.contractors?.length || 0;
+  }
+
+  function renderStages() {
+    const container = document.getElementById('stages-cards-container');
+    if (!constructionData || !constructionData.stages || constructionData.stages.length === 0) {
+      container.innerHTML = `<div style="grid-column: 1/-1; text-align: center; padding: 3rem; background: #fff; border-radius: 16px; color: #94a3b8;">لا توجد مراحل مسجلة بعد. أضف أول مرحلة بناء!</div>`;
+      return;
+    }
+
+    container.innerHTML = constructionData.stages.map(st => `
+      <div class="stage-card-lux" data-id="${st.id}">
+        <div class="stage-card-header">
+          <div>
+            <h4>${st.name}</h4>
+            <div class="stage-proj-name">${st.project?.projectName}</div>
+          </div>
+          <span class="stage-pct-tag" id="pct-val-${st.id}">${st.progressPercent}%</span>
+        </div>
+
+        <div class="stage-progress-bar">
+          <div class="stage-progress-fill" id="fill-bar-${st.id}" style="width: ${st.progressPercent}%;"></div>
+        </div>
+
+        <div class="stage-slider-wrap">
+          <label>
+            <span>تحديث نسبة الإنجاز الميداني:</span>
+            <span id="slider-label-${st.id}">${st.progressPercent}%</span>
+          </label>
+          <input type="range" min="0" max="100" value="${st.progressPercent}" class="stage-range-slider stage-slider" data-id="${st.id}" />
+        </div>
+      </div>
+    `).join('');
+
+    // Attach slider events
+    document.querySelectorAll('.stage-slider').forEach(slider => {
+      slider.addEventListener('input', (e) => {
+        const id = e.target.dataset.id;
+        const val = e.target.value;
+        document.getElementById(`pct-val-${id}`).textContent = `${val}%`;
+        document.getElementById(`slider-label-${id}`).textContent = `${val}%`;
+        document.getElementById(`fill-bar-${id}`).style.width = `${val}%`;
+      });
+
+      slider.addEventListener('change', async (e) => {
+        const id = e.target.dataset.id;
+        const val = parseInt(e.target.value);
+        try {
+          await fetch('/api/erp/construction', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'update_stage_progress', stageId: id, progressPercent: val })
+          });
+        } catch (err) { alert('خطأ في حفظ نسبة الإنجاز'); }
+      });
+    });
+  }
+
+  function renderExpenses() {
+    const tbody = document.getElementById('expenses-tbody');
+    if (!constructionData || !constructionData.expenseRequests || constructionData.expenseRequests.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="5" class="table-loading">لا توجد طلبات صرف ميداني حالياً.</td></tr>`;
+      return;
+    }
+
+    const statusMap = {
+      pending: '<span class="role-pill" style="background:#fef3c7; color:#b45309;">قيد المراجعة بالخزينة</span>',
+      approved: '<span class="role-pill" style="background:#d1fae5; color:#047857;">تم الاعتماد والصرف ✓</span>',
+      rejected: '<span class="role-pill" style="background:#fee2e2; color:#b91c1c;">مرفوض</span>'
+    };
+
+    tbody.innerHTML = constructionData.expenseRequests.map(exp => `
+      <tr>
+        <td><strong>${exp.project?.projectName}</strong></td>
+        <td>${exp.description || 'طلب صرف موقع'}</td>
+        <td style="color:#d97706; font-weight:800;">${exp.amount?.toLocaleString('ar-EG')} ج.م</td>
+        <td>${new Date(exp.createdAt).toLocaleDateString('ar-EG')}</td>
+        <td>${statusMap[exp.status] || exp.status}</td>
+      </tr>
+    `).join('');
+  }
+
+  function renderWarehouse() {
+    const container = document.getElementById('stocks-cards-container');
+    if (!constructionData || !constructionData.warehouseStocks || constructionData.warehouseStocks.length === 0) {
+      container.innerHTML = `<div style="grid-column: 1/-1; text-align: center; padding: 3rem; background: #fff; border-radius: 16px; color: #94a3b8;">المخزن فارغ حالياً. أضف مواد بناء للمشروع!</div>`;
+      return;
+    }
+
+    container.innerHTML = constructionData.warehouseStocks.map(stock => `
+      <div class="stock-card-lux">
+        <div style="font-size:0.75rem; color:#64748b; font-weight:700;">${stock.project?.projectName}</div>
+        <h4>${stock.itemName}</h4>
+        <div class="stock-val-row">
+          <span class="stock-qty">${stock.quantity}</span>
+          <span class="stock-unit">${stock.unit}</span>
+        </div>
+        <div style="font-size:0.8rem; color:#059669; font-weight:700;">
+          التكلفة: ${(stock.unitPrice ? stock.unitPrice.toLocaleString('ar-EG') + ' ج.م / ' + stock.unit : 'غير محدد')}
+        </div>
+      </div>
+    `).join('');
+  }
+
+  async function renderBroadcasts() {
+    const container = document.getElementById('broadcasts-container');
+    try {
+      const res = await fetch('/api/erp/communications');
+      const data = await res.json();
+      if (data.success && data.updates && data.updates.length > 0) {
+        container.innerHTML = data.updates.map(b => `
+          <div class="broadcast-card-lux">
+            ${b.photoUrl ? `<img src="${b.photoUrl}" alt="Site photo" class="broadcast-photo" onerror="this.style.display='none'" />` : ''}
+            <div class="broadcast-body">
+              <span style="font-size:0.75rem; color:#2563eb; font-weight:800;">${b.project?.projectName}</span>
+              <h4>${b.title}</h4>
+              <p>${b.description || ''}</p>
+              <div class="broadcast-meta">نشر بتاريخ: ${new Date(b.createdAt).toLocaleDateString('ar-EG')}</div>
+            </div>
+          </div>
+        `).join('');
+      } else {
+        container.innerHTML = `<div style="grid-column: 1/-1; text-align: center; padding: 3rem; background: #fff; border-radius: 16px; color: #94a3b8;">لا توجد تحديثات منشورة بعد. انشر أول تقرير ميداني!</div>`;
+      }
+    } catch (e) { console.error(e); }
+  }
+
+  function populateModals() {
+    if (!constructionData || !constructionData.projects) return;
+    const options = constructionData.projects.map(p => `<option value="${p.id}">${p.projectName}</option>`).join('');
+    
+    ['stage-project-select', 'exp-project-select', 'stock-project-select', 'broad-project-select'].forEach(id => {
+      const sel = document.getElementById(id);
+      if (sel) sel.innerHTML = options;
+    });
+  }
+
+  function initializeEngineerDashboard() {
+    fetchConstructionData();
+
+    // Tab switcher
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById(btn.dataset.tab)?.classList.add('active');
+      });
+    });
+
+    // Refresh btn
+    document.getElementById('refresh-data-btn')?.addEventListener('click', () => {
+      fetchConstructionData();
+    });
+
+    // Stage Modal
+    const stageModal = document.getElementById('stage-modal');
+    document.getElementById('open-stage-modal-btn')?.addEventListener('click', () => { stageModal.style.display = 'flex'; });
+    document.getElementById('close-stage-x')?.addEventListener('click', () => { stageModal.style.display = 'none'; });
+    document.getElementById('cancel-stage-btn')?.addEventListener('click', () => { stageModal.style.display = 'none'; });
+
+    document.getElementById('stage-form')?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const saveBtn = document.getElementById('save-stage-btn');
+      saveBtn.disabled = true;
+
+      const payload = {
+        action: 'create_stage',
+        projectId: document.getElementById('stage-project-select').value,
+        name: document.getElementById('stage-name-input').value,
+        startDate: document.getElementById('stage-start-date').value || null,
+        endDate: document.getElementById('stage-end-date').value || null
+      };
+
+      try {
+        const res = await fetch('/api/erp/construction', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        if (res.ok) {
+          stageModal.style.display = 'none';
+          document.getElementById('stage-form').reset();
+          fetchConstructionData();
+        } else { alert('فشل إنشاء المرحلة'); }
+      } catch (err) { alert('خطأ في الاتصال'); }
+      finally { saveBtn.disabled = false; }
+    });
+
+    // Expense Modal
+    const expModal = document.getElementById('expense-modal');
+    document.getElementById('open-expense-modal-btn')?.addEventListener('click', () => { expModal.style.display = 'flex'; });
+    document.getElementById('close-exp-x')?.addEventListener('click', () => { expModal.style.display = 'none'; });
+    document.getElementById('cancel-exp-btn')?.addEventListener('click', () => { expModal.style.display = 'none'; });
+
+    document.getElementById('expense-form')?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const saveBtn = document.getElementById('save-exp-btn');
+      saveBtn.disabled = true;
+
+      const payload = {
+        action: 'create_expense_request',
+        projectId: document.getElementById('exp-project-select').value,
+        amount: parseFloat(document.getElementById('exp-amount').value),
+        category: document.getElementById('exp-category').value,
+        description: document.getElementById('exp-desc').value
+      };
+
+      try {
+        const res = await fetch('/api/erp/construction', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        if (res.ok) {
+          alert('✓ تم إرسال طلب الصرف للخزينة بنجاح!');
+          expModal.style.display = 'none';
+          document.getElementById('expense-form').reset();
+          fetchConstructionData();
+        } else { alert('فشل إرسال طلب الصرف'); }
+      } catch (err) { alert('خطأ في الاتصال'); }
+      finally { saveBtn.disabled = false; }
+    });
+
+    // Stock Modal
+    const stockModal = document.getElementById('stock-modal');
+    document.getElementById('open-stock-modal-btn')?.addEventListener('click', () => { stockModal.style.display = 'flex'; });
+    document.getElementById('close-stock-x')?.addEventListener('click', () => { stockModal.style.display = 'none'; });
+    document.getElementById('cancel-stock-btn')?.addEventListener('click', () => { stockModal.style.display = 'none'; });
+
+    document.getElementById('stock-form')?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const saveBtn = document.getElementById('save-stock-btn');
+      saveBtn.disabled = true;
+
+      const payload = {
+        action: 'add_stock',
+        projectId: document.getElementById('stock-project-select').value,
+        itemName: document.getElementById('stock-name').value,
+        unit: document.getElementById('stock-unit').value,
+        quantity: parseFloat(document.getElementById('stock-quantity').value),
+        unitPrice: parseFloat(document.getElementById('stock-unit-price').value) || null
+      };
+
+      try {
+        const res = await fetch('/api/erp/construction', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        if (res.ok) {
+          stockModal.style.display = 'none';
+          document.getElementById('stock-form').reset();
+          fetchConstructionData();
+        } else { alert('فشل تسجيل المادة'); }
+      } catch (err) { alert('خطأ في الاتصال'); }
+      finally { saveBtn.disabled = false; }
+    });
+
+    // Broadcast Modal
+    const broadModal = document.getElementById('broadcast-modal');
+    document.getElementById('open-broadcast-modal-btn')?.addEventListener('click', () => { broadModal.style.display = 'flex'; });
+    document.getElementById('close-broad-x')?.addEventListener('click', () => { broadModal.style.display = 'none'; });
+    document.getElementById('cancel-broad-btn')?.addEventListener('click', () => { broadModal.style.display = 'none'; });
+
+    document.getElementById('broadcast-form')?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const saveBtn = document.getElementById('save-broad-btn');
+      saveBtn.disabled = true;
+
+      const payload = {
+        action: 'create_broadcast',
+        projectId: document.getElementById('broad-project-select').value,
+        title: document.getElementById('broad-title').value,
+        photoUrl: document.getElementById('broad-photo-url').value || null,
+        description: document.getElementById('broad-desc').value
+      };
+
+      try {
+        const res = await fetch('/api/erp/communications', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        if (res.ok) {
+          alert('✓ تم نشر التحديث الميداني لعملاء المشروع بنجاح!');
+          broadModal.style.display = 'none';
+          document.getElementById('broadcast-form').reset();
+          renderBroadcasts();
+        } else { alert('فشل نشر التحديث'); }
+      } catch (err) { alert('خطأ في الاتصال'); }
+      finally { saveBtn.disabled = false; }
+    });
+  }
+</script>

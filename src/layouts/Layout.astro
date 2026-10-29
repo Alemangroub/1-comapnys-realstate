@@ -1,0 +1,160 @@
+
+---
+import '../styles/global.css';
+
+export interface Props {
+	title: string;
+    bodyClass?: string; // Optional body class
+}
+
+const { title, bodyClass = "" } = Astro.props;
+---
+
+<!DOCTYPE html>
+<html lang="ar" dir="ltr" class="scrollbar-thin-custom">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width" />
+		<link rel="icon" type="image/png" href="/logo.png" />
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Almarai:wght@300;400;700;800&family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+		<meta name="generator" content={Astro.generator} />
+		<title>{title}</title>
+	</head>
+	<body class={bodyClass}>
+        <!-- Frame Elements -->
+        <div class="frame frame-left"></div>
+        <div class="frame frame-right"></div>
+
+		<slot />
+
+        <script is:inline>
+            // This script ensures that the search input toggles visibility without submitting the form.
+            if (!document.body.dataset.globalListenerAttached) {
+                document.body.dataset.globalListenerAttached = 'true';
+
+                document.addEventListener('click', function(e) {
+                    const searchIcon = e.target.closest('#search-icon');
+
+                    if (!searchIcon) {
+                        return;
+                    }
+
+                    e.preventDefault();
+
+                    const searchInput = document.getElementById('search-input');
+                    const searchForm = document.getElementById('search-form');
+
+                    if (!searchInput || !searchForm) {
+                        return;
+                    }
+                    
+                    searchInput.classList.toggle('active');
+
+                    if (searchInput.classList.contains('active')) {
+                        searchInput.focus();
+                    }
+                });
+
+                const searchForm = document.getElementById('search-form');
+                if (searchForm) {
+                    searchForm.addEventListener('submit', function(e) {
+                        const searchInput = document.getElementById('search-input');
+                        if (searchInput && searchInput.value.trim() === '') {
+                            e.preventDefault(); // Prevent submission if the input is empty
+                        }
+                    });
+                }
+            }
+        </script>
+	</body>
+</html>
+
+<style is:global>
+    @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap');
+
+    :root {
+        --primary-color: #3f51b5;
+        --primary-dark: #303f9f;
+        --secondary-color: #6c757d;
+        --background-color: #e9edf0;
+        --text-color: #333;
+        --text-light: #555;
+        --border-color: #e0e0e0;
+        --white: #fff;
+        --success-green: #81c784;
+        --error-red: #e57373;
+        --shadow-color: rgba(0, 0, 0, 0.1);
+    }
+
+    html {
+        direction: ltr;
+    }
+
+    *, *::before, *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+    }
+
+    body {
+        font-family: 'Almarai', 'Cairo', sans-serif;
+        background-color: var(--background-color);
+        color: var(--text-color);
+        line-height: 1.6;
+        direction: ltr;
+        position: relative;
+    }
+
+    .frame {
+        position: fixed;
+        top: 0;
+        bottom: 0;
+        width: 3px;
+        background-color: #FFFFFF;
+        z-index: 10000;
+    }
+    .frame-left { left: 0; }
+    .frame-right { right: 0; }
+
+    h1, h2, h3, h4, h5, h6 {
+        font-weight: 700;
+        line-height: 1.2;
+    }
+
+    a {
+        text-decoration: none;
+        color: var(--primary-color);
+        transition: color 0.2s ease;
+    }
+
+    img {
+        max-width: 100%;
+        display: block;
+    }
+
+    input, button, select, textarea {
+        font-family: inherit;
+        font-size: 1rem;
+    }
+
+    @media print {
+        body {
+            background-color: #fff;
+        }
+
+        .printable-area {
+            display: block !important;
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: auto;
+        }
+
+        body > *:not(.printable-area) {
+            display: none !important;
+        }
+    }
+</style>

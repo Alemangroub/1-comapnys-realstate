@@ -1,0 +1,207 @@
+---
+const { showMenu = false } = Astro.props;
+---
+
+<header class="main-header">
+    <a href="/" class="logo-link">
+        <div class="logo-container">
+            <div class="brand-icon-box">
+                <svg xmlns="http://www.w3.org/2000/svg" class="brand-svg-icon" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 3L2 12h3v8h14v-8h3L12 3zm0 3.8l5 4.5V18h-3v-4H10v4H7v-6.7l5-4.5zM11 10h2v2h-2v-2z"/>
+                </svg>
+            </div>
+            <div class="logo-text">
+                <span class="company-name">الاستثمار والتطوير العقاري</span>
+                <span class="slogan">حلول عمرانية واستثمارية متكاملة</span>
+            </div>
+        </div>
+    </a>
+
+    <!-- Navigation Container (Sidebar on Mobile) -->
+    <div class="nav-container" id="nav-container">
+        {showMenu && (
+            <nav class="main-nav">
+                <ul>
+                    <li><a href="/">الرئيسية</a></li>
+                    <li><a href="/services">خدماتنا</a></li>
+                    <li><a href="/achievements">إنجازاتنا</a></li>
+                    <li><a href="/about">معلومات عنا</a></li>
+                    <li><a href="/contact">تواصل معنا</a></li>
+                </ul>
+            </nav>
+        )}
+        <a href="/contact" class="contact-btn mobile-contact-btn">تواصل معنا</a>
+    </div>
+    <div class="nav-overlay" id="nav-overlay"></div>
+
+    <div class="header-actions">
+        <form id="search-form" action="/search" method="get" class="search-form">
+            <input type="search" id="search-input" name="q" class="search-input" placeholder="ابحث هنا...">
+        </form>
+        <a href="#" id="search-icon" class="search-icon-wrapper">
+            <svg xmlns="http://www.w3.org/2000/svg" class="search-svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+        </a>
+        <a href="/contact" class="contact-btn desktop-contact-btn">تواصل معنا</a>
+        
+        <!-- Animated SVG Hamburger/X Menu Toggle -->
+        <button class="menu-toggle" id="menu-toggle" aria-label="Toggle menu" aria-expanded="false">
+            <svg class="hamburger-svg" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path class="hamburger-bar top" d="M4 6h16"/>
+                <path class="hamburger-bar middle" d="M4 12h16"/>
+                <path class="hamburger-bar bottom" d="M4 18h16"/>
+            </svg>
+        </button>
+    </div>
+</header>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const menuToggle = document.getElementById('menu-toggle');
+        const navContainer = document.getElementById('nav-container');
+        const navOverlay = document.getElementById('nav-overlay');
+
+        function toggleMenu() {
+            const isOpen = navContainer.classList.contains('is-open');
+            
+            if (isOpen) {
+                // Close menu
+                menuToggle.classList.remove('is-active');
+                menuToggle.setAttribute('aria-expanded', 'false');
+                navContainer.classList.remove('is-open');
+                navOverlay.classList.remove('is-active');
+                document.body.classList.remove('no-scroll');
+            } else {
+                // Open menu
+                menuToggle.classList.add('is-active');
+                menuToggle.setAttribute('aria-expanded', 'true');
+                navContainer.classList.add('is-open');
+                navOverlay.classList.add('is-active');
+                document.body.classList.add('no-scroll');
+            }
+        }
+
+        if (menuToggle) menuToggle.addEventListener('click', toggleMenu);
+        if (navOverlay) navOverlay.addEventListener('click', toggleMenu); // Close on overlay click
+    });
+</script>
+
+<style>
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    :global(body.no-scroll) {
+        overflow: hidden;
+    }
+
+    .main-header { background-color: #F8F6F4; padding: 8px 20px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #e0e0e0; position: relative; direction: rtl; }
+
+    .logo-link {
+        text-decoration: none;
+        animation: fadeIn 0.5s ease-out forwards; /* Updated animation duration */
+    }
+    .logo-container { 
+        display: flex; 
+        align-items: center; 
+        gap: 15px; 
+        flex-shrink: 0;
+        transition: transform 0.3s ease;
+    }
+    .logo-link:hover .logo-container {
+        transform: scale(1.03);
+    }
+
+    .brand-icon-box {
+        width: 44px;
+        height: 44px;
+        border-radius: 10px;
+        background: linear-gradient(135deg, #2c3e50, #1a252f);
+        color: #d3bfa9;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 4px 12px rgba(44, 62, 80, 0.2);
+    }
+    .brand-svg-icon {
+        width: 26px;
+        height: 26px;
+    }
+    .logo-text { display: flex; flex-direction: column; align-items: flex-start; }
+    .company-name { font-family: 'Cairo', sans-serif; font-size: 18px; color: #2c3e50; font-weight: 700; transition: color 0.3s ease; }
+    .slogan { font-family: 'Almarai', sans-serif; font-size: 13px; color: #555; margin-top: -2px; }
+    .logo-link:hover .company-name {
+        color: #1a252f;
+    }
+
+    /* Desktop Navigation */
+    .nav-container { position: absolute; top: 100%; left: 50%; transform: translateX(-50%); z-index: 100; width: max-content; }
+    .main-nav ul { margin: 0; padding: 10px 30px; list-style: none; display: flex; gap: 15px; background-color: #2c3e50; border-radius: 0 0 12px 12px; box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15); border-top: 2px solid #3498db; }
+    .main-nav ul li a { font-family: 'Cairo', sans-serif; color: #ecf0f1; text-decoration: none; font-size: 17px; font-weight: 600; padding: 8px 12px; border-radius: 6px; transition: background-color 0.3s ease, color 0.3s ease; white-space: nowrap; }
+    .main-nav ul li a:hover { background-color: #34495e; }
+
+    .header-actions { display: flex; align-items: center; gap: 15px; }
+    
+    /* Search Styles */
+    .search-form { display: contents; }
+    .search-input { width: 0; padding: 0; border: none; outline: none; border-radius: 20px; opacity: 0; transition: width 0.4s ease, opacity 0.4s ease, padding 0.4s ease; font-family: 'Cairo', sans-serif; font-size: 14px; direction: rtl; }
+    .search-input.active { width: 200px; padding: 8px 15px; border: 1px solid #ccc; opacity: 1; }
+    .search-icon-wrapper { display: flex; align-items: center; justify-content: center; width: 38px; height: 38px; background-color: #2c3e50; border-radius: 50%; color: white; text-decoration: none; transition: background-color 0.3s ease, transform 0.3s ease; }
+    .search-icon-wrapper .search-svg { width: 20px; height: 20px; }
+    .search-icon-wrapper:hover { background-color: #34495e; transform: scale(1.1); }
+
+    /* Contact Button */
+    .contact-btn { background-color: #2c3e50; color: white; padding: 9px 22px; border-radius: 20px; text-decoration: none; font-family: 'Cairo', sans-serif; font-weight: 700; font-size: 16px; transition: background-color 0.3s ease, box-shadow 0.3s ease; box-shadow: 0 4px 15px rgba(44, 62, 80, 0.4); white-space: nowrap; }
+    .contact-btn:hover { background-color: #34495e; box-shadow: 0 6px 20px rgba(44, 62, 80, 0.5); }
+    .mobile-contact-btn, .menu-toggle, .nav-overlay { display: none; }
+
+    /* --- Responsive Styles --- */
+    @media (max-width: 992px) {
+        .main-nav { display: none; }
+        .desktop-contact-btn { display: none; }
+
+        .menu-toggle { display: block; background: transparent; border: none; border-radius: 50%; cursor: pointer; padding: 5px; z-index: 1002; width: 40px; height: 40px; transition: background-color 0.2s ease-in-out; }
+        .menu-toggle:hover { background-color: #e0e0e0; }
+
+        .hamburger-svg { width: 100%; height: 100%; }
+        .hamburger-bar { stroke: #2c3e50; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; transition: transform 0.3s ease-in-out, opacity 0.2s ease; transform-origin: center; }
+        .menu-toggle.is-active .hamburger-bar.top { transform: translate(0, 6px) rotate(45deg); }
+        .menu-toggle.is-active .hamburger-bar.middle { opacity: 0; }
+        .menu-toggle.is-active .hamburger-bar.bottom { transform: translate(0, -6px) rotate(-45deg); }
+
+        .nav-container { position: fixed; top: 0; right: -100%; width: 280px; height: 100%; background-color: #fff; box-shadow: -4px 0 20px rgba(0,0,0,0.1); transform: none; left: auto; padding: 80px 20px 20px 20px; transition: right 0.4s ease-in-out; z-index: 1001; }
+        .nav-container.is-open { right: 0; }
+
+        .main-nav { display: block; }
+        .main-nav ul { background: none; box-shadow: none; border: none; flex-direction: column; gap: 15px; padding: 0; width: 100%; }
+        .main-nav ul li a { color: #2c3e50; font-size: 1.1rem; padding: 12px 10px; text-align: right; display: block; }
+        .main-nav ul li a:hover { background-color: #f0f0f0; }
+
+        .nav-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.4); z-index: 1000; opacity: 0; visibility: hidden; transition: opacity 0.4s ease, visibility 0s 0.4s; }
+        .nav-overlay.is-active { opacity: 1; visibility: visible; transition: opacity 0.4s ease; }
+        
+        .mobile-contact-btn { display: block; text-align: center; margin-top: 30px; width: 100%; }
+    }
+
+    @media (max-width: 768px) {
+        .company-name { font-size: 16px; }
+        .search-input.active { width: 150px; }
+    }
+
+    @media (max-width: 480px) {
+        .main-header { padding: 8px 15px; }
+        .brand-icon-box { width: 38px; height: 38px; }
+        .brand-svg-icon { width: 22px; height: 22px; }
+        .company-name { font-size: 15px; }
+        .slogan { font-size: 11px; }
+        .nav-container { width: 260px; }
+    }
+</style>

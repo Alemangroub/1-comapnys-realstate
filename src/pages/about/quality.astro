@@ -1,0 +1,8 @@
+---
+import InfoPageLayout from '../../layouts/InfoPageLayout.astro';
+import info from '../../data/info.json';
+
+const cardData = info.cards[1];
+---
+
+<InfoPageLayout frontmatter={cardData} />

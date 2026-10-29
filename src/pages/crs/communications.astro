@@ -1,0 +1,1002 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import AdminLogin from '../../components/AdminLogin.astro';
+---
+
+<Layout title="نظام التواصل الموحد والمهام">
+  <div id="auth-loading-message" class="loading-state">
+    <div class="spinner"></div>
+    <p>جارٍ التحقق من الصلاحيات...</p>
+  </div>
+
+  <div id="admin-login-container" style="display: none;">
+    <AdminLogin />
+  </div>
+
+  <main id="main-content" class="erp-container" style="display: none;">
+    <header class="erp-topbar">
+      <div class="brand-crumb">
+        <a href="/crs" class="back-link">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+          الرئيسية
+        </a>
+        <span class="sep">/</span>
+        <span class="active-crumb">نظام التواصل الموحد والمهام</span>
+      </div>
+      <div class="topbar-actions">
+        <button id="open-task-modal" class="btn btn-primary">+ مهمة عمل جديدة (Task)</button>
+        <button id="open-update-modal" class="btn btn-warning">📸 بث تحديث بناء للعملاء</button>
+        <button id="open-alteration-modal" class="btn btn-success" style="background:#059669;color:#fff;">+ طلب تعديل معماري 🛠️</button>
+        <button id="open-client-portal-btn" class="btn btn-info" style="background:#2563eb;color:#fff;">🔍 استعلام بوابة العميل 📱</button>
+      </div>
+    </header>
+
+    <section class="subsystem-hero hero-comm">
+      <div class="hero-text">
+        <div class="hero-badge">حلقة الوصل بين الجميع</div>
+        <h1>التواصل الداخلي، المهام، وبث تحديثات البناء وتذاكر العملاء</h1>
+        <p>ربط فوري بين الإدارات: تنبيهات الحجز والصرف، توزيع المهام، بث صور تطور الإنشاءات على هواتف العملاء لتعزيز الثقة، وإدارة تذاكر التعديلات والشكاوى.</p>
+      </div>
+    </section>
+
+    <!-- Communication Tabs -->
+    <div class="comm-tabs">
+      <button class="comm-tab-btn active" data-target="pane-notifications">التنبيهات الفورية المشتركة 🔔</button>
+      <button class="comm-tab-btn" data-target="pane-tasks">نظام المهام الإدارية (Tasks) 📋</button>
+      <button class="comm-tab-btn" data-target="pane-updates">تحديثات البناء للعملاء 🏗️</button>
+      <button class="comm-tab-btn" data-target="pane-tickets">تذاكر واستفسارات العملاء 🎫</button>
+      <button class="comm-tab-btn" data-target="pane-alterations">التعديلات المعمارية والتشطيبات 🛠️</button>
+      <button class="comm-tab-btn" data-target="pane-portal">بوابة العميل الذاتية وإشعارات الواتساب 📱</button>
+    </div>
+
+    <!-- Pane 1: Notifications -->
+    <div id="pane-notifications" class="comm-tab-pane active">
+      <div class="notifications-list" id="notifications-container">
+        <!-- Rendered via JS -->
+      </div>
+    </div>
+
+    <!-- Pane 2: Tasks -->
+    <div id="pane-tasks" class="comm-tab-pane" style="display: none;">
+      <div class="tasks-grid" id="tasks-container">
+        <!-- Rendered via JS -->
+      </div>
+    </div>
+
+    <!-- Pane 3: Construction Updates -->
+    <div id="pane-updates" class="comm-tab-pane" style="display: none;">
+      <div class="updates-grid" id="updates-container">
+        <!-- Rendered via JS -->
+      </div>
+    </div>
+
+    <!-- Pane 4: Tickets -->
+    <div id="pane-tickets" class="comm-tab-pane" style="display: none;">
+      <div class="table-responsive">
+        <table class="erp-table">
+          <thead>
+            <tr>
+              <th>رقم التذكرة والموضوع</th>
+              <th>العميل</th>
+              <th>رقم الهاتف</th>
+              <th>التصنيف</th>
+              <th>الحالة</th>
+              <th>التاريخ</th>
+            </tr>
+          </thead>
+          <tbody id="tickets-tbody">
+            <!-- Rendered via JS -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Pane 5: Alterations (التعديلات المعمارية والتشطيبات) -->
+    <div id="pane-alterations" class="comm-tab-pane" style="display: none;">
+      <!-- KPI Ribbon -->
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem;margin-bottom:1.5rem;">
+        <div style="background:#f8fafc;padding:1.25rem;border-radius:16px;border:1px solid #e2e8f0;">
+          <span style="font-size:0.8rem;color:#64748b;font-weight:700;">إجمالي طلبات التعديلات:</span>
+          <h3 id="alt-stat-total" style="font-size:1.6rem;font-weight:900;margin:0.25rem 0 0 0;">0</h3>
+        </div>
+        <div style="background:#fffbeb;padding:1.25rem;border-radius:16px;border:1px solid #fde68a;">
+          <span style="font-size:0.8rem;color:#b45309;font-weight:700;">قيد المراجعة الهندسية:</span>
+          <h3 id="alt-stat-review" style="font-size:1.6rem;font-weight:900;margin:0.25rem 0 0 0;color:#b45309;">0</h3>
+        </div>
+        <div style="background:#eff6ff;padding:1.25rem;border-radius:16px;border:1px solid #bfdbfe;">
+          <span style="font-size:0.8rem;color:#1d4ed8;font-weight:700;">معتمدة وجارٍ التنفيذ:</span>
+          <h3 id="alt-stat-approved" style="font-size:1.6rem;font-weight:900;margin:0.25rem 0 0 0;color:#1d4ed8;">0</h3>
+        </div>
+        <div style="background:#ecfdf5;padding:1.25rem;border-radius:16px;border:1px solid #a7f3d0;">
+          <span style="font-size:0.8rem;color:#047857;font-weight:700;">تم التسليم والإغلاق:</span>
+          <h3 id="alt-stat-completed" style="font-size:1.6rem;font-weight:900;margin:0.25rem 0 0 0;color:#047857;">0</h3>
+        </div>
+      </div>
+
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
+        <h4 style="margin:0;font-size:1.15rem;font-weight:900;">سجل طلبات التعديلات المعمارية والتشطيبات الخاصة</h4>
+        <button id="open-alteration-modal-btn2" class="btn btn-sm btn-success">+ تسجيل طلب تعديل جديد</button>
+      </div>
+
+      <div class="table-responsive">
+        <table class="erp-table">
+          <thead>
+            <tr>
+              <th>العميل ورقم الهاتف</th>
+              <th>عنوان التعديل المطلوب</th>
+              <th>التفاصيل والمواصفات</th>
+              <th>التكلفة الهندسية المقدرة</th>
+              <th>الحالة</th>
+              <th>التاريخ</th>
+              <th>إجراءات المهندس</th>
+            </tr>
+          </thead>
+          <tbody id="alterations-tbody">
+            <!-- Rendered via JS -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Pane 6: Client Portal & WhatsApp Automation (بوابة العميل الذاتية وإشعارات الواتساب) -->
+    <div id="pane-portal" class="comm-tab-pane" style="display: none;">
+      <div style="background:linear-gradient(135deg, #1e293b 0%, #0f172a 100%);color:white;padding:1.75rem;border-radius:20px;margin-bottom:1.5rem;">
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem;">
+          <div>
+            <h3 style="margin:0 0 0.35rem 0;font-size:1.35rem;font-weight:900;">🔍 بوابة الاستعلام الذاتي لملف العميل والمراسلات</h3>
+            <p style="margin:0;color:#94a3b8;font-size:0.88rem;">استعلام فوري برقم الهاتف أو الحجز لمتابعة كافة الأقساط، الشيكات، صور البناء، ومراسلة العميل بالواتساب بضغطة زر واحدة.</p>
+          </div>
+          <div style="display:flex;gap:0.65rem;flex:1;max-width:420px;">
+            <input type="text" id="portal-search-phone" placeholder="أدخل رقم هاتف العميل (مثال: 010...)" style="flex:1;padding:0.65rem 1rem;border-radius:12px;border:none;font-family:inherit;font-size:0.92rem;color:#0f172a;" />
+            <button id="portal-search-btn" class="btn btn-primary" style="background:#2563eb;white-space:nowrap;">بحث واستعلام 🔍</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="portal-results-wrap">
+        <div style="text-align:center;padding:3rem 1rem;color:#64748b;">
+          <div style="font-size:2.5rem;margin-bottom:0.75rem;">📱</div>
+          <h4>يرجى إدخال رقم هاتف العميل في الحقل أعلاه لعرض ملفه الشامل</h4>
+          <p style="font-size:0.85rem;color:#94a3b8;">يمكنك إرسال إشعارات الأقساط والتعاقدات عبر الواتساب مباشرة فور ظهور بيانات العميل.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal: New Task -->
+    <div id="task-modal" class="modal-backdrop" style="display: none;">
+      <div class="modal-card">
+        <div class="modal-header">
+          <h3>إنشاء مهمة عمل إدارية جديدة</h3>
+          <button class="close-modal-btn" id="close-task-modal">&times;</button>
+        </div>
+        <form id="new-task-form" class="modal-form">
+          <div class="form-group">
+            <label>عنوان المهمة *</label>
+            <input type="text" id="task-title" placeholder="مثال: متابعة توريد حديد الأساسات مع المورد" required />
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>الموظف المكلف بالمهمة *</label>
+              <select id="task-user-select" required></select>
+            </div>
+            <div class="form-group">
+              <label>درجة الأهمية</label>
+              <select id="task-priority">
+                <option value="normal">عادية</option>
+                <option value="high">هامة</option>
+                <option value="urgent">عاجلة جداً</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>تاريخ الاستحقاق والتسليم</label>
+            <input type="date" id="task-due-date" />
+          </div>
+          <div class="form-group">
+            <label>شرح وتفاصيل المهمة</label>
+            <textarea id="task-desc" rows="3" placeholder="اكتب تعليمات المهمة بدقة..."></textarea>
+          </div>
+          <div class="form-actions">
+            <button type="submit" class="btn btn-primary">إرسال المهمة وتنبيه الموظف</button>
+            <button type="button" class="btn btn-secondary" id="cancel-task-btn">إلغاء</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Modal: Construction Photo Update -->
+    <div id="update-modal" class="modal-backdrop" style="display: none;">
+      <div class="modal-card">
+        <div class="modal-header">
+          <div>
+            <h3>بث تحديث إنجاز ميداني للعملاء</h3>
+            <p class="modal-sub">يتم إرساله للعملاء المشتركين في المشروع لتعزيز ثقتهم</p>
+          </div>
+          <button class="close-modal-btn" id="close-update-modal">&times;</button>
+        </div>
+        <form id="new-update-form" class="modal-form">
+          <div class="form-group">
+            <label>المشروع *</label>
+            <select id="update-project-select" required></select>
+          </div>
+          <div class="form-group">
+            <label>عنوان الإنجاز *</label>
+            <input type="text" id="update-title" placeholder="مثال: تم الانتهاء من صب سقف الدور الرابع بنجاح!" required />
+          </div>
+          <div class="form-group">
+            <label>وصف التطورات وملاحظات المهندس</label>
+            <textarea id="update-desc" rows="3" placeholder="عميلنا العزيز، يسعدنا إعلامك بتقدم سير العمل في مشروعكم..."></textarea>
+          </div>
+          <div class="form-actions">
+            <button type="submit" class="btn btn-warning">بث التحديث لجميع عملاء المشروع 🚀</button>
+            <button type="button" class="btn btn-secondary" id="cancel-update-btn">إلغاء</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Modal: New Alteration Request -->
+    <div id="alteration-modal" class="modal-backdrop" style="display: none;">
+      <div class="modal-card">
+        <div class="modal-header">
+          <div>
+            <h3>تسجيل طلب تعديل معماري للوحدة</h3>
+            <p class="modal-sub">تعديلات في التقسيم، السباكة، الكهرباء، أو التشطيب الخاص</p>
+          </div>
+          <button class="close-modal-btn" id="close-alteration-modal">&times;</button>
+        </div>
+        <form id="new-alteration-form" class="modal-form">
+          <div class="form-row">
+            <div class="form-group">
+              <label>اسم العميل *</label>
+              <input type="text" id="alt-client-name" placeholder="اسم العميل المتعاقد" required />
+            </div>
+            <div class="form-group">
+              <label>رقم هاتف العميل *</label>
+              <input type="text" id="alt-client-phone" placeholder="01012345678" required />
+            </div>
+          </div>
+          <div class="form-group">
+            <label>عنوان التعديل المطلوب *</label>
+            <input type="text" id="alt-title" placeholder="مثال: تعديل جدار المطبخ لعمل بار أمريكي مفتوح" required />
+          </div>
+          <div class="form-group">
+            <label>المواصفات والتفاصيل الدقيقة *</label>
+            <textarea id="alt-details" rows="3" placeholder="اشرح رغبة العميل بدقة وتحديد الغرفة والبنود المطلوب تعديلها..." required></textarea>
+          </div>
+          <div class="form-actions">
+            <button type="submit" class="btn btn-success" id="save-alt-btn">إرسال الطلب للمكتب الفني والهندسي</button>
+            <button type="button" class="btn btn-secondary" id="cancel-alteration-btn">إلغاء</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Modal: Engineer Pricing & Approval -->
+    <div id="alteration-pricing-modal" class="modal-backdrop" style="display: none;">
+      <div class="modal-card">
+        <div class="modal-header">
+          <div>
+            <h3>التسعير الهندسي والبت في التعديل</h3>
+            <p class="modal-sub">دراسة إمكانية التنفيذ وتحديد التكلفة الإضافية</p>
+          </div>
+          <button class="close-modal-btn" id="close-alt-pricing-modal">&times;</button>
+        </div>
+        <form id="alt-pricing-form" class="modal-form">
+          <input type="hidden" id="pricing-request-id" />
+          <div class="form-group">
+            <label>الطلب المستهدف:</label>
+            <strong id="pricing-request-title" style="color:#0f172a;display:block;background:#f8fafc;padding:0.6rem;border-radius:8px;">-</strong>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>التكلفة الهندسية المقدرة (جنيه مصري) *</label>
+              <input type="number" id="pricing-cost" min="0" step="any" placeholder="مثال: 15000" required />
+            </div>
+            <div class="form-group">
+              <label>القرار الهندسي *</label>
+              <select id="pricing-status" required>
+                <option value="approved">موافقة على التعديل (Approved)</option>
+                <option value="in_progress">جارٍ التنفيذ الميداني بالموقع</option>
+                <option value="completed">تم التنفيذ والاستلام النهائي</option>
+                <option value="rejected">رفض التعديل لتعارضه إنشائياً</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>ملاحظات الاستشاري الفني والهندسي</label>
+            <textarea id="pricing-notes" rows="2" placeholder="ملاحظات حول طريقة التنفيذ أو أسباب الرفض..."></textarea>
+          </div>
+          <div class="form-actions">
+            <button type="submit" class="btn btn-primary" id="save-pricing-btn">حفظ القرار وإشعار العميل</button>
+            <button type="button" class="btn btn-secondary" id="cancel-alt-pricing-btn">إلغاء</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+  </main>
+</Layout>
+
+<script>
+  import { checkAuth } from '../../lib/auth.js';
+
+  let commData = null;
+  let allUsers = [];
+  let allProjects = [];
+
+  const authLoading = document.getElementById('auth-loading-message');
+  const loginContainer = document.getElementById('admin-login-container');
+  const mainContent = document.getElementById('main-content');
+
+  (async () => {
+    try {
+      const user = await checkAuth();
+      if (authLoading) authLoading.style.display = 'none';
+
+      if (user) {
+        if (mainContent) mainContent.style.display = 'block';
+        await loadAuxData();
+        await loadCommData();
+      } else {
+        if (loginContainer) loginContainer.style.display = 'block';
+      }
+    } catch (e) {
+      if (authLoading) authLoading.style.display = 'none';
+      if (loginContainer) loginContainer.style.display = 'block';
+    }
+  })();
+
+  async function loadAuxData() {
+    try {
+      const resU = await fetch('/api/users/list');
+      const dataU = await resU.json();
+      if (dataU.success) {
+        allUsers = dataU.users;
+        const taskUserSel = document.getElementById('task-user-select');
+        if (taskUserSel) {
+          taskUserSel.innerHTML = allUsers.map(u => `<option value="${u.id}">${u.name} (${u.role})</option>`).join('');
+        }
+      }
+
+      const resP = await fetch('/api/erp/development');
+      const dataP = await resP.json();
+      if (dataP.success) {
+        allProjects = dataP.projects;
+        const upProjSel = document.getElementById('update-project-select');
+        if (upProjSel) {
+          upProjSel.innerHTML = allProjects.map(p => `<option value="${p.id}">${p.projectName}</option>`).join('');
+        }
+      }
+    } catch (e) { console.error(e); }
+  }
+
+  async function loadCommData() {
+    try {
+      const res = await fetch('/api/erp/communications');
+      const data = await res.json();
+      if (data.success) {
+        commData = data;
+        renderNotifications();
+        renderTasks();
+        renderUpdates();
+        renderTickets();
+      }
+    } catch (e) { console.error(e); }
+  }
+
+  function renderNotifications() {
+    const c = document.getElementById('notifications-container');
+    if (!c) return;
+    if (commData.notifications.length === 0) {
+      c.innerHTML = `<p class="text-muted p-4 text-center">لا توجد إشعارات جديدة حالياً.</p>`;
+      return;
+    }
+    c.innerHTML = commData.notifications.map(n => `
+      <div class="notification-card">
+        <div class="notif-icon">🔔</div>
+        <div class="notif-content">
+          <h4>${n.title}</h4>
+          <p>${n.message}</p>
+          <small class="text-muted">${new Date(n.createdAt).toLocaleString('ar-EG')}</small>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  function renderTasks() {
+    const c = document.getElementById('tasks-container');
+    if (!c) return;
+    if (commData.tasks.length === 0) {
+      c.innerHTML = `<p class="text-muted p-4 text-center">لا توجد مهام إدارية مسجلة.</p>`;
+      return;
+    }
+    c.innerHTML = commData.tasks.map(t => {
+      const isCompleted = t.status === 'completed';
+      return `
+        <div class="task-card ${isCompleted ? 'task-done' : ''}">
+          <div class="task-top">
+            <span class="priority-tag prio-${t.priority}">${translatePriority(t.priority)}</span>
+            <span class="task-status">${isCompleted ? 'مكتملة ✅' : 'قيد التنفيذ ⏳'}</span>
+          </div>
+          <h4>${t.title}</h4>
+          <p class="task-desc">${t.description || 'لا يوجد تفاصيل إضافية'}</p>
+          <div class="task-meta">
+            <span>المكلف: <strong>${t.assignedTo ? t.assignedTo.name : 'غير محدد'}</strong></span>
+            ${t.dueDate ? `<span>التسليم: ${new Date(t.dueDate).toLocaleDateString('ar-EG')}</span>` : ''}
+          </div>
+          <div class="task-actions">
+            ${!isCompleted ? `
+              <button class="btn btn-sm btn-success mark-task-done" data-id="${t.id}">تعيين كمكتملة ✓</button>
+            ` : '<span class="text-muted"><small>تم الإنجاز</small></span>'}
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    document.querySelectorAll('.mark-task-done').forEach(btn => {
+      btn.onclick = async (e) => {
+        const id = e.currentTarget.getAttribute('data-id');
+        await fetch('/api/erp/communications', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'update_task_status', taskId: id, status: 'completed' })
+        });
+        loadCommData();
+      };
+    });
+  }
+
+  function renderUpdates() {
+    const c = document.getElementById('updates-container');
+    if (!c) return;
+    if (commData.constructionUpdates.length === 0) {
+      c.innerHTML = `<p class="text-muted p-4 text-center">لم يتم بث تحديثات بناء بعد.</p>`;
+      return;
+    }
+    c.innerHTML = commData.constructionUpdates.map(u => `
+      <div class="update-feed-card">
+        <div class="update-feed-header">
+          <span class="proj-badge">${u.project ? u.project.projectName : ''}</span>
+          <small class="text-muted">${new Date(u.publishedAt).toLocaleDateString('ar-EG')}</small>
+        </div>
+        <h4>${u.title}</h4>
+        <p>${u.description || ''}</p>
+        <span class="broadcast-tag">📢 تم البث على هواتف وبوابة العملاء</span>
+      </div>
+    `).join('');
+  }
+
+  function renderTickets() {
+    const tbody = document.getElementById('tickets-tbody');
+    if (!tbody) return;
+    if (commData.tickets.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="6" class="text-center p-4 text-muted">لا توجد تذاكر دعم أو استفسارات حالياً.</td></tr>`;
+      return;
+    }
+    tbody.innerHTML = commData.tickets.map(tk => `
+      <tr>
+        <td><strong>${tk.subject}</strong></td>
+        <td>${tk.clientName}</td>
+        <td>${tk.clientPhone}</td>
+        <td>${translateCategory(tk.category)}</td>
+        <td><span class="status-badge ticket-${tk.status}">${translateTicketStatus(tk.status)}</span></td>
+        <td>${new Date(tk.createdAt).toLocaleDateString('ar-EG')}</td>
+      </tr>
+    `).join('');
+  }
+
+  function translatePriority(p) {
+    const m = { low: 'منخفضة', normal: 'عادية', high: 'هامة', urgent: 'عاجلة جداً' };
+    return m[p] || p;
+  }
+  function translateCategory(c) {
+    const m = { unit_modification: 'تعديل معماري في الوحدة', payment_inquiry: 'استفسار عن قسط', complaint: 'شكوى عامة' };
+    return m[c] || c;
+  }
+  function translateTicketStatus(s) {
+    const m = { open: 'مفتوحة (جديدة)', in_progress: 'قيد المتابعة', resolved: 'تم الحل', closed: 'مغلقة' };
+    return m[s] || s;
+  }
+
+  // Tabs
+  document.querySelectorAll('.comm-tab-btn').forEach(b => {
+    b.onclick = (e) => {
+      document.querySelectorAll('.comm-tab-btn').forEach(btn => btn.classList.remove('active'));
+      document.querySelectorAll('.comm-tab-pane').forEach(p => p.style.display = 'none');
+      e.currentTarget.classList.add('active');
+      const target = e.currentTarget.getAttribute('data-target');
+      const pane = document.getElementById(target);
+      if (pane) pane.style.display = 'block';
+    };
+  });
+
+  // Modals
+  const taskModal = document.getElementById('task-modal');
+  const openTaskBtn = document.getElementById('open-task-modal');
+  const closeTaskBtn = document.getElementById('close-task-modal');
+  const cancelTaskBtn = document.getElementById('cancel-task-btn');
+
+  if (openTaskBtn) openTaskBtn.onclick = () => { if (taskModal) taskModal.style.display = 'flex'; };
+  if (closeTaskBtn) closeTaskBtn.onclick = () => { if (taskModal) taskModal.style.display = 'none'; };
+  if (cancelTaskBtn) cancelTaskBtn.onclick = () => { if (taskModal) taskModal.style.display = 'none'; };
+
+  const updateModal = document.getElementById('update-modal');
+  const openUpBtn = document.getElementById('open-update-modal');
+  const closeUpBtn = document.getElementById('close-update-modal');
+  const cancelUpBtn = document.getElementById('cancel-update-btn');
+
+  if (openUpBtn) openUpBtn.onclick = () => { if (updateModal) updateModal.style.display = 'flex'; };
+  if (closeUpBtn) closeUpBtn.onclick = () => { if (updateModal) updateModal.style.display = 'none'; };
+  if (cancelUpBtn) cancelUpBtn.onclick = () => { if (updateModal) updateModal.style.display = 'none'; };
+
+  // Submits
+  const taskForm = document.getElementById('new-task-form');
+  if (taskForm) {
+    taskForm.onsubmit = async (e) => {
+      e.preventDefault();
+      const title = document.getElementById('task-title').value;
+      const assignedToId = document.getElementById('task-user-select').value;
+      const priority = document.getElementById('task-priority').value;
+      const dueDate = document.getElementById('task-due-date').value;
+      const description = document.getElementById('task-desc').value;
+
+      const res = await fetch('/api/erp/communications', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'create_task', title, assignedToId, priority, dueDate, description })
+      });
+      const data = await res.json();
+      if (data.success) {
+        if (taskModal) taskModal.style.display = 'none';
+        taskForm.reset();
+        loadCommData();
+      }
+    };
+  }
+
+  const upForm = document.getElementById('new-update-form');
+  if (upForm) {
+    upForm.onsubmit = async (e) => {
+      e.preventDefault();
+      const projectId = document.getElementById('update-project-select').value;
+      const title = document.getElementById('update-title').value;
+      const description = document.getElementById('update-desc').value;
+
+      const res = await fetch('/api/erp/communications', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'post_construction_update', projectId, title, description, notifyClients: true })
+      });
+      const data = await res.json();
+      if (data.success) {
+        alert('🚀 تم نشر التحديث الميداني وبثه على هواتف وبوابة العملاء بنجاح!');
+        if (updateModal) updateModal.style.display = 'none';
+        upForm.reset();
+        loadCommData();
+      }
+    };
+  }
+
+  // ========================================================
+  // PHASE 4: ARCHITECTURAL ALTERATIONS & CLIENT PORTAL
+  // ========================================================
+  let alterationsData = [];
+
+  async function loadAlterations() {
+    try {
+      const res = await fetch('/api/erp/client-portal');
+      const data = await res.json();
+      if (data.success) {
+        alterationsData = data.alterations || [];
+        renderAlterations(data);
+      }
+    } catch (e) { console.error('Alterations load error:', e); }
+  }
+
+  function renderAlterations(data) {
+    const alts = data.alterations || [];
+    const stats = data.stats || { total: 0, underReview: 0, approved: 0, completed: 0 };
+
+    const tEl = document.getElementById('alt-stat-total');
+    const rEl = document.getElementById('alt-stat-review');
+    const aEl = document.getElementById('alt-stat-approved');
+    const cEl = document.getElementById('alt-stat-completed');
+
+    if (tEl) tEl.textContent = stats.total.toString();
+    if (rEl) rEl.textContent = stats.underReview.toString();
+    if (aEl) aEl.textContent = stats.approved.toString();
+    if (cEl) cEl.textContent = stats.completed.toString();
+
+    const tbody = document.getElementById('alterations-tbody');
+    if (!tbody) return;
+
+    if (alts.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="7" class="text-center p-4 text-muted">لا توجد طلبات تعديلات معمارية مسجلة حالياً.</td></tr>`;
+      return;
+    }
+
+    const statusTranslations = {
+      under_review: '<span class="status-badge" style="background:#fef3c7;color:#b45309;">قيد المراجعة الهندسية</span>',
+      approved: '<span class="status-badge" style="background:#eff6ff;color:#1d4ed8;">معتمد - جاهز للتنفيذ</span>',
+      in_progress: '<span class="status-badge" style="background:#dbeafe;color:#1e40af;">جارٍ التنفيذ بالموقع</span>',
+      completed: '<span class="status-badge" style="background:#dcfce7;color:#15803d;">تم التسليم بنجاح ✓</span>',
+      rejected: '<span class="status-badge" style="background:#fee2e2;color:#b91c1c;">مرفوض إنشائياً</span>'
+    };
+
+    tbody.innerHTML = alts.map(a => {
+      const costStr = (a.engineeringCost || 0) > 0 ? ((a.engineeringCost).toLocaleString('ar-EG') + ' ج.م') : 'قيد التسعير';
+      const cleanPhone = (a.clientPhone || '').replace(/\D/g, '');
+      const waMsg = encodeURIComponent(`مرحباً أستاذ ${a.clientName}، بخصوص طلب التعديل المعماري (${a.title}): نفيدكم بأن الحالة الحالية هي: ${a.status === 'approved' ? 'معتمد' : a.status} بتكلفة تقديرية: ${costStr}. للتفاصيل يرجى التواصل معنا.`);
+      const waLink = cleanPhone ? `https://wa.me/2${cleanPhone.startsWith('0') ? cleanPhone.substring(1) : cleanPhone}?text=${waMsg}` : '#';
+
+      return `
+        <tr>
+          <td>
+            <strong>${a.clientName}</strong>
+            <span style="display:block;font-size:0.8rem;color:#64748b;">${a.clientPhone}</span>
+          </td>
+          <td><strong>${a.title}</strong></td>
+          <td style="max-width:280px;font-size:0.85rem;color:#475569;">${a.details}</td>
+          <td><strong style="color:#059669;">${costStr}</strong></td>
+          <td>${statusTranslations[a.status] || a.status}</td>
+          <td style="font-size:0.8rem;white-space:nowrap;">${new Date(a.createdAt).toLocaleDateString('ar-EG')}</td>
+          <td>
+            <div style="display:flex;gap:0.4rem;flex-wrap:wrap;">
+              <button class="btn btn-sm btn-secondary open-pricing-btn" data-id="${a.id}" data-title="${a.title}" data-cost="${a.engineeringCost || 0}" data-status="${a.status}" data-notes="${a.engineerNotes || ''}" style="font-size:0.75rem;padding:0.25rem 0.5rem;">
+                ⚙️ بت وتسعير
+              </button>
+              ${cleanPhone ? `
+                <a href="${waLink}" target="_blank" class="btn btn-sm" style="background:#25d366;color:white;font-size:0.75rem;padding:0.25rem 0.5rem;text-decoration:none;">
+                  💬 واتساب
+                </a>
+              ` : ''}
+            </div>
+          </td>
+        </tr>
+      `;
+    }).join('');
+
+    // Attach pricing triggers
+    document.querySelectorAll('.open-pricing-btn').forEach(btn => {
+      btn.onclick = (e) => {
+        const id = e.currentTarget.getAttribute('data-id');
+        const title = e.currentTarget.getAttribute('data-title');
+        const cost = e.currentTarget.getAttribute('data-cost');
+        const status = e.currentTarget.getAttribute('data-status');
+        const notes = e.currentTarget.getAttribute('data-notes');
+
+        document.getElementById('pricing-request-id').value = id;
+        document.getElementById('pricing-request-title').textContent = title;
+        document.getElementById('pricing-cost').value = cost > 0 ? cost : '';
+        document.getElementById('pricing-status').value = status || 'approved';
+        document.getElementById('pricing-notes').value = notes || '';
+
+        const m = document.getElementById('alteration-pricing-modal');
+        if (m) m.style.display = 'flex';
+      };
+    });
+  }
+
+  // Modals for Alterations
+  const altModal = document.getElementById('alteration-modal');
+  const openAltBtn = document.getElementById('open-alteration-modal');
+  const openAltBtn2 = document.getElementById('open-alteration-modal-btn2');
+  const closeAltBtn = document.getElementById('close-alteration-modal');
+  const cancelAltBtn = document.getElementById('cancel-alteration-btn');
+
+  function openAlterationModal() { if (altModal) altModal.style.display = 'flex'; }
+  function closeAlterationModal() { if (altModal) altModal.style.display = 'none'; }
+
+  if (openAltBtn) openAltBtn.onclick = openAlterationModal;
+  if (openAltBtn2) openAltBtn2.onclick = openAlterationModal;
+  if (closeAltBtn) closeAltBtn.onclick = closeAlterationModal;
+  if (cancelAltBtn) cancelAltBtn.onclick = closeAlterationModal;
+
+  const altPricingModal = document.getElementById('alteration-pricing-modal');
+  const closeAltPricingBtn = document.getElementById('close-alt-pricing-modal');
+  const cancelAltPricingBtn = document.getElementById('cancel-alt-pricing-btn');
+
+  if (closeAltPricingBtn) closeAltPricingBtn.onclick = () => { if (altPricingModal) altPricingModal.style.display = 'none'; };
+  if (cancelAltPricingBtn) cancelAltPricingBtn.onclick = () => { if (altPricingModal) altPricingModal.style.display = 'none'; };
+
+  // Submit New Alteration
+  const altForm = document.getElementById('new-alteration-form');
+  if (altForm) {
+    altForm.onsubmit = async (e) => {
+      e.preventDefault();
+      const clientName = document.getElementById('alt-client-name').value.trim();
+      const clientPhone = document.getElementById('alt-client-phone').value.trim();
+      const title = document.getElementById('alt-title').value.trim();
+      const details = document.getElementById('alt-details').value.trim();
+
+      const res = await fetch('/api/erp/client-portal', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'submit_alteration', clientName, clientPhone, title, details })
+      });
+      const data = await res.json();
+      if (data.success) {
+        alert('✓ تم تسجيل طلب التعديل المعماري بنجاح وإرساله للمكتب الفني!');
+        closeAlterationModal();
+        altForm.reset();
+        loadAlterations();
+      } else {
+        alert('فشل: ' + (data.error || 'حدث خطأ'));
+      }
+    };
+  }
+
+  // Submit Alteration Pricing
+  const altPricingForm = document.getElementById('alt-pricing-form');
+  if (altPricingForm) {
+    altPricingForm.onsubmit = async (e) => {
+      e.preventDefault();
+      const requestId = document.getElementById('pricing-request-id').value;
+      const engineeringCost = document.getElementById('pricing-cost').value;
+      const status = document.getElementById('pricing-status').value;
+      const engineerNotes = document.getElementById('pricing-notes').value;
+
+      const res = await fetch('/api/erp/client-portal', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'update_alteration_status', requestId, engineeringCost, status, engineerNotes })
+      });
+      const data = await res.json();
+      if (data.success) {
+        alert('✓ تم حفظ قرار التسعير الهندسي بنجاح!');
+        if (altPricingModal) altPricingModal.style.display = 'none';
+        loadAlterations();
+      } else {
+        alert('فشل: ' + (data.error || 'حدث خطأ'));
+      }
+    };
+  }
+
+  // Client Portal Search & WhatsApp Messaging
+  const portalBtn = document.getElementById('portal-search-btn');
+  const portalPhoneInput = document.getElementById('portal-search-phone');
+  const portalResultsWrap = document.getElementById('portal-results-wrap');
+
+  // Trigger from topbar button
+  document.getElementById('open-client-portal-btn')?.addEventListener('click', () => {
+    document.querySelectorAll('.comm-tab-btn').forEach(btn => btn.classList.remove('active'));
+    document.querySelectorAll('.comm-tab-pane').forEach(p => p.style.display = 'none');
+    const portalTabBtn = document.querySelector('[data-target="pane-portal"]');
+    if (portalTabBtn) portalTabBtn.classList.add('active');
+    const portalPane = document.getElementById('pane-portal');
+    if (portalPane) portalPane.style.display = 'block';
+  });
+
+  async function searchClientPortal() {
+    const phone = portalPhoneInput?.value?.trim() || '';
+    if (!phone) {
+      alert('يرجى كتابة رقم هاتف العميل للبحث');
+      return;
+    }
+
+    if (portalResultsWrap) portalResultsWrap.innerHTML = '<p class="text-center p-4">جارٍ البحث في قاعدة البيانات العقارية...</p>';
+
+    try {
+      const res = await fetch(`/api/erp/client-portal?phone=${encodeURIComponent(phone)}`);
+      const data = await res.json();
+      if (!data.success || !data.portfolio || data.portfolio.length === 0) {
+        if (portalResultsWrap) {
+          portalResultsWrap.innerHTML = `
+            <div style="text-align:center;padding:2.5rem;background:#fef2f2;border:1px solid #fecaca;border-radius:16px;">
+              <h4 style="color:#b91c1c;margin:0 0 0.5rem 0;">لم يتم العثور على أي حجوزات أو تعاقدات برقم الهاتف (${phone})</h4>
+              <p style="margin:0;color:#64748b;font-size:0.85rem;">يرجى التأكد من صحة رقم هاتف العميل المسجل في عقود البيع.</p>
+            </div>
+          `;
+        }
+        return;
+      }
+
+      renderClientPortfolio(data.portfolio, phone);
+    } catch (err) {
+      console.error(err);
+      if (portalResultsWrap) portalResultsWrap.innerHTML = '<p class="text-center p-4 text-danger">حدث خطأ في الاتصال</p>';
+    }
+  }
+
+  function renderClientPortfolio(portfolio, phone) {
+    if (!portalResultsWrap) return;
+
+    portalResultsWrap.innerHTML = portfolio.map(item => {
+      const r = item.reservation;
+      const unit = r.unit || {};
+      const proj = r.project || {};
+      const installments = r.installments || [];
+      const cheques = item.cheques || [];
+      const cleanPhone = phone.replace(/\D/g, '');
+      const waPrefix = `https://wa.me/2${cleanPhone.startsWith('0') ? cleanPhone.substring(1) : cleanPhone}?text=`;
+
+      // Next due installment
+      const nextInst = installments.find(i => i.status !== 'paid');
+      const nextDueDateStr = nextInst ? new Date(nextInst.dueDate).toLocaleDateString('ar-EG') : 'لا يوجد';
+      const nextAmountStr = nextInst ? (nextInst.amount.toLocaleString('ar-EG') + ' ج.م') : '-';
+
+      // Pre-filled WhatsApp templates
+      const msgReminder = encodeURIComponent(`مرحباً أستاذ ${r.clientName}،\nنود تذكيركم بموعد استحقاق القسط القادم لوحدتكم (${unit.unitNumber || '-'}) بمشروع ${proj.name || '-'}.\nالمبلغ المستحق: ${nextAmountStr}\nتاريخ الاستحقاق: ${nextDueDateStr}\nشاكرين تعاونكم الدائم.`);
+      const msgContract = encodeURIComponent(`مرحباً أستاذ ${r.clientName}،\nيسعدنا إعلامك بجاهزية عقد البيع الابتدائي لوحدتكم (${unit.unitNumber || '-'}) بمشروع ${proj.name || '-'}.\nيمكنكم التفضل بمقر الشركة لاستلام نسختكم المعتمدة.`);
+      const msgProgress = encodeURIComponent(`مرحباً أستاذ ${r.clientName}،\nتقرير متابعة الإنشاءات: بلغت نسبة تنفيذ مشروع ${proj.name || '-'} حالياً ${proj.progressPercentage || 0}% والعمل يسير وفق الجدول الزمني المعتمد.`);
+
+      const instRows = installments.slice(0, 8).map(i => `
+        <tr>
+          <td>قسط شهر ${new Date(i.dueDate).toLocaleDateString('ar-EG', { month: 'short', year: 'numeric' })}</td>
+          <td>${new Date(i.dueDate).toLocaleDateString('ar-EG')}</td>
+          <td><strong>${i.amount.toLocaleString('ar-EG')} ج.م</strong></td>
+          <td>
+            <span class="status-badge" style="${i.status === 'paid' ? 'background:#dcfce7;color:#15803d;' : 'background:#fef3c7;color:#b45309;'}">
+              ${i.status === 'paid' ? 'تم السداد ✓' : 'مستحق'}
+            </span>
+          </td>
+        </tr>
+      `).join('');
+
+      return `
+        <div style="background:white;border:1.5px solid #e2e8f0;border-radius:20px;padding:2rem;margin-bottom:1.5rem;box-shadow:0 6px 20px rgba(0,0,0,0.03);">
+          <!-- Client Header -->
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:1rem;border-bottom:1px solid #f1f5f9;padding-bottom:1.25rem;margin-bottom:1.5rem;">
+            <div>
+              <span style="background:#eff6ff;color:#2563eb;padding:0.2rem 0.65rem;border-radius:12px;font-size:0.75rem;font-weight:800;">عميل معتمد</span>
+              <h3 style="margin:0.4rem 0 0.2rem 0;font-size:1.45rem;font-weight:900;color:#0f172a;">${r.clientName}</h3>
+              <p style="margin:0;color:#64748b;font-size:0.85rem;">هاتف: ${r.clientPhone} | الرقم القومي: ${r.clientNationalId || '-'}</p>
+            </div>
+
+            <!-- WhatsApp Automation Actions -->
+            <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
+              <a href="${waPrefix}${msgReminder}" target="_blank" class="btn btn-sm" style="background:#25d366;color:white;text-decoration:none;">
+                📱 تذكير القسط
+              </a>
+              <a href="${waPrefix}${msgContract}" target="_blank" class="btn btn-sm" style="background:#0284c7;color:white;text-decoration:none;">
+                📄 إشعار جاهزية العقد
+              </a>
+              <a href="${waPrefix}${msgProgress}" target="_blank" class="btn btn-sm" style="background:#4f46e5;color:white;text-decoration:none;">
+                🏗️ بث تقدم البناء
+              </a>
+            </div>
+          </div>
+
+          <!-- Unit & Financial Grid -->
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1rem;margin-bottom:1.5rem;">
+            <div style="background:#f8fafc;padding:1rem;border-radius:14px;border:1px solid #e2e8f0;">
+              <span style="font-size:0.75rem;color:#64748b;display:block;">الوحدة والمشروع:</span>
+              <strong style="font-size:1.15rem;color:#0f172a;display:block;margin-top:0.2rem;">وحدة ${unit.unitNumber || '-'} (${proj.name || '-'})</strong>
+              <small style="color:#64748b;">الدور ${unit.floor || '-'} | المساحة ${unit.area || 0} م²</small>
+            </div>
+
+            <div style="background:#f8fafc;padding:1rem;border-radius:14px;border:1px solid #e2e8f0;">
+              <span style="font-size:0.75rem;color:#64748b;display:block;">إجمالي قيمة التعاقد:</span>
+              <strong style="font-size:1.2rem;color:#0f172a;display:block;margin-top:0.2rem;">${(r.totalPrice || unit.finalPrice || 0).toLocaleString('ar-EG')} ج.م</strong>
+              <small style="color:#64748b;">المقدم المدفوع: ${(r.downPayment || 0).toLocaleString('ar-EG')} ج.م</small>
+            </div>
+
+            <div style="background:#ecfdf5;padding:1rem;border-radius:14px;border:1px solid #a7f3d0;">
+              <span style="font-size:0.75rem;color:#047857;display:block;">إجمالي المسدد حتى اليوم:</span>
+              <strong style="font-size:1.25rem;color:#047857;display:block;margin-top:0.2rem;">${(item.totalPaid || 0).toLocaleString('ar-EG')} ج.م</strong>
+              <small style="color:#059669;">نسبة السداد: ${Math.round(((item.totalPaid || 0) / (r.totalPrice || unit.finalPrice || 1)) * 100)}%</small>
+            </div>
+
+            <div style="background:#fffbeb;padding:1rem;border-radius:14px;border:1px solid #fde68a;">
+              <span style="font-size:0.75rem;color:#b45309;display:block;">المتبقي من ثمن الوحدة:</span>
+              <strong style="font-size:1.25rem;color:#b45309;display:block;margin-top:0.2rem;">${(item.remainingBalance || 0).toLocaleString('ar-EG')} ج.م</strong>
+              <small style="color:#b45309;">الشيكات في الخزنة: ${cheques.length} شيك</small>
+            </div>
+          </div>
+
+          <!-- Installments Table Preview -->
+          <h4 style="margin:0 0 0.75rem 0;font-size:1.05rem;font-weight:800;">جدول الأقساط وحالة السداد:</h4>
+          <div class="table-responsive">
+            <table class="erp-table">
+              <thead>
+                <tr>
+                  <th>البيان</th>
+                  <th>تاريخ الاستحقاق</th>
+                  <th>المبلغ</th>
+                  <th>الحالة</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${instRows}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  if (portalBtn) portalBtn.onclick = searchClientPortal;
+  if (portalPhoneInput) {
+    portalPhoneInput.onkeypress = (e) => {
+      if (e.key === 'Enter') searchClientPortal();
+    };
+  }
+
+  // Initial load of alterations
+  loadAlterations();
+</script>
+
+<style>
+  * { box-sizing: border-box; }
+  .erp-container { direction: rtl; font-family: 'Cairo', system-ui, sans-serif; background-color: #f8fafc; min-height: 100vh; padding: 2rem; }
+  .loading-state { text-align: center; padding: 5rem; font-family: 'Cairo', sans-serif; }
+  .spinner { width: 40px; height: 40px; border: 4px solid #e2e8f0; border-top-color: #6366f1; border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 1rem; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .erp-topbar { display: flex; justify-content: space-between; align-items: center; background: white; border: 1px solid #e2e8f0; padding: 1rem 1.75rem; border-radius: 16px; margin-bottom: 2rem; }
+  .brand-crumb { display: flex; align-items: center; gap: 0.65rem; font-weight: 700; }
+  .back-link { display: inline-flex; align-items: center; gap: 0.35rem; color: #0284c7; text-decoration: none; }
+  .sep { color: #94a3b8; }
+  .active-crumb { color: #0f172a; }
+
+  .subsystem-hero { background: linear-gradient(135deg, #4f46e5 0%, #312e81 100%); color: white; border-radius: 24px; padding: 2.75rem; margin-bottom: 2rem; }
+  .hero-badge { display: inline-block; padding: 0.35rem 0.95rem; border-radius: 20px; background: rgba(255,255,255,0.18); font-size: 0.8rem; font-weight: 800; margin-bottom: 0.75rem; }
+  .hero-text h1 { margin: 0 0 0.65rem 0; font-size: 2rem; font-weight: 900; }
+  .hero-text p { margin: 0; max-width: 650px; font-size: 0.96rem; color: #c7d2fe; }
+
+  .comm-tabs { display: flex; gap: 0.5rem; margin-bottom: 1.5rem; overflow-x: auto; }
+  .comm-tab-btn { padding: 0.85rem 1.4rem; background: white; border: 1.5px solid #e2e8f0; border-radius: 14px; font-family: inherit; font-size: 0.95rem; font-weight: 800; color: #475569; cursor: pointer; white-space: nowrap; }
+  .comm-tab-btn.active { background: #4f46e5; color: white; border-color: #4f46e5; box-shadow: 0 6px 16px rgba(79, 70, 229, 0.3); }
+
+  .comm-tab-pane { background: white; border: 1px solid #e2e8f0; border-radius: 20px; padding: 2rem; }
+
+  /* Notifications */
+  .notifications-list { display: flex; flex-direction: column; gap: 0.85rem; }
+  .notification-card { display: flex; align-items: center; gap: 1rem; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 16px; padding: 1.25rem; }
+  .notif-icon { font-size: 1.6rem; }
+  .notif-content h4 { margin: 0 0 0.25rem 0; font-size: 1.05rem; }
+  .notif-content p { margin: 0 0 0.35rem 0; color: #475569; font-size: 0.9rem; }
+
+  /* Tasks Grid */
+  .tasks-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.25rem; }
+  .task-card { background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 16px; padding: 1.5rem; display: flex; flex-direction: column; justify-content: space-between; }
+  .task-done { opacity: 0.65; border-color: #cbd5e1; }
+  .task-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; }
+  .priority-tag { font-size: 0.74rem; font-weight: 800; padding: 0.2rem 0.6rem; border-radius: 12px; }
+  .prio-normal { background: #dbeafe; color: #1e40af; }
+  .prio-high { background: #fef3c7; color: #b45309; }
+  .prio-urgent { background: #fee2e2; color: #b91c1c; }
+  .task-card h4 { margin: 0 0 0.5rem 0; font-size: 1.15rem; }
+  .task-desc { color: #64748b; font-size: 0.88rem; margin: 0 0 1rem 0; }
+  .task-meta { display: flex; justify-content: space-between; font-size: 0.8rem; color: #64748b; margin-bottom: 1rem; }
+
+  /* Updates */
+  .updates-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1.25rem; }
+  .update-feed-card { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 16px; padding: 1.5rem; }
+  .update-feed-header { display: flex; justify-content: space-between; margin-bottom: 0.65rem; }
+  .proj-badge { font-size: 0.75rem; font-weight: 800; background: #e0f2fe; color: #0284c7; padding: 0.2rem 0.65rem; border-radius: 12px; }
+  .update-feed-card h4 { margin: 0 0 0.5rem 0; font-size: 1.15rem; }
+  .update-feed-card p { margin: 0 0 1rem 0; color: #64748b; font-size: 0.88rem; line-height: 1.5; }
+  .broadcast-tag { display: inline-block; font-size: 0.75rem; color: #059669; font-weight: 700; }
+
+  .erp-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+  .erp-table th, .erp-table td { padding: 0.85rem 1rem; text-align: right; border-bottom: 1px solid #f1f5f9; }
+  .erp-table th { background: #f8fafc; color: #475569; font-weight: 700; }
+
+  .status-badge { padding: 0.25rem 0.65rem; border-radius: 20px; font-size: 0.75rem; font-weight: 700; }
+  .ticket-open { background: #fee2e2; color: #b91c1c; }
+  .ticket-in_progress { background: #fef3c7; color: #b45309; }
+  .ticket-resolved { background: #dcfce7; color: #15803d; }
+
+  .btn { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.75rem 1.4rem; border-radius: 12px; font-weight: 700; font-size: 0.95rem; cursor: pointer; border: none; text-decoration: none; }
+  .btn-sm { padding: 0.45rem 0.85rem; font-size: 0.85rem; border-radius: 10px; }
+  .btn-primary { background: #4f46e5; color: white; }
+  .btn-warning { background: #b45309; color: white; }
+  .btn-success { background: #059669; color: white; }
+  .btn-secondary { background: #f1f5f9; color: #475569; }
+
+  .modal-backdrop { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(8px); z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 1.5rem; }
+  .modal-card { background: white; border-radius: 24px; width: 100%; max-width: 580px; padding: 2.25rem; box-shadow: 0 25px 60px rgba(0, 0, 0, 0.25); }
+  .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
+  .modal-header h3 { margin: 0; font-size: 1.35rem; font-weight: 900; }
+  .modal-sub { margin: 0.2rem 0 0 0; font-size: 0.82rem; color: #64748b; }
+  .close-modal-btn { background: #f1f5f9; border: none; width: 34px; height: 34px; border-radius: 50%; cursor: pointer; font-size: 1.4rem; }
+  .modal-form { display: flex; flex-direction: column; gap: 1.15rem; }
+  .form-group { display: flex; flex-direction: column; gap: 0.45rem; flex: 1; }
+  .form-group label { font-size: 0.85rem; font-weight: 700; color: #334155; }
+  .form-group input, .form-group select, .form-group textarea { padding: 0.75rem 1rem; border: 1.5px solid #e2e8f0; border-radius: 12px; font-family: inherit; font-size: 0.95rem; }
+  .form-row { display: flex; gap: 1rem; }
+  .form-actions { display: flex; justify-content: flex-end; gap: 0.75rem; margin-top: 1.25rem; }
+</style>

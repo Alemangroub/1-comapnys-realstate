@@ -1,0 +1,756 @@
+---
+import info from '../data/info.json';
+const { isTitleLink = false } = Astro.props;
+
+const aboutCards = [
+  {
+    slug: "basic-info",
+    number: "01",
+    title: "معلومات أساسية",
+    description: "كيان رائد في التطوير العقاري، متخصص في ابتكار وتطوير مجتمعات سكنية وتجارية متكاملة بمعايير عالمية ترتقي بجودة الحياة.",
+    tag: "ريادة وتأسيس",
+    glowColor: "rgba(56, 189, 248, 0.35)",
+    iconSvg: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18M5 21V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16M9 9h1M9 13h1M9 17h1M14 9h1M14 13h1M14 17h1"/></svg>`
+  },
+  {
+    slug: "quality",
+    number: "02",
+    title: "الجودة والتميز",
+    description: "التزام صارم بأعلى مواصفات الإتقان الهندسي في كافة مراحل التخطيط والتنفيذ لضمان سلامة، جمالية، واستدامة تدوم لأجيال.",
+    tag: "معايير عالمية",
+    glowColor: "rgba(245, 158, 11, 0.35)",
+    iconSvg: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>`
+  },
+  {
+    slug: "innovation",
+    number: "03",
+    title: "الابتكار والتطوير",
+    description: "نبتكر حلولاً استثمارية ذكية وتصاميم معمارية فريدة تستبق المستقبل وتواكب أرقى اتجاهات العمران العصري المستدام.",
+    tag: "تصاميم ذكية",
+    glowColor: "rgba(168, 85, 247, 0.35)",
+    iconSvg: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/><circle cx="12" cy="12" r="3.5"/></svg>`
+  },
+  {
+    slug: "transparency",
+    number: "04",
+    title: "الشفافية والمصداقية",
+    description: "نبني جسوراً متينة من الثقة مع عملائنا وشركائنا من خلال الوضوح التام والنزاهة المطلقة في كل تعاقد ومرحلة تنفيذ.",
+    tag: "ثقة وشراكة",
+    glowColor: "rgba(16, 185, 129, 0.35)",
+    iconSvg: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>`
+  }
+];
+
+const highlights = [
+  {
+    title: "تاريخنا ورؤيتنا",
+    desc: "منذ انطلاقتنا في مسيرة التطوير والاستثمار العقاري، نسعى جاهدين لتقديم مشاريع استثنائية تلبي طموحات عملائنا، حيث قمنا بتسليم مجموعة متنوعة من المشاريع السكنية والتجارية التي أصبحت معالم بارزة ومتميزة.",
+    icon: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>`
+  },
+  {
+    title: "فريقنا المتخصص",
+    desc: "نخبة متميزة من المهندسين، المعماريين، والمستشارين الماليين والإداريين الذين يجمعهم شغف بالتميز والابتكار، ويسخرون خبراتهم المتنوعة لتقديم أعلى قيمة حقيقية لعملائنا وشركائنا.",
+    icon: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>`
+  },
+  {
+    title: "المسؤولية المجتمعية",
+    desc: "نؤمن بدورنا الإيجابي في بناء وتنمية مجتمعات مستدامة وواعية، مع الحرص على أن تكون مشاريعنا صديقة للبيئة وتعتمد كفاءة الطاقة وتثري النسيج الحضري للمدن.",
+    icon: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>`
+  },
+  {
+    title: "قيمنا الأساسية",
+    desc: "النزاهة، الإتقان، الابتكار، والالتزام المستمر برضا العميل؛ قيم راسخة توجه كافة قراراتنا وممارساتنا اليومية لصناعة فارق حقيقي وملموس.",
+    icon: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>`
+  },
+  {
+    title: "شركاء النجاح",
+    desc: "شبكة وثيقة من كبرى الشركات الهندسية، المقاولين المعتمدين، والمؤسسات الاستثمارية الذين نتشارك معهم ذات الرؤية لتحقيق إنجازات استثنائية وبناء مستقبل واعد.",
+    icon: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M16 16v1a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h11a2 2 0 0 1 2 2v1"/><path d="M18 8h4a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2h-4"/><circle cx="8" cy="12" r="2"/></svg>`
+  }
+];
+---
+
+<section id="about-us" class="about-section">
+    <!-- Ambient Dynamic Glows -->
+    <div class="about-glow about-glow-1"></div>
+    <div class="about-glow about-glow-2"></div>
+    <div class="about-pattern"></div>
+
+    <div class="container">
+        <!-- Advanced Top Header -->
+        <div class="section-header">
+            <div class="about-top-badge">
+                <span class="badge-dot"></span>
+                <span class="badge-text">هويتنا ورؤيتنا المستقبلية</span>
+            </div>
+            
+            {isTitleLink ? (
+                <a href="/about" class="section-title-link">
+                    <h2 class="section-title">{info.title || "معلومات عنا"}</h2>
+                </a>
+            ) : (
+                <h2 class="section-title">{info.title || "معلومات عنا"}</h2>
+            )}
+
+            <h3 class="section-subtitle">{info.subtitle || "رواد الاستثمار والتطوير العقاري الحديث"}</h3>
+
+            {info.paragraphs && info.paragraphs.map(paragraph => (
+                <p class="section-desc-lead">{paragraph}</p>
+            ))}
+
+            <!-- Feature Pills Strip -->
+            <div class="header-pills">
+                <span class="pill-item"><i class="fas fa-check-circle"></i> خبرة هندسية متراكمة</span>
+                <span class="pill-item"><i class="fas fa-check-circle"></i> أعلى معايير الجودة والتنفيذ</span>
+                <span class="pill-item"><i class="fas fa-check-circle"></i> تصاميم ذكية ومستدامة</span>
+                <span class="pill-item"><i class="fas fa-check-circle"></i> ثقة ومصداقية استثمارية</span>
+            </div>
+        </div>
+
+        <!-- 4 Futuristic Modern Cards (No Photos, Pure High-Tech Glass) -->
+        <div class="about-grid">
+            {aboutCards.map((card, index) => (
+                <a 
+                    href={`/about/${card.slug}`} 
+                    class="about-card-link" 
+                    data-index={index}
+                    style={`--card-glow: ${card.glowColor};`}
+                >
+                    <article class="about-card">
+                        <!-- Holographic Background Effect -->
+                        <div class="card-mesh"></div>
+                        <div class="card-radial-light"></div>
+                        
+                        <!-- Header inside Card -->
+                        <div class="card-top">
+                            <span class="card-number">{card.number}</span>
+                            <span class="card-tag">{card.tag}</span>
+                        </div>
+
+                        <!-- 3D Luminous Icon Container -->
+                        <div class="card-icon-wrapper" set:html={card.iconSvg}></div>
+
+                        <!-- Card Content -->
+                        <div class="card-body">
+                            <h3 class="card-title">{card.title}</h3>
+                            <p class="card-description">{card.description}</p>
+                        </div>
+
+                        <!-- Footer Action CTA -->
+                        <div class="card-footer">
+                            <span class="cta-label">اكتشف المزيد</span>
+                            <span class="cta-arrow">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                    <line x1="19" y1="12" x2="5" y2="12"></line>
+                                    <polyline points="12 19 5 12 12 5"></polyline>
+                                </svg>
+                            </span>
+                        </div>
+                    </article>
+                </a>
+            ))}
+        </div>
+
+        <!-- High-Tech Glass Panels: Additional Pillars & Story -->
+        <div class="additional-info-wrapper">
+            <div class="pillars-header">
+                <span class="pillars-badge">ركائز تميزنا</span>
+                <h3 class="pillars-title">مسيرتنا وقيمنا الاستراتيجية</h3>
+            </div>
+
+            <div class="pillars-grid">
+                {highlights.map((item, idx) => (
+                    <div class="pillar-card" data-idx={idx}>
+                        <div class="pillar-icon-box" set:html={item.icon}></div>
+                        <div class="pillar-content">
+                            <h4 class="pillar-card-title">{item.title}</h4>
+                            <p class="pillar-card-desc">{item.desc}</p>
+                        </div>
+                    </div>
+                ))}
+            </div>
+        </div>
+    </div>
+</section>
+
+<script is:inline>
+    document.addEventListener('DOMContentLoaded', () => {
+        const cards = document.querySelectorAll('.about-card-link, .pillar-card');
+
+        const observer = new IntersectionObserver((entries, obs) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const el = entry.target;
+                    const index = el.getAttribute('data-index') || el.getAttribute('data-idx') || 0;
+                    el.style.transitionDelay = `${index * 110}ms`;
+                    el.classList.add('is-visible');
+                    obs.unobserve(el);
+                }
+            });
+        }, { threshold: 0.12 });
+
+        cards.forEach(card => {
+            observer.observe(card);
+        });
+    });
+</script>
+
+<style>
+    .about-section {
+        position: relative;
+        padding: 100px 0 110px;
+        background: radial-gradient(circle at 50% 20%, #0d1627 0%, #080d19 60%, #050812 100%);
+        direction: rtl;
+        overflow: hidden;
+    }
+
+    /* Ambient Dynamic Glows */
+    .about-glow {
+        position: absolute;
+        border-radius: 50%;
+        filter: blur(120px);
+        pointer-events: none;
+        z-index: 1;
+        opacity: 0.32;
+    }
+
+    .about-glow-1 {
+        width: 520px;
+        height: 520px;
+        top: -50px;
+        right: -100px;
+        background: radial-gradient(circle, rgba(56, 189, 248, 0.45) 0%, transparent 70%);
+        animation: floatOrb 20s ease-in-out infinite alternate;
+    }
+
+    .about-glow-2 {
+        width: 480px;
+        height: 480px;
+        bottom: 50px;
+        left: -80px;
+        background: radial-gradient(circle, rgba(211, 191, 169, 0.35) 0%, transparent 70%);
+        animation: floatOrb 16s ease-in-out infinite alternate-reverse;
+    }
+
+    @keyframes floatOrb {
+        0% { transform: translate(0, 0) scale(1); }
+        50% { transform: translate(-35px, 25px) scale(1.08); }
+        100% { transform: translate(30px, -35px) scale(0.95); }
+    }
+
+    .about-pattern {
+        position: absolute;
+        inset: 0;
+        background-size: 40px 40px;
+        background-image: 
+            linear-gradient(to right, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+            linear-gradient(to bottom, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+        z-index: 1;
+        mask-image: radial-gradient(circle at center, black 40%, transparent 85%);
+        -webkit-mask-image: radial-gradient(circle at center, black 40%, transparent 85%);
+    }
+
+    .container {
+        position: relative;
+        z-index: 2;
+        max-width: 1240px;
+        margin: 0 auto;
+        padding: 0 25px;
+    }
+
+    /* Top Header Section */
+    .section-header {
+        text-align: center;
+        margin-bottom: 70px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .about-top-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 16px;
+        border-radius: 30px;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(211, 191, 169, 0.3);
+        backdrop-filter: blur(10px);
+        margin-bottom: 20px;
+    }
+
+    .badge-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background-color: #38bdf8;
+        box-shadow: 0 0 10px #38bdf8;
+        animation: pulseDot 2s infinite;
+    }
+
+    @keyframes pulseDot {
+        0%, 100% { opacity: 1; transform: scale(1); }
+        50% { opacity: 0.4; transform: scale(0.8); }
+    }
+
+    .badge-text {
+        font-family: 'Cairo', sans-serif;
+        font-size: 0.95rem;
+        font-weight: 700;
+        color: #d3bfa9;
+        letter-spacing: 0.5px;
+    }
+
+    .section-title-link {
+        text-decoration: none;
+        color: inherit;
+        display: inline-block;
+        transition: transform 0.3s ease;
+    }
+
+    .section-title-link:hover {
+        transform: scale(1.02);
+    }
+
+    .section-title {
+        font-family: 'Cairo', sans-serif;
+        font-size: 3rem;
+        font-weight: 800;
+        color: #ffffff;
+        margin-bottom: 15px;
+        background: linear-gradient(180deg, #ffffff 40%, #cbd5e1 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        letter-spacing: -0.5px;
+    }
+
+    .section-subtitle {
+        font-family: 'Cairo', sans-serif;
+        font-size: 1.45rem;
+        font-weight: 700;
+        color: #d3bfa9;
+        margin-bottom: 15px;
+    }
+
+    .section-desc-lead {
+        font-family: 'Almarai', sans-serif;
+        font-size: 1.15rem;
+        color: #94a3b8;
+        max-width: 780px;
+        margin: 0 auto 25px;
+        line-height: 1.8;
+    }
+
+    /* Feature Pills Strip */
+    .header-pills {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 12px;
+        margin-top: 10px;
+    }
+
+    .pill-item {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 14px;
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 20px;
+        font-family: 'Cairo', sans-serif;
+        font-size: 0.88rem;
+        color: #cbd5e1;
+        transition: background-color 0.3s ease, border-color 0.3s ease;
+    }
+
+    .pill-item i {
+        color: #38bdf8;
+        font-size: 0.8rem;
+    }
+
+    .pill-item:hover {
+        background: rgba(255, 255, 255, 0.08);
+        border-color: rgba(56, 189, 248, 0.4);
+    }
+
+    /* Cards Grid */
+    .about-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
+        gap: 30px;
+        margin-bottom: 75px;
+    }
+
+    .about-card-link {
+        text-decoration: none;
+        color: inherit;
+        display: block;
+        border-radius: 20px;
+        opacity: 0;
+        transform: translateY(40px);
+        transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1), transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .about-card-link.is-visible {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    /* Futuristic Card Styling */
+    .about-card {
+        position: relative;
+        height: 100%;
+        min-height: 380px;
+        padding: 35px 28px 25px;
+        border-radius: 20px;
+        background: linear-gradient(160deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0.015) 100%);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        overflow: hidden;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+        transition: transform 0.4s ease, border-color 0.4s ease, box-shadow 0.4s ease, background 0.4s ease;
+    }
+
+    .card-mesh {
+        position: absolute;
+        inset: 0;
+        background-size: 24px 24px;
+        background-image: 
+            radial-gradient(circle, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+        opacity: 0.6;
+        pointer-events: none;
+        transition: opacity 0.4s ease;
+    }
+
+    .card-radial-light {
+        position: absolute;
+        top: -40px;
+        left: -40px;
+        width: 180px;
+        height: 180px;
+        border-radius: 50%;
+        background: radial-gradient(circle, var(--card-glow) 0%, transparent 70%);
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.5s ease, transform 0.5s ease;
+    }
+
+    .about-card-link:hover .about-card {
+        transform: translateY(-10px);
+        border-color: rgba(255, 255, 255, 0.25);
+        box-shadow: 0 20px 45px rgba(0, 0, 0, 0.4), 0 0 35px var(--card-glow);
+        background: linear-gradient(160deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.03) 100%);
+    }
+
+    .about-card-link:hover .card-radial-light {
+        opacity: 1;
+        transform: scale(1.4);
+    }
+
+    /* Card Top */
+    .card-top {
+        position: relative;
+        z-index: 2;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 25px;
+    }
+
+    .card-number {
+        font-family: 'Cairo', monospace;
+        font-size: 1.5rem;
+        font-weight: 800;
+        color: rgba(255, 255, 255, 0.25);
+        transition: color 0.3s ease;
+    }
+
+    .about-card-link:hover .card-number {
+        color: #d3bfa9;
+    }
+
+    .card-tag {
+        font-family: 'Cairo', sans-serif;
+        font-size: 0.78rem;
+        font-weight: 700;
+        padding: 4px 10px;
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.06);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        color: #94a3b8;
+        transition: color 0.3s ease, border-color 0.3s ease;
+    }
+
+    .about-card-link:hover .card-tag {
+        color: #ffffff;
+        border-color: rgba(255, 255, 255, 0.3);
+    }
+
+    /* Card Icon */
+    .card-icon-wrapper {
+        position: relative;
+        z-index: 2;
+        width: 60px;
+        height: 60px;
+        border-radius: 14px;
+        background: linear-gradient(145deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.03) 100%);
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #ffffff;
+        margin-bottom: 25px;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+        transition: transform 0.4s ease, border-color 0.4s ease, box-shadow 0.4s ease;
+    }
+
+    .card-icon-wrapper :global(svg) {
+        width: 30px;
+        height: 30px;
+        transition: transform 0.4s ease;
+    }
+
+    .about-card-link:hover .card-icon-wrapper {
+        transform: scale(1.1) rotate(-3deg);
+        border-color: rgba(255, 255, 255, 0.4);
+        box-shadow: 0 10px 25px var(--card-glow);
+    }
+
+    .about-card-link:hover .card-icon-wrapper :global(svg) {
+        transform: scale(1.08);
+    }
+
+    /* Card Body */
+    .card-body {
+        position: relative;
+        z-index: 2;
+        flex-grow: 1;
+        margin-bottom: 25px;
+    }
+
+    .card-title {
+        font-family: 'Cairo', sans-serif;
+        font-size: 1.55rem;
+        font-weight: 800;
+        color: #ffffff;
+        margin: 0 0 12px 0;
+        line-height: 1.35;
+        transition: color 0.3s ease;
+    }
+
+    .about-card-link:hover .card-title {
+        color: #d3bfa9;
+    }
+
+    .card-description {
+        font-family: 'Almarai', sans-serif;
+        font-size: 0.95rem;
+        color: #94a3b8;
+        line-height: 1.7;
+        margin: 0;
+    }
+
+    /* Card Footer Action */
+    .card-footer {
+        position: relative;
+        z-index: 2;
+        padding-top: 18px;
+        border-top: 1px solid rgba(255, 255, 255, 0.08);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .cta-label {
+        font-family: 'Cairo', sans-serif;
+        font-size: 0.95rem;
+        font-weight: 700;
+        color: #cbd5e1;
+        transition: color 0.3s ease;
+    }
+
+    .cta-arrow {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.06);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #cbd5e1;
+        transition: transform 0.3s ease, background-color 0.3s ease, color 0.3s ease;
+    }
+
+    .cta-arrow svg {
+        width: 14px;
+        height: 14px;
+    }
+
+    .about-card-link:hover .cta-label {
+        color: #ffffff;
+    }
+
+    .about-card-link:hover .cta-arrow {
+        transform: translateX(-4px);
+        background-color: #d3bfa9;
+        color: #0c1424;
+        border-color: #d3bfa9;
+    }
+
+    /* Pillars Section */
+    .additional-info-wrapper {
+        margin-top: 60px;
+        padding-top: 60px;
+        border-top: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .pillars-header {
+        text-align: center;
+        margin-bottom: 45px;
+    }
+
+    .pillars-badge {
+        display: inline-block;
+        font-family: 'Cairo', sans-serif;
+        font-size: 0.85rem;
+        font-weight: 700;
+        color: #d3bfa9;
+        background: rgba(211, 191, 169, 0.1);
+        border: 1px solid rgba(211, 191, 169, 0.25);
+        padding: 4px 14px;
+        border-radius: 20px;
+        margin-bottom: 12px;
+    }
+
+    .pillars-title {
+        font-family: 'Cairo', sans-serif;
+        font-size: 2.2rem;
+        font-weight: 800;
+        color: #ffffff;
+        margin: 0;
+    }
+
+    .pillars-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+        gap: 25px;
+    }
+
+    .pillar-card {
+        display: flex;
+        gap: 20px;
+        align-items: flex-start;
+        padding: 28px 24px;
+        border-radius: 16px;
+        background: linear-gradient(145deg, rgba(255, 255, 255, 0.04) 0%, rgba(255, 255, 255, 0.01) 100%);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        backdrop-filter: blur(10px);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        opacity: 0;
+        transform: translateY(30px);
+        transition: opacity 0.6s ease, transform 0.6s ease, border-color 0.3s ease, background 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .pillar-card.is-visible {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    .pillar-card:hover {
+        transform: translateY(-5px);
+        border-color: rgba(211, 191, 169, 0.3);
+        background: linear-gradient(145deg, rgba(255, 255, 255, 0.07) 0%, rgba(255, 255, 255, 0.02) 100%);
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.35);
+    }
+
+    .pillar-icon-box {
+        flex-shrink: 0;
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        background: rgba(211, 191, 169, 0.12);
+        border: 1px solid rgba(211, 191, 169, 0.25);
+        color: #d3bfa9;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: transform 0.3s ease, background-color 0.3s ease, color 0.3s ease;
+    }
+
+    .pillar-icon-box :global(svg) {
+        width: 24px;
+        height: 24px;
+    }
+
+    .pillar-card:hover .pillar-icon-box {
+        transform: scale(1.1);
+        background: #d3bfa9;
+        color: #080d19;
+    }
+
+    .pillar-content {
+        flex-grow: 1;
+    }
+
+    .pillar-card-title {
+        font-family: 'Cairo', sans-serif;
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: #ffffff;
+        margin: 0 0 10px 0;
+        line-height: 1.4;
+    }
+
+    .pillar-card-desc {
+        font-family: 'Almarai', sans-serif;
+        font-size: 0.95rem;
+        color: #94a3b8;
+        line-height: 1.75;
+        margin: 0;
+    }
+
+    /* Responsive */
+    @media (max-width: 992px) {
+        .section-title {
+            font-size: 2.5rem;
+        }
+        .about-grid {
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 25px;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .about-section {
+            padding: 70px 0 80px;
+        }
+        .section-title {
+            font-size: 2.1rem;
+        }
+        .section-subtitle {
+            font-size: 1.2rem;
+        }
+        .section-desc-lead {
+            font-size: 1rem;
+        }
+        .header-pills {
+            gap: 8px;
+        }
+        .pill-item {
+            font-size: 0.8rem;
+            padding: 5px 11px;
+        }
+        .pillars-grid {
+            grid-template-columns: 1fr;
+        }
+        .pillar-card {
+            padding: 20px 18px;
+        }
+    }
+</style>

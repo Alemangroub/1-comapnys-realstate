@@ -1,0 +1,880 @@
+---
+import Layout from '../layouts/Layout.astro';
+import AdminLogin from '../components/AdminLogin.astro';
+---
+
+<Layout title="لوحة التحكم الرئيسية | منظومة التطوير العقاري والمقاولات">
+  <div class="admin-app-root">
+    
+    <!-- Auth Loading State -->
+    <div id="auth-loading-message" class="auth-loading-screen">
+      <div class="auth-spinner"></div>
+      <p>جارٍ التحقق من صلاحيات الدخول للمنظومة...</p>
+    </div>
+
+    <!-- Auth Login Container -->
+    <div id="admin-login-container" class="auth-container" style="display: none;">
+      <AdminLogin />
+    </div>
+
+    <!-- Main Master Layout Wrapper -->
+    <div id="admin-dashboard-container" class="master-layout-wrapper" style="display: none;">
+      
+      <!-- Fixed Right Sidebar -->
+      <aside class="fixed-sidebar-right" id="main-sidebar">
+        
+        <!-- Brand & System Title -->
+        <div class="sidebar-brand-box">
+          <div class="brand-crest-pod">
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"></path><path d="M5 21V7l8-4v18"></path><path d="M19 21V11l-6-4"></path><path d="M9 9v.01"></path><path d="M9 12v.01"></path><path d="M9 15v.01"></path><path d="M9 18v.01"></path></svg>
+          </div>
+          <div class="brand-text-wrap">
+            <h2 class="brand-company-title">شركة الإيمان</h2>
+            <span class="brand-system-sub">منظومة التطوير العقاري ERP</span>
+          </div>
+        </div>
+
+        <!-- Sidebar Navigation Menu -->
+        <nav class="sidebar-nav-menu">
+          
+          <div class="menu-group-label">القائمة الرئيسية</div>
+
+          <!-- 1. الرئيسية (لوحة التحكم) -->
+          <a href="/crs" class="nav-item-link active">
+            <div class="nav-icon-pod">
+              <svg xmlns="http://www.w3.org/2000/svg" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+            </div>
+            <span class="nav-text">الرئيسية (لوحة التحكم)</span>
+          </a>
+
+          <!-- 2. إدارة الموظفين والصلاحيات -->
+          <a href="/crs/users" class="nav-item-link">
+            <div class="nav-icon-pod">
+              <svg xmlns="http://www.w3.org/2000/svg" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+            </div>
+            <span class="nav-text">إدارة الموظفين والصلاحيات</span>
+          </a>
+
+          <!-- 3. سجل الرقابة والتدقيق الأمني (Audit Trail) -->
+          <a href="/crs/users?tab=audit" class="nav-item-link">
+            <div class="nav-icon-pod">
+              <svg xmlns="http://www.w3.org/2000/svg" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+            </div>
+            <span class="nav-text">سجل الرقابة والتدقيق (Audit)</span>
+          </a>
+
+          <div class="menu-group-label">إدارات المشروعات والتنفيذ</div>
+
+          <!-- 3. التطوير العقاري (المشروعات والوحدات) -->
+          <a href="/crs/development" class="nav-item-link">
+            <div class="nav-icon-pod">
+              <svg xmlns="http://www.w3.org/2000/svg" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"></path><path d="M5 21V7l8-4v18"></path><path d="M19 21V11l-6-4"></path></svg>
+            </div>
+            <span class="nav-text">التطوير العقاري (المشروعات والوحدات)</span>
+          </a>
+
+          <!-- 4. الإنشاءات والمقاولات -->
+          <a href="/crs/construction" class="nav-item-link">
+            <div class="nav-icon-pod">
+              <svg xmlns="http://www.w3.org/2000/svg" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 20h20"></path><path d="M5 20V8l7-5 7 5v12"></path><rect x="9" y="12" width="6" height="8"></rect></svg>
+            </div>
+            <span class="nav-text">الإنشاءات والمقاولات</span>
+          </a>
+
+          <!-- 5. المبيعات والعملاء (CRM) -->
+          <a href="/crs/sales" class="nav-item-link">
+            <div class="nav-icon-pod">
+              <svg xmlns="http://www.w3.org/2000/svg" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><line x1="19" y1="8" x2="19" y2="14"></line><line x1="22" y1="11" x2="16" y2="11"></line></svg>
+            </div>
+            <span class="nav-text">المبيعات والعملاء (CRM)</span>
+          </a>
+
+          <div class="menu-group-label">المالية والحسابات المركزية</div>
+
+          <!-- 6. التحصيل والأقساط -->
+          <a href="/crs/collection" class="nav-item-link">
+            <div class="nav-icon-pod">
+              <svg xmlns="http://www.w3.org/2000/svg" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg>
+            </div>
+            <span class="nav-text">التحصيل والأقساط</span>
+          </a>
+
+          <!-- 7. الخزنة والحسابات -->
+          <a href="/crs/treasury" class="nav-item-link">
+            <div class="nav-icon-pod">
+              <svg xmlns="http://www.w3.org/2000/svg" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+            </div>
+            <span class="nav-text">الخزنة والحسابات</span>
+          </a>
+
+          <div class="menu-group-label">التواصل والدعم</div>
+
+          <!-- 8. التواصل والتذاكر -->
+          <a href="/crs/communications" class="nav-item-link">
+            <div class="nav-icon-pod">
+              <svg xmlns="http://www.w3.org/2000/svg" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
+            </div>
+            <span class="nav-text">التواصل والتذاكر</span>
+          </a>
+
+        </nav>
+
+      </aside>
+
+      <!-- Main Layout Content Area (Positioned Left of the Fixed Sidebar) -->
+      <main class="main-content-layout">
+        
+        <!-- Top Executive Navbar -->
+        <header class="master-top-navbar">
+          <div class="navbar-left-brand">
+            <button id="mobile-sidebar-toggle" class="sidebar-toggle-btn" aria-label="تبديل القائمة">
+              <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+            </button>
+            <div class="breadcrumb-trail">
+              <span class="crumb-root">لوحة التحكم</span>
+              <span class="crumb-sep">/</span>
+              <span class="crumb-active">نظرة عامة على الأنظمة</span>
+            </div>
+          </div>
+
+          <div class="navbar-right-actions">
+            <!-- User Profile Pill -->
+            <div class="user-executive-pill">
+              <div class="user-avatar-crest">A</div>
+              <div class="user-texts">
+                <span class="user-role-lbl">المالك / المدير العام</span>
+                <strong id="top-user-name" class="user-name-str">مدير النظام</strong>
+              </div>
+            </div>
+
+            <button id="logout-button" class="btn-top-util btn-logout-action">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+              <span>تسجيل الخروج</span>
+            </button>
+          </div>
+        </header>
+
+        <!-- Main Body Content -->
+        <div class="dashboard-body-content">
+          
+          <!-- Executive Hero Banner -->
+          <section class="executive-hero-banner">
+            <div class="hero-text-content">
+              <div class="hero-badge-row">
+                <span class="status-live-chip">
+                  <span class="pulsing-green-dot"></span>
+                  النظام المركزي متصل وشغال
+                </span>
+                <span class="version-tag-chip">الإصدار الشامل 2.0</span>
+              </div>
+              <h1>مرحباً بك في لوحة تحكم المنظومة المركزية</h1>
+              <p id="welcome-message">إدارة دورة حياة مشاريع التطوير العقاري والمقاولات من المخططات والمبيعات وصولاً للتحصيل وإدارة الخزينة.</p>
+            </div>
+          </section>
+
+          <!-- Real-Time Metrics Ribbon -->
+          <section class="metrics-kpi-ribbon">
+            <div class="kpi-card">
+              <div class="kpi-icon-box box-purple">
+                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg>
+              </div>
+              <div class="kpi-data">
+                <span class="kpi-label">المشاريع القائمة</span>
+                <h3 id="stat-projects">-</h3>
+                <span class="kpi-sub">نشطة بالتطوير</span>
+              </div>
+            </div>
+
+            <div class="kpi-card">
+              <div class="kpi-icon-box box-blue">
+                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+              </div>
+              <div class="kpi-data">
+                <span class="kpi-label">مخزون الوحدات الكلي</span>
+                <h3 id="stat-units">-</h3>
+                <span class="kpi-sub" id="stat-units-sub">متاحة ومحجوزة ومباعة</span>
+              </div>
+            </div>
+
+            <div class="kpi-card">
+              <div class="kpi-icon-box box-green">
+                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"></rect><line x1="12" y1="8" x2="12" y2="16"></line><line x1="8" y1="12" x2="16" y2="12"></line></svg>
+              </div>
+              <div class="kpi-data">
+                <span class="kpi-label">إجمالي السيولة بالخزائن</span>
+                <h3 id="stat-treasury">- ج.م</h3>
+                <span class="kpi-sub" id="stat-treasury-sub">أرصدة نقدية متوفرة</span>
+              </div>
+            </div>
+
+            <div class="kpi-card">
+              <div class="kpi-icon-box box-amber">
+                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+              </div>
+              <div class="kpi-data">
+                <span class="kpi-label">أقساط قيد التحصيل</span>
+                <h3 id="stat-collection">-</h3>
+                <span class="kpi-sub" id="stat-collection-sub">مستحقة ومتأخرة</span>
+              </div>
+            </div>
+          </section>
+
+          <!-- System Operational Status Banner -->
+          <section class="system-ready-panel">
+            <div class="ready-panel-content">
+              <div class="ready-icon-box">
+                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path><polyline points="9 12 11 14 15 10"></polyline></svg>
+              </div>
+              <div class="ready-text-wrap">
+                <h3>المنظومة المركزية تعمل بكامل كفاءتها</h3>
+                <p>جميع الإدارات والأقسام السبعة مربوطة ومفعلة مباشرة في القائمة الجانبية الثابتة. يمكنك الوصول الفوري لأي قسم وإدارة العمليات من خلال القائمة على اليمين.</p>
+              </div>
+            </div>
+          </section>
+
+        </div>
+
+      </main>
+
+    </div>
+  </div>
+</Layout>
+
+<style is:global>
+  * {
+    box-sizing: border-box;
+  }
+
+  .admin-app-root {
+    direction: rtl;
+    font-family: 'Cairo', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background-color: #f8fafc;
+    min-height: 100vh;
+    color: #0f172a;
+    margin: 0;
+    padding: 0;
+  }
+
+  /* Loading State */
+  .auth-loading-screen {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    font-family: 'Cairo', sans-serif;
+    color: #475569;
+    gap: 1rem;
+    direction: rtl;
+  }
+
+  .auth-spinner {
+    width: 44px;
+    height: 44px;
+    border: 4px solid #e2e8f0;
+    border-top-color: #2563eb;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+
+  /* Master Layout Container */
+  .master-layout-wrapper {
+    display: flex;
+    min-height: 100vh;
+    width: 100%;
+    position: relative;
+  }
+
+  /* ========================================================
+     1. FIXED RIGHT SIDEBAR (شريط جانبي ثابت على اليمين)
+     ======================================================== */
+  .fixed-sidebar-right {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 290px;
+    background: #ffffff;
+    border-left: 1px solid #e2e8f0;
+    box-shadow: -2px 0 12px rgba(0, 0, 0, 0.02);
+    display: flex;
+    flex-direction: column;
+    z-index: 100;
+    overflow-y: auto;
+  }
+
+  /* Brand Header in Sidebar */
+  .sidebar-brand-box {
+    padding: 1.4rem 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    border-bottom: 1px solid #f1f5f9;
+    background: #ffffff;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+
+  .brand-crest-pod {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #1e293b, #0f172a);
+    color: #38bdf8;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.15);
+    flex-shrink: 0;
+  }
+
+  .brand-company-title {
+    margin: 0;
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: #0f172a;
+    line-height: 1.3;
+  }
+
+  .brand-system-sub {
+    font-size: 0.72rem;
+    color: #64748b;
+    font-weight: 600;
+    display: block;
+  }
+
+  /* Navigation Links in Sidebar */
+  .sidebar-nav-menu {
+    padding: 1.15rem 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    flex: 1;
+  }
+
+  .menu-group-label {
+    font-size: 0.72rem;
+    font-weight: 800;
+    color: #94a3b8;
+    padding: 0.65rem 0.75rem 0.25rem;
+    letter-spacing: 0.2px;
+  }
+
+  .nav-item-link {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    padding: 0.72rem 0.95rem;
+    border-radius: 12px;
+    color: #334155;
+    text-decoration: none;
+    font-size: 0.88rem;
+    font-weight: 700;
+    transition: all 0.2s ease;
+    border: 1px solid transparent;
+  }
+
+  .nav-icon-pod {
+    width: 34px;
+    height: 34px;
+    border-radius: 8px;
+    background: #f1f5f9;
+    color: #64748b;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: all 0.2s ease;
+  }
+
+  .nav-item-link:hover {
+    background: #f8fafc;
+    color: #2563eb;
+    border-color: #e2e8f0;
+    transform: translateX(-2px);
+  }
+
+  .nav-item-link:hover .nav-icon-pod {
+    background: #eff6ff;
+    color: #2563eb;
+  }
+
+  /* Active Sidebar Link */
+  .nav-item-link.active {
+    background: #eff6ff;
+    color: #1d4ed8;
+    border-color: #bfdbfe;
+    box-shadow: 0 2px 8px rgba(37, 99, 235, 0.08);
+  }
+
+  .nav-item-link.active .nav-icon-pod {
+    background: #2563eb;
+    color: #ffffff;
+  }
+
+
+
+  /* ========================================================
+     2. MAIN CONTENT LAYOUT (المساحة التنفيذية بجانب السايدبار)
+     ======================================================== */
+  .main-content-layout {
+    margin-right: 290px;
+    flex: 1;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background: #f8fafc;
+    min-width: 0;
+  }
+
+  /* Top Navbar */
+  .master-top-navbar {
+    background: #ffffff;
+    border-bottom: 1px solid #e2e8f0;
+    padding: 0.85rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.02);
+  }
+
+  .navbar-left-brand {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+  }
+
+  .sidebar-toggle-btn {
+    display: none;
+    background: #f1f5f9;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 0.45rem;
+    cursor: pointer;
+    color: #334155;
+  }
+
+  .breadcrumb-trail {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.85rem;
+    font-weight: 700;
+  }
+
+  .crumb-root { color: #64748b; }
+  .crumb-sep { color: #cbd5e1; }
+  .crumb-active { color: #0f172a; }
+
+  .navbar-right-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+  }
+
+  .user-executive-pill {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    padding: 0.35rem 0.85rem;
+    border-radius: 12px;
+  }
+
+  .user-avatar-crest {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 1.05rem;
+  }
+
+  .user-texts {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .user-role-lbl {
+    font-size: 0.68rem;
+    color: #64748b;
+    font-weight: 700;
+  }
+
+  .user-name-str {
+    font-size: 0.88rem;
+    font-weight: 800;
+    color: #0f172a;
+  }
+
+  .btn-top-util {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.52rem 1.05rem;
+    border-radius: 10px;
+    font-size: 0.86rem;
+    font-weight: 700;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .btn-logout-action {
+    background: #fee2e2;
+    color: #dc2626;
+  }
+
+  .btn-logout-action:hover {
+    background: #fecaca;
+    color: #b91c1c;
+  }
+
+  /* Body Content */
+  .dashboard-body-content {
+    padding: 1.8rem 2rem;
+    max-width: 1550px;
+    margin: 0 auto;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 1.8rem;
+  }
+
+  /* Hero Banner */
+  .executive-hero-banner {
+    background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+    color: #ffffff;
+    border-radius: 20px;
+    padding: 2.2rem 2.4rem;
+    box-shadow: 0 10px 25px rgba(15, 23, 42, 0.1);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .executive-hero-banner::before {
+    content: '';
+    position: absolute;
+    top: -40px;
+    left: -40px;
+    width: 220px;
+    height: 220px;
+    background: radial-gradient(circle, rgba(56, 189, 248, 0.15) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .hero-badge-row {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin-bottom: 0.85rem;
+  }
+
+  .status-live-chip {
+    background: rgba(56, 189, 248, 0.12);
+    border: 1px solid rgba(56, 189, 248, 0.25);
+    padding: 0.35rem 0.85rem;
+    border-radius: 20px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: #38bdf8;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+  }
+
+  .version-tag-chip {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    padding: 0.35rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #cbd5e1;
+  }
+
+  .pulsing-green-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: #38bdf8;
+    box-shadow: 0 0 0 0 rgba(56, 189, 248, 0.7);
+    animation: pulse 1.8s infinite;
+  }
+
+  @keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(56, 189, 248, 0.7); }
+    70% { box-shadow: 0 0 0 8px rgba(56, 189, 248, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(56, 189, 248, 0); }
+  }
+
+  .hero-text-content h1 {
+    margin: 0 0 0.5rem 0;
+    font-size: 1.75rem;
+    font-weight: 800;
+  }
+
+  .hero-text-content p {
+    margin: 0;
+    font-size: 0.95rem;
+    color: #94a3b8;
+    line-height: 1.6;
+    max-width: 800px;
+  }
+
+  /* KPI Ribbon */
+  .metrics-kpi-ribbon {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.25rem;
+  }
+
+  .kpi-card {
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 1.25rem 1.4rem;
+    border: 1px solid #e2e8f0;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+  }
+
+  .kpi-icon-box {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .box-purple { background: #ede9fe; color: #7c3aed; }
+  .box-blue { background: #dbeafe; color: #2563eb; }
+  .box-green { background: #d1fae5; color: #059669; }
+  .box-amber { background: #fef3c7; color: #d97706; }
+
+  .kpi-data {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+
+  .kpi-label {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: #64748b;
+  }
+
+  .kpi-data h3 {
+    margin: 0.15rem 0;
+    font-size: 1.5rem;
+    font-weight: 900;
+    color: #0f172a;
+    letter-spacing: -0.5px;
+  }
+
+  .kpi-sub {
+    font-size: 0.72rem;
+    color: #94a3b8;
+    font-weight: 600;
+  }
+
+  /* System Operational Panel */
+  .system-ready-panel {
+    background: #ffffff;
+    border-radius: 18px;
+    border: 1px solid #e2e8f0;
+    padding: 1.75rem 2rem;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.02);
+  }
+
+  .ready-panel-content {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+  }
+
+  .ready-icon-box {
+    width: 60px;
+    height: 60px;
+    border-radius: 16px;
+    background: #dcfce7;
+    color: #16a34a;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .ready-text-wrap h3 {
+    margin: 0 0 0.35rem 0;
+    font-size: 1.2rem;
+    font-weight: 800;
+    color: #0f172a;
+  }
+
+  .ready-text-wrap p {
+    margin: 0;
+    font-size: 0.92rem;
+    color: #64748b;
+    line-height: 1.6;
+    max-width: 900px;
+  }
+
+  /* Responsive Adjustments */
+  @media (max-width: 1200px) {
+    .metrics-kpi-ribbon {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (max-width: 992px) {
+    .fixed-sidebar-right {
+      transform: translateX(100%);
+      transition: transform 0.3s ease;
+    }
+
+    .fixed-sidebar-right.mobile-open {
+      transform: translateX(0);
+    }
+
+    .main-content-layout {
+      margin-right: 0;
+    }
+
+    .sidebar-toggle-btn {
+      display: inline-flex;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .metrics-kpi-ribbon {
+      grid-template-columns: 1fr;
+    }
+
+    .dashboard-body-content {
+      padding: 1.25rem 1rem;
+    }
+
+    .master-top-navbar {
+      padding: 0.75rem 1rem;
+    }
+  }
+</style>
+
+<script>
+  import { checkAuth, logout } from '../lib/auth.js';
+
+  const authLoadingMessage = document.getElementById('auth-loading-message');
+  const loginContainer = document.getElementById('admin-login-container');
+  const dashboardContainer = document.getElementById('admin-dashboard-container');
+  const logoutButton = document.getElementById('logout-button');
+  const topUserName = document.getElementById('top-user-name');
+  const welcomeMessage = document.getElementById('welcome-message');
+  const mobileToggle = document.getElementById('mobile-sidebar-toggle');
+  const sidebar = document.getElementById('main-sidebar');
+
+  if (mobileToggle && sidebar) {
+    mobileToggle.addEventListener('click', () => {
+      sidebar.classList.toggle('mobile-open');
+    });
+  }
+
+  const timeout = setTimeout(() => {
+    if (authLoadingMessage) authLoadingMessage.style.display = 'none';
+    if (loginContainer) loginContainer.style.display = 'block';
+  }, 5000);
+
+  async function loadErpSummary() {
+    try {
+      const res = await fetch('/api/erp/summary');
+      const data = await res.json();
+      if (data.success && data.stats) {
+        const stats = data.stats;
+        
+        const pElem = document.getElementById('stat-projects');
+        if (pElem) pElem.textContent = stats.totalProjects || 0;
+
+        const uElem = document.getElementById('stat-units');
+        const uSub = document.getElementById('stat-units-sub');
+        if (uElem) uElem.textContent = stats.units.total || 0;
+        if (uSub) uSub.textContent = `${stats.units.available || 0} متاحة · ${stats.units.reserved || 0} محجوزة · ${stats.units.sold || 0} مباعة`;
+
+        const tElem = document.getElementById('stat-treasury');
+        const tSub = document.getElementById('stat-treasury-sub');
+        if (tElem) tElem.textContent = (stats.treasury.totalBalance || 0).toLocaleString('ar-EG') + ' ج.م';
+        if (tSub) tSub.textContent = `${stats.treasury.accountsCount || 0} حسابات خزينة مسجلة`;
+
+        const cElem = document.getElementById('stat-collection');
+        const cSub = document.getElementById('stat-collection-sub');
+        if (cElem) cElem.textContent = (stats.collection.pending || 0) + (stats.collection.late || 0);
+        if (cSub) cSub.textContent = `${stats.collection.late || 0} أقساط متأخرة · ${stats.collection.pending || 0} قيد التحصيل`;
+      }
+    } catch (err) {
+      console.warn('Could not load ERP summary metrics:', err);
+    }
+  }
+
+  (async () => {
+    try {
+      const user = await checkAuth();
+      clearTimeout(timeout);
+      if (authLoadingMessage) authLoadingMessage.style.display = 'none';
+
+      if (user) {
+        if (user.role === 'admin') {
+          if (dashboardContainer) dashboardContainer.style.display = 'flex';
+          if (loginContainer) loginContainer.style.display = 'none';
+          
+          if (user.name) {
+            if (topUserName) topUserName.textContent = user.name;
+            if (welcomeMessage) {
+              welcomeMessage.textContent = `مرحباً بك يا ${user.name} في لوحة التحكم المركزية لمنظومة التطوير العقاري. جميع الإدارات السبعة وقواعد البيانات متزامنة ومستعدة للعمل.`;
+            }
+          }
+
+          // Fetch real-time KPI metrics
+          loadErpSummary();
+        } else if (user.role === 'sales') {
+          window.location.href = '/sales-dashboard';
+        } else if (user.role === 'accountant') {
+          window.location.href = '/accounting-dashboard';
+        } else if (user.role === 'supervisor' || user.role === 'engineer') {
+          window.location.href = '/engineer-dashboard';
+        } else {
+          if (loginContainer) loginContainer.style.display = 'block';
+        }
+      } else {
+        if (dashboardContainer) dashboardContainer.style.display = 'none';
+        if (loginContainer) loginContainer.style.display = 'block';
+      }
+    } catch (error) {
+      console.error('Auth check failed:', error);
+      clearTimeout(timeout);
+      if (authLoadingMessage) authLoadingMessage.style.display = 'none';
+      if (loginContainer) loginContainer.style.display = 'block';
+    }
+  })();
+
+  if (logoutButton) {
+    logoutButton.addEventListener('click', async () => {
+      await logout();
+    });
+  }
+</script>

@@ -1,0 +1,774 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ==========================================
+// 1. المستخدمين والصلاحيات (Users & Roles)
+// ==========================================
+// Roles: admin, finance, sales, engineer, collector, supervisor, client
+model User {
+  id               String                   @id @default(uuid())
+  name             String
+  role             String
+  email            String?                  @unique
+  password         String?
+  phone            String?
+  monthlyTarget    Float?                   @default(3000000)
+  commissionRate   Float?                   @default(1.0)
+  
+  // New Scoped ERP Relations
+  salesProjects    SalesProjectAssignment[]
+  assignedLeads    Lead[]                   @relation("SalesLeads")
+  reservations     Reservation[]            @relation("SalesReservations")
+  expenseRequests  ExpenseRequest[]         @relation("RequestedByUser")
+  assignedTasks    SystemTask[]             @relation("AssignedTo")
+  createdTasks     SystemTask[]             @relation("CreatedBy")
+  clientTickets    ClientTicket[]           @relation("ClientTickets")
+
+  @@map("user")
+}
+
+// ==========================================
+// 2. نظام التطوير العقاري (الأب الروحي للمشاريع)
+// ==========================================
+model Project {
+  id                   String                   @id @default(uuid())
+  projectName          String
+  projectCode          String?                  // كود المشروع المميز
+  projectType          String?                  // نوع المشروع (مشروع سكني، مول تجاري، مبنى إداري، أخرى)
+  maintenancePercentage Float?                  // نسبة الصيانة %
+  projectAddress       String?
+  locationCoordinates  String?                  // إحداثيات الموقع الجغرافي
+  totalArea            Float?                   // المساحة الكلية للمشروع
+  startDate            DateTime?                // تاريخ بدء المشروع
+  expectedEndDate      DateTime?                // تاريخ الانتهاء المتوقع
+  status               String                   @default("under_development") // under_development, under_construction, completed, archived
+  archived             Boolean                  @default(false)
+  createdAt            DateTime                 @default(now())
+
+  // New Development & ERP Relations
+  buildings            Building[]
+  units                Unit[]
+  paymentPlans         PaymentPlan[]
+  constructionStages   ConstructionStage[]
+  contractors          Contractor[]
+  contractorContracts  ContractorContract[]
+  warehouseStocks      WarehouseStock[]
+  inventoryMaterials   InventoryMaterial[]
+  inventoryLogs        InventoryLog[]
+  expenseRequests      ExpenseRequest[]
+  salesAssignments     SalesProjectAssignment[]
+  leads                Lead[]
+  reservations         Reservation[]
+  treasuries           Treasury[]
+  constructionUpdates  ConstructionUpdate[]
+  contractorInvoices   ContractorInvoice[]
+  boqItems             ProjectBOQItem[]
+  unitInspections      UnitInspection[]
+}
+
+// تقسيم المشروع: عمارات، فيلات، مولات
+model Building {
+  id           String   @id @default(uuid())
+  projectId    String
+  name         String   // عمارة A، فيلا 12، المول التجاري
+  buildingType String   @default("residential") // residential (سكني), commercial (تجاري), administrative (إداري), villa (فيلات)
+  floorsCount  Int      @default(1)
+  description  String?
+  createdAt    DateTime @default(now())
+  
+  project      Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  units        Unit[]
+
+  @@index([projectId])
+}
+
+// تقسيم الوحدات وتسعيرها (شقق، محلات، مكاتب، دوبلكس)
+model Unit {
+  id             String        @id @default(uuid())
+  projectId      String
+  buildingId     String?
+  unitNumber     String        // رقم الشقة/المحل (e.g. 101, B-12)
+  unitType       String        // residential, commercial, administrative, villa, duplex, penthouse
+  floor          Int           @default(0) // 0 = أرضي, 1 = أول...
+  roomsCount     Int?          @default(1) // عدد الغرف
+  bathroomsCount Int?          @default(1) // عدد الحمامات
+  view           String?       // الإطلالة: على جنينة، حمام سباحة، الشارع الرئيسي، خلفي
+  finishingType  String?       // نوع التشطيب: طوب أحمر، نص تشطيب، متشطبة بالكامل
+  area           Float         // المساحة بالمتر المربع
+  gardenArea     Float?        @default(0) // مساحة الجنينة للأدوار الأرضية
+  pricePerMeter  Float         // سعر المتر
+  totalPrice     Float         // السعر الإجمالي
+  planImage      String?       @db.Text // صورة البلان / الرسمة الهندسية للشقة
+  status         String        @default("available") // available (متاح), reserved (محجوز), sold (مباع)
+  notes          String?       @db.Text
+  createdAt      DateTime      @default(now())
+
+  project        Project       @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  building       Building?     @relation(fields: [buildingId], references: [id], onDelete: SetNull)
+  reservations   Reservation[]
+  inspections    UnitInspection[]
+
+  @@index([projectId])
+  @@index([buildingId])
+}
+
+// أنظمة السداد المتاحة لكل مشروع
+model PaymentPlan {
+  id                   String        @id @default(uuid())
+  projectId            String
+  name                 String        // e.g. 10% مقدم والباقي على 5 سنوات
+  downPaymentPercent   Float         // نسبة المقدم (e.g. 10)
+  installmentYears     Int           // عدد سنوات التقسيط (e.g. 5)
+  installmentFrequency String        @default("monthly") // monthly, quarterly, semi_annual, annual
+  maintenancePercent   Float         @default(0) // نسبة وديعة الصيانة
+  deliveryPaymentPercent Float       @default(0) // دفعة الاستلام
+  discountPercent      Float         @default(0) // خصم الكاش إن وجد
+  description          String?
+  createdAt            DateTime      @default(now())
+
+  project              Project       @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  reservations         Reservation[]
+
+  @@index([projectId])
+}
+
+// ==========================================
+// 3. نظام الإنشاءات والمقاولات (Construction & Contractors)
+// ==========================================
+
+// مراحل البناء ونسب الإنجاز (construction_phases)
+model ConstructionStage {
+  id             String    @id @default(uuid())
+  projectId      String
+  name           String    // حفر، أساسات، هيكل خرساني، مباني، تشطيبات
+  stageOrder     Int       @default(1)
+  progress       Float     @default(0) // نسبة إنجاز المرحلة (0 إلى 100%)
+  percentage     Float     @default(0) // للتوافق العكسي
+  weight         Float     @default(1) // الوزن النسبي للمرحلة من إجمالي المشروع
+  status         String    @default("pending") // pending (معلقة), in_progress (قيد التنفيذ), completed (مكتملة)
+  photoUrl       String?   // رابط أو مسار صورة التحديث
+  startDate      DateTime?
+  completionDate DateTime?
+  notes          String?   @db.Text
+  updatedAt      DateTime  @updatedAt @default(now())
+  createdAt      DateTime  @default(now())
+
+  project        Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId])
+}
+
+// المقاولين والموردين (contractors)
+model Contractor {
+  id              String               @id @default(uuid())
+  projectId       String?
+  name            String               // اسم المقاول أو الشركة
+  specialty       String               // حداد / نجار / مقاول خرسانة / مورد مواد
+  phone           String?
+  companyName     String?
+  address         String?
+  contractAmount  Float                @default(0) // إجمالي قيمة العقد
+  paidAmount      Float                @default(0) // المبلغ المدفوع حتى الآن
+  remainingAmount Float                @default(0) // المبلغ المتبقي
+  createdAt       DateTime             @default(now())
+
+  project         Project?             @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  contracts       ContractorContract[]
+  invoices        ContractorInvoice[]
+
+  @@index([projectId])
+}
+
+// عقود المقاولين
+model ContractorContract {
+  id             String              @id @default(uuid())
+  contractorId   String
+  projectId      String
+  title          String              // عقد صب الخرسانات للمرحلة الأولى
+  totalValue     Float               // القيمة الإجمالية للعقد
+  paidValue      Float               @default(0)
+  remainingValue Float               @default(0)
+  startDate      DateTime?
+  endDate        DateTime?
+  status         String              @default("active") // active, completed, cancelled
+  createdAt      DateTime            @default(now())
+
+  contractor     Contractor          @relation(fields: [contractorId], references: [id], onDelete: Cascade)
+  project        Project             @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  invoices       ContractorInvoice[]
+
+  @@index([contractorId])
+  @@index([projectId])
+}
+
+// مستخلصات المقاولين (دفعات مالية مستحقة مع الاستقطاعات الهندسية)
+model ContractorInvoice {
+  id                 String              @id @default(uuid())
+  projectId          String?
+  contractorId       String?
+  contractId         String?
+  invoiceNumber      String              // رقم المستخلص (e.g. مستخلص 1)
+  stageDescription   String              // الأعمال المنفذة المستحق عنها الدفعة
+  grossAmount        Float               @default(0) // إجمالي الأعمال المنفذة بالمستخلص
+  retentionRate      Float               @default(5.0) // نسبة تأمين الأعمال % (5% أو 10%)
+  retentionAmount    Float               @default(0)   // المبلغ المحتجز لتأمين الأعمال
+  advanceDeducted    Float               @default(0)   // خصم استهلاك دفعة مقدمة
+  taxDeducted        Float               @default(0)   // خصم ضرائب أ.ت.ص
+  netAmountPayable   Float               @default(0)   // صافي المبلغ المستحق للصرف
+  amount             Float               @default(0)   // للتوافق العكسي
+  status             String              @default("pending") // pending, approved, paid, rejected
+  consultantApproval Boolean             @default(false) // اعتماد الاستشاري الهندسي
+  dueDate            DateTime?
+  paidDate           DateTime?
+  receiptNumber      String?
+  notes              String?             @db.Text
+  createdAt          DateTime            @default(now())
+
+  project            Project?            @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  contractor         Contractor?         @relation(fields: [contractorId], references: [id], onDelete: Cascade)
+  contract           ContractorContract? @relation(fields: [contractId], references: [id], onDelete: SetNull)
+
+  @@index([projectId])
+  @@index([contractorId])
+  @@index([contractId])
+}
+
+// مخزن الخامات لكل مشروع (inventory_materials)
+model InventoryMaterial {
+  id           String         @id @default(uuid())
+  projectId    String
+  name         String         // حديد تسليح، أسمنت، طوب، رمل، سن
+  unit         String         // طن، شيكارة، ألف طوبة، متر مكعب
+  currentStock Float          @default(0) // الكمية المتاحة حالياً بالمخزن
+  notes        String?        @db.Text
+  updatedAt    DateTime       @updatedAt @default(now())
+  createdAt    DateTime       @default(now())
+
+  project      Project        @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  logs         InventoryLog[]
+
+  @@index([projectId])
+}
+
+// سجل حركات المخزن (inventory_logs)
+model InventoryLog {
+  id           String            @id @default(uuid())
+  projectId    String
+  materialId   String
+  type         String            // in (توريد خامة للمخزن), out (سحب خامة للبناء)
+  quantity     Float             // الكمية
+  engineerName String?           // اسم المهندس المسجل للحركة
+  notes        String?           @db.Text
+  createdAt    DateTime          @default(now())
+
+  project      Project           @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  material     InventoryMaterial @relation(fields: [materialId], references: [id], onDelete: Cascade)
+
+  @@index([projectId])
+  @@index([materialId])
+}
+
+// إدارة المخازن والخامات المسحوبة لكل مشروع (التوافق مع النماذج القديمة)
+model WarehouseStock {
+  id            String   @id @default(uuid())
+  projectId     String
+  materialName  String   // حديد عز، أسمنت لافارج، طوب مصمت، رمل
+  unit          String   // طن، شيكارة، ألف طوبة، متر مكعب
+  totalReceived Float    @default(0) // إجمالي الوارد
+  totalConsumed Float    @default(0) // إجمالي المسحوب للموقع
+  currentStock  Float    @default(0) // الرصيد الحالي بالمخزن
+  notes         String?  @db.Text
+  updatedAt     DateTime @updatedAt
+  createdAt     DateTime @default(now())
+
+  project       Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId])
+}
+
+// طلب صرف نقدية (من الأقسام المختلفة إلى الخزينة)
+model ExpenseRequest {
+  id            String    @id @default(uuid())
+  projectId     String
+  requestedById String?
+  requesterName String?   // اسم مقدم الطلب
+  department    String    @default("construction") // construction (إنشاءات), sales (مبيعات), management (إدارة)
+  title         String    // سبب الصرف: شراء خامات، دفعة مقاول، مصاريف نقل
+  category      String?   @default("operational") // materials, contractor, labor, operational, other
+  amount        Float
+  description   String?   @db.Text
+  status        String    @default("pending") // pending (قيد المراجعة), approved (معتمد وتم الصرف), rejected (مرفوض)
+  approvedById  String?
+  approvedAt    DateTime?
+  receiptUrl    String?   // صورة الإيصال أو الفاتورة
+  createdAt     DateTime  @default(now())
+
+  project       Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  requestedBy   User?     @relation("RequestedByUser", fields: [requestedById], references: [id], onDelete: SetNull)
+
+  @@index([projectId])
+  @@index([requestedById])
+}
+
+// ==========================================
+// 4. نظام المبيعات وإدارة العملاء (Sales CRM)
+// ==========================================
+
+// ربط موظف المبيعات بمشروع محدد فقط
+model SalesProjectAssignment {
+  id         String   @id @default(uuid())
+  userId     String   // موظف المبيعات
+  projectId  String   // المشروع المسموح له برؤيته وبيعه
+  assignedAt DateTime @default(now())
+
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  project    Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, projectId])
+  @@index([userId])
+  @@index([projectId])
+}
+
+// تسجيل ومتابعة العملاء المهتمين (Leads)
+model Lead {
+  id              String        @id @default(uuid())
+  projectId       String?
+  assignedSalesId String?
+  fullName        String
+  phone           String
+  email           String?
+  budget          Float?
+  interestType    String?       // سكني، تجاري، إداري
+  status          String        @default("new") // new (جديد), contacted (تم الاتصال), viewing (معاينة), negotiating (تفاوض), converted (تم التعاقد), lost (ملغي)
+  lostReason      String?       // سبب فقدان العميل أو إلغاء التفاوض
+  nextFollowUp    DateTime?     // موعد المتابعة أو الاتصال القادم
+  notes           String?       @db.Text
+  createdAt       DateTime      @default(now())
+
+  project         Project?      @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  assignedSales   User?         @relation("SalesLeads", fields: [assignedSalesId], references: [id], onDelete: SetNull)
+  reservations    Reservation[]
+  activities      LeadActivity[]
+
+  @@index([projectId])
+  @@index([assignedSalesId])
+}
+
+// سجل أنشطة وتواصل العميل (مكالمات، زيارات، ملاحظات)
+model LeadActivity {
+  id          String   @id @default(uuid())
+  leadId      String
+  type        String   @default("call") // call, meeting, whatsapp, note, proposal
+  summary     String
+  details     String?  @db.Text
+  performedBy String?  // اسم أو معرف مسؤول المبيعات
+  createdAt   DateTime @default(now())
+
+  lead        Lead     @relation(fields: [leadId], references: [id], onDelete: Cascade)
+
+  @@index([leadId])
+}
+
+// حجز وتعاقد الوحدة
+model Reservation {
+  id                    String                 @id @default(uuid())
+  projectId             String
+  unitId                String
+  leadId                String?
+  salesId               String?
+  clientId              String?                // User ID إذا كان للعميل حساب على البوابة
+  clientName            String
+  clientPhone           String
+  clientNationalId      String?
+  totalPrice            Float
+  downPayment           Float
+  paymentPlanId         String?
+  status                String                 @default("reserved") // reserved (محجوز), contracted (تعاقد رسمي), cancelled (ملغي)
+  contractDate          DateTime               @default(now())
+  commissionAmount      Float                  @default(0) // عمولة موظف المبيعات
+  commissionPaid        Boolean                @default(false)
+  brokerId              String?
+  brokerCommission      Float                  @default(0) // عمولة شركة البروكر الخارجي
+  brokerCommissionPaid  Boolean                @default(false)
+
+  project               Project                @relation(fields: [projectId], references: [id])
+  unit                  Unit                   @relation(fields: [unitId], references: [id])
+  paymentPlan           PaymentPlan?           @relation(fields: [paymentPlanId], references: [id])
+  lead                  Lead?                  @relation(fields: [leadId], references: [id])
+  sales                 User?                  @relation("SalesReservations", fields: [salesId], references: [id])
+  broker                BrokerAgency?          @relation(fields: [brokerId], references: [id], onDelete: SetNull)
+  
+  scheduledInstallments ScheduledInstallment[]
+  transactions          Transaction[]
+  bankCheques           BankCheque[]
+  transfers             OwnershipTransfer[]
+
+  @@index([projectId])
+  @@index([unitId])
+  @@index([salesId])
+  @@index([brokerId])
+}
+
+// ==========================================
+// 5. نظام التحصيل وجدولة الأقساط (Collection)
+// ==========================================
+model ScheduledInstallment {
+  id                String        @id @default(uuid())
+  reservationId     String
+  installmentNumber Int           // رقم القسط
+  title             String        // مقدم حجز، قسط 1، دفعة استلام، صيانة
+  amount            Float         // قيمة القسط المستحقة
+  dueDate           DateTime      // تاريخ الاستحقاق
+  status            String        @default("pending") // pending (مستحق), paid (مدفوع), late (متأخر), partially_paid (مدفوع جزئياً)
+  paidAmount        Float         @default(0)
+  paidDate          DateTime?
+  latePenalty       Float         @default(0) // غرامة التأخير التلقائية
+  receiptNumber     String?       // رقم إيصال السداد
+  paymentMethod     String?       // cash, online_card, vodafone_cash, fawry, bank_transfer
+  notes             String?
+
+  reservation       Reservation   @relation(fields: [reservationId], references: [id], onDelete: Cascade)
+  transactions      Transaction[]
+  bankCheques       BankCheque[]
+
+  @@index([reservationId])
+  @@index([dueDate])
+}
+
+// شركات التسويق العقاري والوسطاء (Brokers & Real Estate Agencies)
+model BrokerAgency {
+  id               String        @id @default(uuid())
+  name             String        // اسم الشركة أو البروكر
+  contactPerson    String?       // اسم مسؤول الاتصال
+  phone            String        // رقم الهاتف
+  email            String?       // البريد الإلكتروني
+  defaultCommRate  Float         @default(2.5) // نسبة العمولة الافتراضية %
+  totalSalesMade   Float         @default(0)   // إجمالي المبيعات المحققة
+  totalCommissions Float         @default(0)   // إجمالي العمولات المستحقة
+  paidCommissions  Float         @default(0)   // العمولات المسددة
+  notes            String?       @db.Text
+  createdAt        DateTime      @default(now())
+
+  reservations     Reservation[]
+}
+
+// محفظة أوراق القبض والشيكات البنكية (Cheque Portfolio)
+model BankCheque {
+  id               String                @id @default(uuid())
+  reservationId    String
+  installmentId    String?
+  chequeNumber     String                // رقم الشيك
+  bankName         String                // اسم البنك المسحوب عليه
+  drawerName       String                // اسم الساحب
+  branch           String?               // الفرع
+  amount           Float                 // قيمة الشيك
+  dueDate          DateTime              // تاريخ الاستحقاق
+  status           String                @default("in_safe") // in_safe (في الخزنة), under_collection (مرسل للتحصيل), collected (تم التحصيل), bounced (مرتد/مرفوض), replaced (مستبدل)
+  bouncedReason    String?               // سبب الارتداد (e.g. لا يوجد رصيد، اختلاف توقيع)
+  depositBank      String?               // اسم البنك المودع فيه للتحصيل
+  collectedDate    DateTime?             // تاريخ التحصيل الفعلي
+  receiptNumber    String?               // رقم إيصال التحصيل أو إشعار الإيداع
+  notes            String?               @db.Text
+  createdAt        DateTime              @default(now())
+
+  reservation      Reservation           @relation(fields: [reservationId], references: [id], onDelete: Cascade)
+  installment      ScheduledInstallment? @relation(fields: [installmentId], references: [id], onDelete: SetNull)
+
+  @@index([reservationId])
+  @@index([installmentId])
+  @@index([dueDate])
+  @@index([status])
+}
+
+// ==========================================
+// 6. نظام الخزينة المركزية والحسابات (Treasury & Cash Flow)
+// ==========================================
+
+// الخزنة (خزينة رئيسية + خزينة لكل مشروع)
+model Treasury {
+  id           String        @id @default(uuid())
+  projectId    String?       // null = الخزينة المركزية للشركة
+  name         String        // الخزينة الرئيسية، خزينة برج النور
+  safeType     String        @default("project") // main (رئيسية), project (فرعية لمشروع)
+  balance      Float         @default(0)
+  currency     String        @default("EGP")
+  isMain       Boolean       @default(false) // هل هي الخزينة الرئيسية
+  createdAt    DateTime      @default(now())
+
+  project      Project?      @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  transactions Transaction[]
+
+  @@index([projectId])
+}
+
+// حركات الخزينة الدقيقة (الإيرادات والمصروفات)
+model Transaction {
+  id                     String                @id @default(uuid())
+  treasuryId             String
+  type                   String                // income (إيراد/داخل), expense (مصروف/خارج)
+  amount                 Float
+  category               String                // down_payment, installment, contractor_invoice, material_purchase, sales_commission, general_expense
+  projectId              String?
+  reservationId          String?
+  scheduledInstallmentId String?
+  description            String                // البيان التفصيلي للحركة
+  recordedBy             String?               // اسم من قام بالحركة
+  createdAt              DateTime              @default(now())
+
+  treasury               Treasury              @relation(fields: [treasuryId], references: [id], onDelete: Cascade)
+  reservation            Reservation?          @relation(fields: [reservationId], references: [id], onDelete: SetNull)
+  scheduledInstallment   ScheduledInstallment? @relation(fields: [scheduledInstallmentId], references: [id], onDelete: SetNull)
+
+  @@index([treasuryId])
+  @@index([projectId])
+  @@index([reservationId])
+}
+
+// ==========================================
+// 7. التواصل الموحد والمهام وتحديثات البناء
+// ==========================================
+
+// الإشعارات الداخلية الفورية بين الأقسام
+model InternalNotification {
+  id         String   @id @default(uuid())
+  userId     String?  // مستخدم محدد أو null للتعميم
+  targetRole String?  // admin, finance, sales, engineer, collector
+  title      String
+  message    String   @db.Text
+  link       String?  // رابط الانتقال
+  isRead     Boolean  @default(false)
+  createdAt  DateTime @default(now())
+
+  @@index([userId])
+  @@index([targetRole])
+}
+
+// نظام المهام الإدارية بين الموظفين
+model SystemTask {
+  id           String    @id @default(uuid())
+  createdById  String
+  assignedToId String
+  projectId    String?
+  title        String
+  description  String?   @db.Text
+  dueDate      DateTime?
+  status       String    @default("todo") // todo, in_progress, completed
+  priority     String    @default("normal") // low, normal, high, urgent
+  createdAt    DateTime  @default(now())
+
+  createdBy    User      @relation("CreatedBy", fields: [createdById], references: [id], onDelete: Cascade)
+  assignedTo   User      @relation("AssignedTo", fields: [assignedToId], references: [id], onDelete: Cascade)
+
+  @@index([createdById])
+  @@index([assignedToId])
+}
+
+// تحديثات الإنجاز الميداني المصورة للعملاء والإدارة
+model ConstructionUpdate {
+  id            String   @id @default(uuid())
+  projectId     String
+  title         String   // تم صب سقف الدور الرابع
+  description   String?  @db.Text
+  imageUrls     Json?    // مصفوفة صور التطورات الميدانية
+  notifyClients Boolean  @default(true)
+  publishedAt   DateTime @default(now())
+
+  project       Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId])
+}
+
+// تذاكر الدعم والشكاوى والتعديلات للعملاء
+model ClientTicket {
+  id          String   @id @default(uuid())
+  clientId    String?
+  clientName  String
+  clientPhone String
+  projectId   String?
+  subject     String
+  category    String   // unit_modification, payment_inquiry, complaint, other
+  status      String   @default("open") // open, in_progress, resolved, closed
+  priority    String   @default("normal")
+  messages    Json?    // سجل الردود والمحادثة
+  createdAt   DateTime @default(now())
+
+  client      User?    @relation("ClientTickets", fields: [clientId], references: [id], onDelete: SetNull)
+
+  @@index([clientId])
+}
+
+// طلبات التنازل ونقل الملكية (Resale & Ownership Transfer)
+model OwnershipTransfer {
+  id              String      @id @default(uuid())
+  reservationId   String
+  fromClientName  String      // اسم العميل الأصلي
+  toClientName    String      // اسم المشتري الجديد
+  toClientPhone   String      // رقم هاتف المشتري الجديد
+  toClientNatId   String?     // الرقم القومي
+  transferFee     Float       @default(0) // رسوم التنازل للشركة
+  approvedByAdmin Boolean     @default(true)
+  notes           String?     @db.Text
+  transferDate    DateTime    @default(now())
+
+  reservation     Reservation @relation(fields: [reservationId], references: [id], onDelete: Cascade)
+
+  @@index([reservationId])
+}
+
+// بنود مقايسة الأعمال الإنشائية وجدول الكميات (BOQ - Bill of Quantities)
+model ProjectBOQItem {
+  id              String   @id @default(uuid())
+  projectId       String
+  itemCode        String   // كود البند مثل "CONC-01", "EXCAV-01"
+  category        String   // أعمال ترابية، خرسانات، مباني، تشطيبات، كهروميكانيك MEP
+  description     String   // وصف البند التفصيلي
+  unit            String   // m3, m2, ton, item, ml
+  estimatedQty    Float    // الكمية التقديرية بالمقايسة
+  unitCost        Float    // سعر الوحدة التقديري
+  totalBudget     Float    // إجمالي الميزانية التقديرية المعتمدة
+  actualCostSpent Float    @default(0) // المنصرف الفعلي
+  actualQtyUsed   Float    @default(0) // الكمية المنفذة فعلياً
+  createdAt       DateTime @default(now())
+
+  project         Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId])
+}
+
+// محضر فحص واستلام الوحدة وقائمة الملاحظات (Snagging List & Handover Protocol)
+model UnitInspection {
+  id             String    @id @default(uuid())
+  projectId      String
+  unitId         String
+  reservationId  String?
+  inspectorName  String    // اسم المهندس الفاحص
+  clientName     String    // اسم العميل المستلم
+  status         String    @default("snagging") // snagging (ملاحظات قيد المعالجة), ready_for_handover (جاهزة للتسليم), completed (تم التسليم والاعتماد)
+  inspectionDate DateTime  @default(now())
+  handoverDate   DateTime?
+  snagItems      Json?     // [{item: "دهانات الصالة بها تقشير", status: "open|fixed", notes: ""}]
+  clientSigned   Boolean   @default(false)
+  clientFeedback String?   @db.Text
+  notes          String?   @db.Text
+  createdAt      DateTime  @default(now())
+
+  project        Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  unit           Unit      @relation(fields: [unitId], references: [id], onDelete: Cascade)
+
+  @@index([projectId])
+  @@index([unitId])
+}
+
+// ==========================================
+// 8. شجرة الحسابات العامة والقيود اليومية (General Ledger)
+// ==========================================
+
+// شجرة الحسابات العامة (Chart of Accounts)
+model Account {
+  id             String          @id @default(uuid())
+  code           String          @unique // e.g. "1101", "1102"
+  nameAr         String          // اسم الحساب بالعربية
+  nameEn         String?         // اسم الحساب بالإنجليزية
+  accountType    String          // asset (أصول), liability (التزامات), equity (حقوق ملكية), revenue (إيرادات), expense (مصروفات)
+  parentId       String?
+  balance        Float           @default(0) // الرصيد الحالي
+  isParent       Boolean         @default(false)
+  notes          String?         @db.Text
+  createdAt      DateTime        @default(now())
+
+  parent         Account?        @relation("AccountHierarchy", fields: [parentId], references: [id], onDelete: SetNull)
+  children       Account[]       @relation("AccountHierarchy")
+  journalLines   JournalEntryLine[]
+
+  @@index([code])
+  @@index([accountType])
+}
+
+// القيود المحاسبية اليومية (Journal Entries)
+model JournalEntry {
+  id           String             @id @default(uuid())
+  entryNumber  Int                @default(autoincrement())
+  entryDate    DateTime           @default(now())
+  description  String             // البيان العام للقيد
+  refType      String?            // installment, reservation, contractor_invoice, manual, transfer_fee
+  refId        String?            // معرف السند المرتبط
+  totalDebit   Float              @default(0) // إجمالي الطرف المدين
+  totalCredit  Float              @default(0) // إجمالي الطرف الدائن
+  posted       Boolean            @default(true) // مرحل
+  createdBy    String?            // اسم منشئ القيد
+  createdAt    DateTime           @default(now())
+
+  lines        JournalEntryLine[]
+
+  @@index([entryDate])
+  @@index([refType, refId])
+}
+
+// سطور القيد اليومي (طرف مدين وطرف دائن)
+model JournalEntryLine {
+  id           String        @id @default(uuid())
+  entryId      String
+  accountId    String
+  debit        Float         @default(0) // مدين
+  credit       Float         @default(0) // دائن
+  costCenterId String?       // معرف مركز التكلفة (المشروع)
+  description  String?       // بيان السطر
+  createdAt    DateTime      @default(now())
+
+  entry        JournalEntry  @relation(fields: [entryId], references: [id], onDelete: Cascade)
+  account      Account       @relation(fields: [accountId], references: [id])
+
+  @@index([entryId])
+  @@index([accountId])
+  @@index([costCenterId])
+}
+
+// سجل التدقيق الأمني ورقابة الحركات (Audit Trail)
+model AuditLog {
+  id         String   @id @default(uuid())
+  userId     String?
+  userName   String?
+  userRole   String?
+  action     String   // CREATE, UPDATE, DELETE, APPROVE, REJECT, RESCHEDULE, TRANSFER, BOUNCE, LOGIN
+  entity     String   // Project, Unit, Reservation, BankCheque, Invoice, Treasury, User, Account, JournalEntry
+  entityId   String?
+  details    String?  @db.Text
+  oldValues  Json?    // البيانات قبل التعديل
+  newValues  Json?    // البيانات بعد التعديل
+  severity   String   @default("normal") // normal, warning, critical
+  ipAddress  String?
+  timestamp  DateTime @default(now())
+
+  @@index([entity, entityId])
+  @@index([userId])
+  @@index([action])
+  @@index([severity])
+  @@index([timestamp])
+}
+
+// طلبات التعديلات المعمارية والتشطيبات للعملاء
+model CustomerAlterationRequest {
+  id             String    @id @default(uuid())
+  reservationId  String
+  unitId         String
+  clientName     String
+  clientPhone    String
+  title          String    // e.g. تعديل جدار أو تكسية أو تمديدات
+  details        String    @db.Text
+  engineeringCost Float    @default(0) // التكلفة التقديرية الهندسية
+  clientApproved Boolean   @default(false)
+  status         String    @default("under_review") // under_review, approved, in_progress, completed, rejected
+  engineerNotes  String?   @db.Text
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt @default(now())
+
+  @@index([reservationId])
+  @@index([unitId])
+}
+

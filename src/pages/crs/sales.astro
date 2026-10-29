@@ -1,0 +1,1719 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import AdminLogin from '../../components/AdminLogin.astro';
+---
+
+<Layout title="نظام المبيعات وإدارة فريق البيع والعملاء">
+  <div id="auth-loading-message" class="loading-state">
+    <div class="spinner"></div>
+    <p>جارٍ التحقق من الصلاحيات...</p>
+  </div>
+
+  <div id="admin-login-container" style="display: none;">
+    <AdminLogin />
+  </div>
+
+  <main id="main-content" class="erp-container" style="display: none;">
+    <!-- Top Navigation Bar -->
+    <header class="erp-topbar">
+      <div class="brand-crumb">
+        <a href="/crs" class="back-link">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+          الرئيسية
+        </a>
+        <span class="sep">/</span>
+        <span class="active-crumb">نظام المبيعات (Sales CRM & Team)</span>
+      </div>
+
+      <div class="topbar-actions">
+        <button id="open-lead-modal" class="btn btn-primary">+ عميل محتمل جديد (Lead)</button>
+        <button id="open-reservation-modal" class="btn btn-success">+ حجز وتعاقد وحدة</button>
+      </div>
+    </header>
+
+    <!-- Subsystem Hero Banner -->
+    <section class="subsystem-hero hero-sales">
+      <div class="hero-text">
+        <div class="hero-badge">فريق البيع وخطط التعاقد</div>
+        <h1>إدارة المبيعات، العملاء، وحساب العمولات</h1>
+        <p>عزل المشروعات لكل موظف، متابعة العملاء المهتمين (Leads)، الحجز الفوري مع التسميع المالي التلقائي في الخزنة وجدولة الأقساط.</p>
+      </div>
+      <div class="hero-stats-row">
+        <div class="hero-stat-card highlight-card">
+          <span class="stat-number text-emerald" id="avail-units-stat">0</span>
+          <span class="stat-title">الوحدات المتاحة للبيع 🟢</span>
+        </div>
+        <div class="hero-stat-card">
+          <span class="stat-number" id="leads-count-stat">0</span>
+          <span class="stat-title">العملاء المحتملين</span>
+        </div>
+        <div class="hero-stat-card">
+          <span class="stat-number" id="reservations-count-stat">0</span>
+          <span class="stat-title">الوحدات المتعاقد عليها</span>
+        </div>
+        <div class="hero-stat-card">
+          <span class="stat-number" id="commissions-stat">0 ج.م</span>
+          <span class="stat-title">إجمالي العمولات</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Sales Tabs -->
+    <div class="sales-tabs">
+      <button class="s-tab-btn active" data-target="pane-inventory">
+        <span>الوحدات المعروضة والمتاحة للبيع 🏢</span>
+        <span id="tab-avail-badge" class="tab-badge">0</span>
+      </button>
+      <button class="s-tab-btn" data-target="pane-leads">العملاء ومراحل المتابعة (Leads Pipeline) 👥</button>
+      <button class="s-tab-btn" data-target="pane-reservations">الحجوزات والعقود المبرمة 📝</button>
+      <button class="s-tab-btn" data-target="pane-brokers">شركات البروكرز والتسويق 👔</button>
+    </div>
+
+    <!-- Pane 1: Inventory Units (Now Primary) -->
+    <div id="pane-inventory" class="s-tab-pane active">
+      <!-- Top Title & Counts -->
+      <div class="inv-topbar-header">
+        <div>
+          <h2 class="inv-title">كتالوج ومربعات الوحدات المتاحة والمعروضة</h2>
+          <p class="inv-subtitle">استعراض كافة تفاصيل ومواصفات الوحدات (الطابق، المساحة، الغرف، الإطلالة، التشطيب، والأسعار) مع إمكانية الحجز المباشر ومشاركة التفاصيل عبر واتساب للعميل.</p>
+        </div>
+        <div class="inv-quick-counts">
+          <span class="inv-count-chip chip-avail">متاح للبيع: <strong id="inv-count-avail">0</strong></span>
+          <span class="inv-count-chip chip-sold">مباع: <strong id="inv-count-sold">0</strong></span>
+          <span class="inv-count-chip chip-total">إجمالي المعروض: <strong id="inv-count-total">0</strong></span>
+        </div>
+      </div>
+
+      <!-- Search & Filters Bar -->
+      <div class="inv-filters-container">
+        <div class="inv-search-wrap">
+          <span class="search-icon">🔍</span>
+          <input type="text" id="unit-search-input" placeholder="ابحث برقم الوحدة، العمارة، الطابق، الفيو، أو المساحة..." />
+        </div>
+
+        <div class="inv-filters-row">
+          <div class="inv-filter-item">
+            <label>المشروع:</label>
+            <select id="filter-project-select">
+              <option value="all">جميع المشروعات</option>
+            </select>
+          </div>
+
+          <div class="inv-filter-item">
+            <label>حالة الوحدة:</label>
+            <select id="filter-status-select">
+              <option value="available" selected>🟢 المتاحة للبيع فقط</option>
+              <option value="all">كل الحالات (متاح ومباع)</option>
+              <option value="reserved">🟡 المحجوزة</option>
+              <option value="sold">🔴 المباعة والمسددة</option>
+            </select>
+          </div>
+
+          <div class="inv-filter-item">
+            <label>رقم الطابق:</label>
+            <select id="filter-floor-select">
+              <option value="all">كل الأدوار</option>
+              <option value="0">الدور الأرضي</option>
+              <option value="1">الدور الأول</option>
+              <option value="2">الدور الثاني</option>
+              <option value="3">الدور الثالث</option>
+              <option value="4">الدور الرابع</option>
+              <option value="5">الدور الخامس</option>
+              <option value="higher">الدور السادس فأعلى</option>
+            </select>
+          </div>
+
+          <div class="inv-filter-item">
+            <label>نوع الوحدة:</label>
+            <select id="filter-type-select">
+              <option value="all">كل الأنواع</option>
+              <option value="residential">شقق سكنية</option>
+              <option value="duplex">دوبلكس</option>
+              <option value="penthouse">بنتهاوس</option>
+              <option value="commercial">محلات تجارية</option>
+              <option value="administrative">مكاتب إدارية</option>
+              <option value="villa">فيلات</option>
+            </select>
+          </div>
+
+          <button id="reset-filters-btn" type="button" class="btn btn-outline btn-reset">
+            <span>🔄 تفريغ الفلاتر</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Matching Count Subbar -->
+      <div class="inv-results-summary">
+        <span>يتم عرض <strong id="displayed-units-count">0</strong> وحدة مطابقة لشروط البحث</span>
+      </div>
+
+      <!-- Units Cards Grid -->
+      <div class="units-inventory-grid" id="inventory-grid">
+        <!-- Rendered via JS -->
+      </div>
+    </div>
+
+    <!-- Pane 2: Leads -->
+    <div id="pane-leads" class="s-tab-pane" style="display: none;">
+      <div class="table-responsive">
+        <table class="erp-table">
+          <thead>
+            <tr>
+              <th>اسم العميل</th>
+              <th>رقم الهاتف</th>
+              <th>المشروع المهتم به</th>
+              <th>الميزانية التقديرية</th>
+              <th>مرحلة المتابعة</th>
+              <th>الإجراء</th>
+            </tr>
+          </thead>
+          <tbody id="leads-tbody">
+            <!-- Rendered via JS -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Pane 3: Reservations -->
+    <div id="pane-reservations" class="s-tab-pane" style="display: none;">
+      <div class="table-responsive">
+        <table class="erp-table">
+          <thead>
+            <tr>
+              <th>رقم الوحدة</th>
+              <th>المشروع</th>
+              <th>اسم العميل</th>
+              <th>إجمالي السعر</th>
+              <th>المقدم المدفوع</th>
+              <th>شركة البروكر (الوسيط)</th>
+              <th>عمولة السيلز</th>
+              <th>حالة التعاقد</th>
+              <th>طباعة الوثائق الرسمية</th>
+            </tr>
+          </thead>
+          <tbody id="reservations-tbody">
+            <!-- Rendered via JS -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Pane 4: Brokers & External Agencies -->
+    <div id="pane-brokers" class="s-tab-pane" style="display: none;">
+      <div class="inv-topbar-header">
+        <div>
+          <h2 class="inv-title">دليل شركات التسويق العقاري والبروكرز</h2>
+          <p class="inv-subtitle">متابعة مبيعات وعمولات الوسطاء وشركات التسويق الخارجي وصرف المستحقات مع التسميع بالخزينة.</p>
+        </div>
+        <button type="button" class="btn btn-primary" id="open-broker-modal">+ تسجيل شركة بروكر جديدة</button>
+      </div>
+
+      <div class="table-responsive">
+        <table class="erp-table">
+          <thead>
+            <tr>
+              <th>اسم الشركة / الوسيط</th>
+              <th>مسؤول الاتصال</th>
+              <th>رقم الهاتف</th>
+              <th>نسبة العمولة %</th>
+              <th>إجمالي المبيعات</th>
+              <th>العمولات المستحقة</th>
+              <th>المسدد بالخزنة</th>
+              <th>المتبقي للصرف</th>
+              <th>الإجراءات</th>
+            </tr>
+          </thead>
+          <tbody id="brokers-tbody">
+            <!-- Rendered via JS -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Modal: New Lead -->
+    <div id="lead-modal" class="modal-backdrop" style="display: none;">
+      <div class="modal-card">
+        <div class="modal-header">
+          <h3>تسجيل عميل محتمل جديد</h3>
+          <button class="close-modal-btn" id="close-lead-modal">&times;</button>
+        </div>
+        <form id="new-lead-form" class="modal-form">
+          <div class="form-group">
+            <label>اسم العميل بالكامل *</label>
+            <input type="text" id="lead-name" placeholder="مثال: أستاذ محمود الشريف" required />
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>رقم الهاتف *</label>
+              <input type="text" id="lead-phone" placeholder="01xxxxxxxxx" required />
+            </div>
+            <div class="form-group">
+              <label>البريد الإلكتروني</label>
+              <input type="email" id="lead-email" placeholder="client@example.com" />
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>المشروع</label>
+              <select id="lead-project-select"></select>
+            </div>
+            <div class="form-group">
+              <label>الميزانية المتوقعة (ج.م)</label>
+              <input type="number" id="lead-budget" placeholder="مثال: 1500000" />
+            </div>
+          </div>
+          <div class="form-actions">
+            <button type="submit" class="btn btn-primary">حفظ في سجل المبيعات</button>
+            <button type="button" class="btn btn-secondary" id="cancel-lead-btn">إلغاء</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Modal: Contract Unit (حجز وتعاقد) -->
+    <div id="reservation-modal" class="modal-backdrop" style="display: none;">
+      <div class="modal-card modal-large">
+        <div class="modal-header">
+          <div>
+            <h3>حجز وتعاقد وحدة جديدة</h3>
+            <p class="modal-sub">يتم ترحيل العميل فوراً لنظام التحصيل وتوريد المقدم في الخزنة</p>
+          </div>
+          <button class="close-modal-btn" id="close-res-modal">&times;</button>
+        </div>
+        <form id="new-res-form" class="modal-form">
+          <div class="form-row">
+            <div class="form-group">
+              <label>المشروع *</label>
+              <select id="res-project-select" required></select>
+            </div>
+            <div class="form-group">
+              <label>الوحدة المتاحة للبيع *</label>
+              <select id="res-unit-select" required></select>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>اسم العميل المتعاقد *</label>
+              <input type="text" id="res-client-name" placeholder="الاسم رباعي" required />
+            </div>
+            <div class="form-group">
+              <label>رقم الهاتف *</label>
+              <input type="text" id="res-client-phone" placeholder="01xxxxxxxxx" required />
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>الرقم القومي</label>
+              <input type="text" id="res-client-nid" placeholder="14 رقم" />
+            </div>
+            <div class="form-group">
+              <label>نظام السداد والتقسيط</label>
+              <select id="res-plan-select"></select>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>قيمة مقدم التعاقد (ج.م) *</label>
+              <input type="number" id="res-down-payment" placeholder="مثال: 100000" required step="any" />
+            </div>
+            <div class="form-group">
+              <label>نسبة عمولة المبيعات %</label>
+              <input type="number" id="res-commission-pct" placeholder="1.5" value="1.5" step="any" />
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>شركة البروكر / الوسيط العقاري (اختياري)</label>
+              <select id="res-broker-select">
+                <option value="">بدون وسيط (مبيعات داخلية مباشرة)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>عمولة البروكر (ج.م)</label>
+              <input type="number" id="res-broker-commission" placeholder="0" value="0" step="any" />
+            </div>
+          </div>
+          <div class="form-actions">
+            <button type="submit" class="btn btn-success">إتمام التعاقد وجدولة الأقساط تلقائياً</button>
+            <button type="button" class="btn btn-secondary" id="cancel-res-btn">إلغاء</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Modal: New Broker -->
+    <div id="broker-modal" class="modal-backdrop" style="display: none;">
+      <div class="modal-card">
+        <div class="modal-header">
+          <h3>تسجيل شركة تسويق عقاري / بروكر</h3>
+          <button class="close-modal-btn" id="close-broker-modal">&times;</button>
+        </div>
+        <form id="new-broker-form" class="modal-form">
+          <div class="form-group">
+            <label>اسم الشركة أو البروكر *</label>
+            <input type="text" id="broker-name" placeholder="مثال: شركة ريماكس أو كولدويل بانكر" required />
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>اسم مسؤول الاتصال</label>
+              <input type="text" id="broker-contact" placeholder="اسم مدير المبيعات" />
+            </div>
+            <div class="form-group">
+              <label>رقم الهاتف *</label>
+              <input type="text" id="broker-phone" placeholder="01xxxxxxxxx" required />
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>البريد الإلكتروني</label>
+              <input type="email" id="broker-email" placeholder="broker@company.com" />
+            </div>
+            <div class="form-group">
+              <label>نسبة العمولة الافتراضية %</label>
+              <input type="number" id="broker-comm-rate" value="2.5" step="any" required />
+            </div>
+          </div>
+          <div class="form-group">
+            <label>ملاحظات وشروط التعاقد</label>
+            <input type="text" id="broker-notes" placeholder="ملاحظات وشروط الصرف..." />
+          </div>
+          <div class="form-actions">
+            <button type="submit" class="btn btn-primary">حفظ في دليل الوسطاء</button>
+            <button type="button" class="btn btn-secondary" id="cancel-broker-btn">إلغاء</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Modal: Pay Broker Commission -->
+    <div id="pay-broker-modal" class="modal-backdrop" style="display: none;">
+      <div class="modal-card">
+        <div class="modal-header">
+          <h3>صرف عمولة تسويق لشركة بروكر</h3>
+          <button class="close-modal-btn" id="close-pay-broker-modal">&times;</button>
+        </div>
+        <form id="pay-broker-form" class="modal-form">
+          <input type="hidden" id="pay-broker-id" />
+          <p id="pay-broker-info" class="modal-sub">...</p>
+          <div class="form-group">
+            <label>المبلغ المراد صرفه (ج.م) *</label>
+            <input type="number" id="pay-broker-amount" required step="any" />
+          </div>
+          <div class="form-group">
+            <label>البيان / سبب الصرف</label>
+            <input type="text" id="pay-broker-notes" placeholder="دفعة عمولة..." />
+          </div>
+          <div class="form-actions">
+            <button type="submit" class="btn btn-success">تأكيد الصرف والتسميع في الخزينة</button>
+            <button type="button" class="btn btn-secondary" id="cancel-pay-broker-btn">إلغاء</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Modal: Transfer Ownership -->
+    <div id="transfer-modal" class="modal-backdrop" style="display: none;">
+      <div class="modal-card">
+        <div class="modal-header">
+          <div>
+            <h3>طلب تنازل ونقل ملكية وحدة</h3>
+            <p class="modal-sub">تحويل التعاقد والأقساط لعميل جديد وتوريد رسوم التنازل للشركة</p>
+          </div>
+          <button class="close-modal-btn" id="close-transfer-modal">&times;</button>
+        </div>
+        <form id="transfer-form" class="modal-form">
+          <input type="hidden" id="transfer-reservation-id" />
+          <div class="info-strip" style="background: #f1f5f9; padding: 0.75rem 1rem; border-radius: 8px; margin-bottom: 0.5rem; display: flex; justify-content: space-between; font-weight: 700;">
+            <span id="transfer-unit-info">الوحدة: --</span>
+            <span id="transfer-current-client">العميل الحالي: --</span>
+          </div>
+
+          <div class="form-group">
+            <label>اسم المشتري الجديد *</label>
+            <input type="text" id="transfer-to-name" placeholder="الاسم الرباعي للمشتري الجديد" required />
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>رقم هاتف المشتري الجديد *</label>
+              <input type="text" id="transfer-to-phone" placeholder="01xxxxxxxxx" required />
+            </div>
+            <div class="form-group">
+              <label>الرقم القومي للمشتري الجديد</label>
+              <input type="text" id="transfer-to-natid" placeholder="14 رقم" />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>رسوم التنازل المحصلة للشركة (ج.م)</label>
+            <input type="number" id="transfer-fee" placeholder="0" value="0" step="any" />
+            <small class="text-muted" style="display:block; margin-top:4px; font-size: 0.8rem; color: #64748b;">يتم توريد رسوم التنازل تلقائياً في خزينة المشروع/الشركة كإيراد خدمات</small>
+          </div>
+
+          <div class="form-group">
+            <label>ملاحظات وسند التنازل</label>
+            <input type="text" id="transfer-notes" placeholder="رقم التوكيل بالشهر العقاري أو محضر التنازل الداخلي..." />
+          </div>
+
+          <div class="form-actions">
+            <button type="submit" class="btn btn-warning">اعتماد التنازل ونقل الملكية</button>
+            <button type="button" class="btn btn-secondary" id="cancel-transfer-btn">إلغاء</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+  </main>
+</Layout>
+
+<script>
+  import { checkAuth } from '../../lib/auth.js';
+
+  let salesData = null;
+
+  const authLoading = document.getElementById('auth-loading-message');
+  const loginContainer = document.getElementById('admin-login-container');
+  const mainContent = document.getElementById('main-content');
+
+  (async () => {
+    try {
+      const user = await checkAuth();
+      if (authLoading) authLoading.style.display = 'none';
+
+      if (user && (user.role === 'admin' || user.role === 'sales')) {
+        if (mainContent) mainContent.style.display = 'block';
+        loadSalesData();
+      } else {
+        if (loginContainer) loginContainer.style.display = 'block';
+      }
+    } catch (e) {
+      if (authLoading) authLoading.style.display = 'none';
+      if (loginContainer) loginContainer.style.display = 'block';
+    }
+  })();
+
+  async function loadSalesData() {
+    try {
+      const res = await fetch('/api/erp/sales');
+      const data = await res.json();
+      if (data.success) {
+        salesData = data;
+        renderHeaderStats();
+        renderLeads();
+        renderReservations();
+        renderInventory();
+        populateModals();
+        loadBrokers();
+      }
+    } catch (e) { console.error(e); }
+  }
+
+  function renderHeaderStats() {
+    let availCount = 0;
+    let soldCount = 0;
+    let totalUnits = 0;
+
+    salesData.projects.forEach(p => {
+      if (p.units) {
+        totalUnits += p.units.length;
+        p.units.forEach(u => {
+          if (u.status === 'available') availCount++;
+          else if (u.status === 'sold') soldCount++;
+        });
+      }
+    });
+
+    const availStat = document.getElementById('avail-units-stat');
+    if (availStat) availStat.textContent = availCount;
+    const availBadge = document.getElementById('tab-avail-badge');
+    if (availBadge) availBadge.textContent = availCount;
+
+    const countAvail = document.getElementById('inv-count-avail');
+    if (countAvail) countAvail.textContent = availCount;
+    const countSold = document.getElementById('inv-count-sold');
+    if (countSold) countSold.textContent = soldCount;
+    const countTotal = document.getElementById('inv-count-total');
+    if (countTotal) countTotal.textContent = totalUnits;
+
+    document.getElementById('leads-count-stat').textContent = salesData.leads.length;
+    document.getElementById('reservations-count-stat').textContent = salesData.reservations.length;
+    document.getElementById('commissions-stat').textContent = `${salesData.totalCommissions.toLocaleString()} ج.م`;
+  }
+
+  function renderLeads() {
+    const tbody = document.getElementById('leads-tbody');
+    if (!tbody) return;
+    if (salesData.leads.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="6" class="text-center p-3 text-muted">لا يوجد عملاء محتملين مسجلين بعد.</td></tr>`;
+      return;
+    }
+    tbody.innerHTML = salesData.leads.map(l => {
+      const cleanPhone = l.phone ? l.phone.replace(/[^0-9]/g, '').replace(/^0+/, '') : '';
+      const waUrl = cleanPhone ? `https://wa.me/20${cleanPhone}?text=${encodeURIComponent('السلام عليكم أستاذ ' + l.fullName + '، معك إدارة المبيعات بخصوص اهتمامكم بمشروعاتنا العقارية')}` : '#';
+      let fuBadge = '';
+      if (l.nextFollowUp) {
+        const d = new Date(l.nextFollowUp);
+        const isPast = d < new Date();
+        fuBadge = `<div style="font-size:0.72rem; margin-top:2px; font-weight:700; color:${isPast ? '#dc2626' : '#d97706'};">⏰ متابعة: ${d.toLocaleDateString('ar-EG', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</div>`;
+      }
+      return `
+        <tr>
+          <td><strong>${l.fullName}</strong></td>
+          <td>
+            <div style="display:flex; align-items:center; gap:0.4rem;">
+              <span>${l.phone}</span>
+              ${cleanPhone ? `<a href="${waUrl}" target="_blank" style="background:#25D366; color:#fff; padding:0.2rem 0.5rem; border-radius:6px; font-size:0.75rem; text-decoration:none; font-weight:700;">💬 واتساب</a>` : ''}
+            </div>
+            ${fuBadge}
+          </td>
+          <td>${l.project ? l.project.projectName : 'غير محدد'}</td>
+          <td>${l.budget ? l.budget.toLocaleString() + ' ج.م' : '-'}</td>
+          <td><span class="status-badge lead-${l.status}">${translateLeadStatus(l.status)}</span></td>
+          <td>
+            <button class="btn btn-sm btn-outline update-lead-status-btn" data-id="${l.id}">تحديث المرحلة</button>
+          </td>
+        </tr>
+      `;
+    }).join('');
+
+    document.querySelectorAll('.update-lead-status-btn').forEach(btn => {
+      btn.onclick = async (e) => {
+        const id = e.currentTarget.getAttribute('data-id');
+        const next = prompt('اختر الحالة: new (جديد), contacted (اتصال), viewing (معاينة), negotiating (تفاوض), converted (تعاقد)');
+        if (next) {
+          await fetch('/api/erp/sales', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'update_lead_status', leadId: id, status: next })
+          });
+          loadSalesData();
+        }
+      };
+    });
+  }
+
+  function renderReservations() {
+    const tbody = document.getElementById('reservations-tbody');
+    if (!tbody) return;
+    if (salesData.reservations.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="9" class="text-center p-3 text-muted">لا يوجد تعاقدات بعد.</td></tr>`;
+      return;
+    }
+    tbody.innerHTML = salesData.reservations.map(r => `
+      <tr>
+        <td><strong>${r.unit ? r.unit.unitNumber : ''}</strong></td>
+        <td>${r.project ? r.project.projectName : ''}</td>
+        <td>
+          <strong>${r.clientName}</strong>
+          ${r.transfers && r.transfers.length > 0 ? `<div style="font-size:0.75rem; color:#d97706; font-weight:700;">🔄 نُقلت ملكيتها (${r.transfers.length})</div>` : ''}
+        </td>
+        <td><strong>${r.totalPrice.toLocaleString()} ج.م</strong></td>
+        <td><span class="text-success">${r.downPayment.toLocaleString()} ج.م</span></td>
+        <td>${r.broker ? `<span class="badge-broker">👔 ${r.broker.name} (${(r.brokerCommission || 0).toLocaleString()} ج.م)</span>` : '<span class="text-muted">مبيعات داخلية</span>'}</td>
+        <td>${r.commissionAmount.toLocaleString()} ج.م</td>
+        <td><span class="status-badge badge-sold">عقد رسمي</span></td>
+        <td>
+          <div class="doc-btns-row" style="display: flex; gap: 0.35rem; flex-wrap: wrap;">
+            <button type="button" class="btn btn-sm btn-outline btn-print-doc" onclick="window.printDoc('${r.id}', 'eoi')" title="طباعة استمارة الحجز الرسمية EOI">
+              📄 استمارة حجز
+            </button>
+            <button type="button" class="btn btn-sm btn-primary btn-print-doc" onclick="window.printDoc('${r.id}', 'contract')" title="طباعة عقد البيع الابتدائي">
+              📜 عقد البيع
+            </button>
+            <button type="button" class="btn btn-sm btn-warning btn-transfer" onclick="window.openTransferModal('${r.id}')" title="تنازل ونقل ملكية الوحدة لعميل جديد">
+              🔄 تنازل
+            </button>
+          </div>
+        </td>
+      </tr>
+    `).join('');
+  }
+
+  function formatFloor(floor) {
+    if (floor === 0 || floor === '0') return 'الدور الأرضي';
+    if (floor === 1 || floor === '1') return 'الدور الأول';
+    if (floor === 2 || floor === '2') return 'الدور الثاني';
+    if (floor === 3 || floor === '3') return 'الدور الثالث';
+    if (floor === 4 || floor === '4') return 'الدور الرابع';
+    if (floor === 5 || floor === '5') return 'الدور الخامس';
+    if (floor > 5) return `الدور ${floor}`;
+    return `الدور ${floor}`;
+  }
+
+  function formatUnitType(t) {
+    const map = {
+      residential: 'شقة سكنية',
+      apartment: 'شقة سكنية',
+      duplex: 'دوبلكس',
+      penthouse: 'بنتهاوس',
+      commercial: 'محل تجاري',
+      administrative: 'مكتب إداري',
+      villa: 'فيلا مستقلة'
+    };
+    return map[t] || t || 'شقة سكنية';
+  }
+
+  function formatFinishing(f) {
+    if (!f) return 'غير محدد';
+    const map = {
+      full: 'متشطبة سوبر لوكس ✨',
+      finished: 'متشطبة سوبر لوكس ✨',
+      semi: 'نص تشطيب 🧱',
+      semi_finished: 'نص تشطيب 🧱',
+      core: 'طوب أحمر 🏗️',
+      red_brick: 'طوب أحمر 🏗️'
+    };
+    return map[f] || f;
+  }
+
+  function formatView(v) {
+    if (!v) return 'غير محدد';
+    const map = {
+      garden: 'على جنينة 🌳',
+      pool: 'على حمام سباحة 🏊',
+      street: 'على الشارع الرئيسي 🛣️',
+      back: 'إطلالة خلفية 🧭'
+    };
+    return map[v] || v;
+  }
+
+  function translateStatus(s) {
+    const map = { available: 'متاح للبيع', reserved: 'محجوز', sold: 'تم البيع' };
+    return map[s] || s;
+  }
+
+  function populateModals() {
+    const leadProj = document.getElementById('lead-project-select');
+    const resProj = document.getElementById('res-project-select');
+
+    if (!salesData || !salesData.projects) return;
+
+    const projOpts = salesData.projects.map(p => `<option value="${p.id}">${p.projectName}</option>`).join('');
+    if (leadProj) leadProj.innerHTML = projOpts;
+    if (resProj) {
+      resProj.innerHTML = projOpts;
+      resProj.onchange = updateResUnitsAndPlans;
+      updateResUnitsAndPlans();
+    }
+
+    const resBroker = document.getElementById('res-broker-select');
+    if (resBroker && salesData.brokers) {
+      resBroker.innerHTML = '<option value="">بدون وسيط (مبيعات داخلية مباشرة)</option>' +
+        salesData.brokers.map(b => `<option value="${b.id}" data-rate="${b.defaultCommRate || 2.5}">${b.name} (${b.defaultCommRate}% عمولة)</option>`).join('');
+
+      resBroker.onchange = () => {
+        const selectedOpt = resBroker.options[resBroker.selectedIndex];
+        const rate = selectedOpt ? parseFloat(selectedOpt.getAttribute('data-rate') || 0) : 0;
+        const resUnit = document.getElementById('res-unit-select');
+        const unitId = resUnit?.value;
+        const pid = document.getElementById('res-project-select')?.value;
+        const project = salesData.projects.find(p => p.id === pid);
+        const unit = project?.units?.find(u => u.id === unitId);
+        const totalPrice = unit?.totalPrice || 0;
+        const commInput = document.getElementById('res-broker-commission');
+        if (commInput) {
+          commInput.value = rate > 0 ? Math.round((totalPrice * rate) / 100) : 0;
+        }
+      };
+    }
+  }
+
+  function updateResUnitsAndPlans() {
+    const resProj = document.getElementById('res-project-select');
+    const resUnit = document.getElementById('res-unit-select');
+    const resPlan = document.getElementById('res-plan-select');
+    const resBroker = document.getElementById('res-broker-select');
+    if (!resProj || !salesData || !salesData.projects) return;
+
+    const pid = resProj.value;
+    const project = salesData.projects.find(p => p.id === pid);
+
+    if (project) {
+      const availUnits = project.units ? project.units.filter(u => u.status === 'available') : [];
+      if (resUnit) {
+        resUnit.innerHTML = availUnits.length > 0
+          ? availUnits.map(u => `<option value="${u.id}">وحدة ${u.unitNumber} (${u.area}م² - ${u.totalPrice.toLocaleString()} ج.م)</option>`).join('')
+          : '<option value="">لا توجد وحدات متاحة</option>';
+
+        resUnit.onchange = () => {
+          if (resBroker && resBroker.value) {
+            resBroker.onchange();
+          }
+        };
+      }
+
+      if (resPlan) {
+        resPlan.innerHTML = project.paymentPlans && project.paymentPlans.length > 0
+          ? project.paymentPlans.map(p => `<option value="${p.id}">${p.name}</option>`).join('')
+          : '<option value="">نظام افتراضي</option>';
+      }
+    }
+  }
+
+  let inventoryFiltersBound = false;
+
+  function renderInventory() {
+    const grid = document.getElementById('inventory-grid');
+    if (!grid) return;
+
+    // Collect all units from projects
+    const allUnits = [];
+    salesData.projects.forEach(p => {
+      if (p.units) {
+        p.units.forEach(u => {
+          allUnits.push({
+            ...u,
+            projectId: p.id,
+            projectName: p.projectName
+          });
+        });
+      }
+    });
+
+    // Populate filter projects dropdown once
+    const filterProj = document.getElementById('filter-project-select');
+    if (filterProj && filterProj.options.length <= 1) {
+      filterProj.innerHTML = '<option value="all">جميع المشروعات</option>' +
+        salesData.projects.map(p => `<option value="${p.id}">${p.projectName}</option>`).join('');
+    }
+
+    // Attach filter listeners once
+    if (!inventoryFiltersBound) {
+      const searchInput = document.getElementById('unit-search-input');
+      const filterStatus = document.getElementById('filter-status-select');
+      const filterFloor = document.getElementById('filter-floor-select');
+      const filterType = document.getElementById('filter-type-select');
+      const resetBtn = document.getElementById('reset-filters-btn');
+
+      const triggerReFilter = () => renderInventory();
+
+      if (searchInput) searchInput.addEventListener('input', triggerReFilter);
+      if (filterProj) filterProj.addEventListener('change', triggerReFilter);
+      if (filterStatus) filterStatus.addEventListener('change', triggerReFilter);
+      if (filterFloor) filterFloor.addEventListener('change', triggerReFilter);
+      if (filterType) filterType.addEventListener('change', triggerReFilter);
+
+      if (resetBtn) {
+        resetBtn.addEventListener('click', () => {
+          if (searchInput) searchInput.value = '';
+          if (filterProj) filterProj.value = 'all';
+          if (filterStatus) filterStatus.value = 'available';
+          if (filterFloor) filterFloor.value = 'all';
+          if (filterType) filterType.value = 'all';
+          renderInventory();
+        });
+      }
+
+      inventoryFiltersBound = true;
+    }
+
+    // Current filter values
+    const searchVal = (document.getElementById('unit-search-input')?.value || '').trim().toLowerCase();
+    const projVal = document.getElementById('filter-project-select')?.value || 'all';
+    const statusVal = document.getElementById('filter-status-select')?.value || 'available';
+    const floorVal = document.getElementById('filter-floor-select')?.value || 'all';
+    const typeVal = document.getElementById('filter-type-select')?.value || 'all';
+
+    // Apply filtering
+    const filteredUnits = allUnits.filter(u => {
+      // Status filter
+      if (statusVal !== 'all' && u.status !== statusVal) return false;
+
+      // Project filter
+      if (projVal !== 'all' && u.projectId !== projVal) return false;
+
+      // Floor filter
+      if (floorVal !== 'all') {
+        if (floorVal === 'higher') {
+          if (Number(u.floor) < 6) return false;
+        } else {
+          if (String(u.floor) !== String(floorVal)) return false;
+        }
+      }
+
+      // Unit Type filter
+      if (typeVal !== 'all') {
+        const uType = (u.unitType || '').toLowerCase();
+        if (typeVal === 'residential' && !['residential', 'apartment'].includes(uType)) return false;
+        if (typeVal !== 'residential' && uType !== typeVal) return false;
+      }
+
+      // Search query (unitNumber, building name, projectName, view, floor)
+      if (searchVal) {
+        const bldgName = (u.building ? u.building.name : '').toLowerCase();
+        const projName = (u.projectName || '').toLowerCase();
+        const unitNum = (u.unitNumber || '').toLowerCase();
+        const viewStr = (u.view || '').toLowerCase();
+        const floorStr = formatFloor(u.floor).toLowerCase();
+
+        const match = unitNum.includes(searchVal) ||
+          bldgName.includes(searchVal) ||
+          projName.includes(searchVal) ||
+          viewStr.includes(searchVal) ||
+          floorStr.includes(searchVal);
+
+        if (!match) return false;
+      }
+
+      return true;
+    });
+
+    // Update counter
+    const counterEl = document.getElementById('displayed-units-count');
+    if (counterEl) counterEl.textContent = filteredUnits.length;
+
+    if (filteredUnits.length === 0) {
+      grid.innerHTML = `
+        <div class="empty-inventory-state">
+          <div class="empty-icon">🏢</div>
+          <h3>لا توجد وحدات مطابقة لشروط البحث والفلاتر</h3>
+          <p>جرّب اختيار "جميع الحالات" أو مسح كلمات البحث لعرض كافة الوحدات المتاحة.</p>
+        </div>
+      `;
+      return;
+    }
+
+    grid.innerHTML = filteredUnits.map(u => {
+      const isAvailable = u.status === 'available';
+      const isSold = u.status === 'sold';
+      const isReserved = u.status === 'reserved';
+
+      const floorText = formatFloor(u.floor);
+      const typeText = formatUnitType(u.unitType);
+      const finishingText = formatFinishing(u.finishingType);
+      const viewText = formatView(u.view);
+      const bldgName = u.building ? u.building.name : 'عمارة رئيسية';
+
+      return `
+        <div class="unit-card-box status-${u.status}">
+          <!-- Header -->
+          <div class="unit-card-header">
+            <div class="unit-title-group">
+              <span class="unit-badge-number">وحدة ${u.unitNumber}</span>
+              <span class="unit-type-tag">${typeText}</span>
+            </div>
+            <span class="unit-status-badge badge-${u.status}">${translateStatus(u.status)}</span>
+          </div>
+
+          <!-- Project & Building Subheader -->
+          <div class="unit-location-row">
+            <span class="proj-badge">📍 ${u.projectName}</span>
+            <span class="bldg-badge">🏢 ${bldgName}</span>
+          </div>
+
+          <!-- Specs Badges Grid -->
+          <div class="unit-specs-grid">
+            <div class="spec-cell">
+              <span class="spec-label">📍 الطابق:</span>
+              <strong class="spec-val">${floorText}</strong>
+            </div>
+
+            <div class="spec-cell">
+              <span class="spec-label">📐 المساحة:</span>
+              <strong class="spec-val">${u.area} م²</strong>
+            </div>
+
+            ${u.gardenArea && u.gardenArea > 0 ? `
+              <div class="spec-cell highlight-green">
+                <span class="spec-label">🌳 جنينة:</span>
+                <strong class="spec-val">${u.gardenArea} م²</strong>
+              </div>
+            ` : ''}
+
+            <div class="spec-cell">
+              <span class="spec-label">🛏️ التقسيم:</span>
+              <strong class="spec-val">${u.roomsCount || 1} غرف • ${u.bathroomsCount || 1} حمام</strong>
+            </div>
+
+            <div class="spec-cell">
+              <span class="spec-label">🌅 الإطلالة:</span>
+              <strong class="spec-val">${viewText}</strong>
+            </div>
+
+            <div class="spec-cell">
+              <span class="spec-label">🎨 التشطيب:</span>
+              <strong class="spec-val">${finishingText}</strong>
+            </div>
+          </div>
+
+          <!-- Pricing Section -->
+          <div class="unit-pricing-bar">
+            <div class="price-meter-col">
+              <span class="price-sub">سعر المتر:</span>
+              <span class="price-meter-val">${(u.pricePerMeter || 0).toLocaleString()} ج.م</span>
+            </div>
+            <div class="price-total-col">
+              <span class="price-sub">السعر الإجمالي:</span>
+              <span class="price-total-val">${u.totalPrice.toLocaleString()} ج.م</span>
+            </div>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="unit-card-actions">
+            ${isAvailable ? `
+              <button class="btn btn-success btn-reserve-unit" onclick="window.bookUnitDirect('${u.projectId}', '${u.id}', '${u.unitNumber}', ${u.totalPrice})">
+                <span>💳 حجز وتعاقد فوري</span>
+              </button>
+              <button class="btn btn-outline btn-whatsapp-share" onclick="window.shareUnitWhatsApp('${u.unitNumber}', '${u.projectName}', '${bldgName}', '${floorText}', ${u.area}, ${u.gardenArea || 0}, ${u.roomsCount || 0}, ${u.bathroomsCount || 0}, '${viewText}', '${finishingText}', ${u.pricePerMeter || 0}, ${u.totalPrice})">
+                <span>💬 واتساب للعميل</span>
+              </button>
+            ` : isSold ? `
+              <div class="sold-indicator">
+                <span>📝 وحدة متعاقد عليها ومباعة</span>
+              </div>
+            ` : `
+              <div class="reserved-indicator">
+                <span>⏳ وحدة محجوزة مؤقتاً</span>
+              </div>
+            `}
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  // Quick Direct Booking Helper
+  window.bookUnitDirect = (projectId, unitId, unitNumber, totalPrice) => {
+    const resModal = document.getElementById('reservation-modal');
+    const resProj = document.getElementById('res-project-select');
+    const resUnit = document.getElementById('res-unit-select');
+
+    if (resProj) {
+      resProj.value = projectId;
+      updateResUnitsAndPlans();
+    }
+    if (resUnit) {
+      resUnit.value = unitId;
+    }
+
+    const downPayInput = document.getElementById('res-down-payment');
+    if (downPayInput && totalPrice) {
+      downPayInput.value = Math.round(totalPrice * 0.1);
+    }
+
+    if (resModal) resModal.style.display = 'flex';
+  };
+
+  // WhatsApp Share Helper
+  window.shareUnitWhatsApp = (unitNumber, projName, bldgName, floorText, area, gardenArea, rooms, baths, viewText, finishingText, pricePerMeter, totalPrice) => {
+    let text = `مرحباً بك،\nتفاصيل ومواصفات الوحدة المعروضة للبيع:\n\n`;
+    text += `📍 المشروع: ${projName} - ${bldgName}\n`;
+    text += `🏢 رقم الوحدة: ${unitNumber}\n`;
+    text += `📍 الطابق: ${floorText}\n`;
+    text += `📐 المساحة: ${area} م²` + (gardenArea > 0 ? ` + حديقة خاصة ${gardenArea} م²\n` : `\n`);
+    if (rooms || baths) text += `🛏️ التقسيم الداخلي: ${rooms || 0} غرف نوم • ${baths || 0} حمام\n`;
+    if (viewText && viewText !== 'غير محدد') text += `🌅 الإطلالة: ${viewText}\n`;
+    if (finishingText && finishingText !== 'غير محدد') text += `🎨 نوع التشطيب: ${finishingText}\n`;
+    text += `💰 سعر المتر: ${Number(pricePerMeter).toLocaleString()} ج.م\n`;
+    text += `💵 إجمالي السعر: ${Number(totalPrice).toLocaleString()} ج.م\n\n`;
+    text += `للحجز والاستفسار يسعدنا خدمتكم دائماً.`;
+
+    window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`, '_blank');
+  };
+
+  // Tabs
+  document.querySelectorAll('.s-tab-btn').forEach(b => {
+    b.onclick = (e) => {
+      document.querySelectorAll('.s-tab-btn').forEach(btn => btn.classList.remove('active'));
+      document.querySelectorAll('.s-tab-pane').forEach(p => p.style.display = 'none');
+      e.currentTarget.classList.add('active');
+      const target = e.currentTarget.getAttribute('data-target');
+      const pane = document.getElementById(target);
+      if (pane) pane.style.display = 'block';
+    };
+  });
+
+  // Modals
+  const leadModal = document.getElementById('lead-modal');
+  const openLeadBtn = document.getElementById('open-lead-modal');
+  const closeLeadBtn = document.getElementById('close-lead-modal');
+  const cancelLeadBtn = document.getElementById('cancel-lead-btn');
+
+  if (openLeadBtn) openLeadBtn.onclick = () => { if (leadModal) leadModal.style.display = 'flex'; };
+  if (closeLeadBtn) closeLeadBtn.onclick = () => { if (leadModal) leadModal.style.display = 'none'; };
+  if (cancelLeadBtn) cancelLeadBtn.onclick = () => { if (leadModal) leadModal.style.display = 'none'; };
+
+  const resModal = document.getElementById('reservation-modal');
+  const openResBtn = document.getElementById('open-reservation-modal');
+  const closeResBtn = document.getElementById('close-res-modal');
+  const cancelResBtn = document.getElementById('cancel-res-btn');
+
+  if (openResBtn) openResBtn.onclick = () => { if (resModal) resModal.style.display = 'flex'; };
+  if (closeResBtn) closeResBtn.onclick = () => { if (resModal) resModal.style.display = 'none'; };
+  if (cancelResBtn) cancelResBtn.onclick = () => { if (resModal) resModal.style.display = 'none'; };
+
+  // Submits
+  const leadForm = document.getElementById('new-lead-form');
+  if (leadForm) {
+    leadForm.onsubmit = async (e) => {
+      e.preventDefault();
+      const fullName = document.getElementById('lead-name').value;
+      const phone = document.getElementById('lead-phone').value;
+      const email = document.getElementById('lead-email').value;
+      const projectId = document.getElementById('lead-project-select').value;
+      const budget = document.getElementById('lead-budget').value;
+
+      const res = await fetch('/api/erp/sales', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'create_lead', fullName, phone, email, projectId, budget })
+      });
+      const data = await res.json();
+      if (data.success) {
+        if (leadModal) leadModal.style.display = 'none';
+        leadForm.reset();
+        loadSalesData();
+      }
+    };
+  }
+
+  const resForm = document.getElementById('new-res-form');
+  if (resForm) {
+    resForm.onsubmit = async (e) => {
+      e.preventDefault();
+      const projectId = document.getElementById('res-project-select').value;
+      const unitId = document.getElementById('res-unit-select').value;
+      const clientName = document.getElementById('res-client-name').value;
+      const clientPhone = document.getElementById('res-client-phone').value;
+      const clientNationalId = document.getElementById('res-client-nid').value;
+      const paymentPlanId = document.getElementById('res-plan-select').value;
+      const downPayment = document.getElementById('res-down-payment').value;
+      const commissionPercent = document.getElementById('res-commission-pct').value;
+
+      const brokerId = document.getElementById('res-broker-select')?.value || null;
+      const brokerCommission = document.getElementById('res-broker-commission')?.value || 0;
+
+      const res = await fetch('/api/erp/sales', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'create_reservation',
+          projectId, unitId, clientName, clientPhone, clientNationalId, paymentPlanId, downPayment, commissionPercent,
+          brokerId, brokerCommission
+        })
+      });
+      const data = await res.json();
+      if (data.success) {
+        alert('🎉 تم التعاقد بنجاح وجدولة الأقساط وتوريد المقدم في الخزنة تلقائياً!');
+        if (resModal) resModal.style.display = 'none';
+        resForm.reset();
+        loadSalesData();
+      } else {
+        alert(data.error || 'فشل التعاقد');
+      }
+    };
+  }
+
+  // ==========================================
+  // BROKERS MANAGEMENT LOGIC
+  // ==========================================
+  let allBrokers = [];
+
+  async function loadBrokers() {
+    try {
+      const res = await fetch('/api/erp/brokers');
+      const data = await res.json();
+      if (data.success) {
+        allBrokers = data.brokers || [];
+        renderBrokers();
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  function renderBrokers() {
+    const tbody = document.getElementById('brokers-tbody');
+    if (!tbody) return;
+    if (allBrokers.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="9" class="text-center p-3 text-muted">لا توجد شركات تسويق أو وسطاء مسجلين بعد. انقر على "+ تسجيل شركة بروكر جديدة" للبدء.</td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = allBrokers.map(b => `
+      <tr>
+        <td><strong>${b.name}</strong></td>
+        <td>${b.contactPerson || '--'}</td>
+        <td>${b.phone}</td>
+        <td><span class="badge-rate">${b.defaultCommRate}%</span></td>
+        <td><strong>${(b.totalSalesMade || 0).toLocaleString()} ج.م</strong></td>
+        <td><strong class="text-primary">${(b.totalCommissions || 0).toLocaleString()} ج.م</strong></td>
+        <td><span class="text-success">${(b.paidCommissions || 0).toLocaleString()} ج.م</span></td>
+        <td><strong class="text-danger">${(b.remainingCommissions || 0).toLocaleString()} ج.م</strong></td>
+        <td>
+          <button type="button" class="btn btn-sm btn-success open-pay-broker-modal-btn" data-id="${b.id}" data-name="${b.name}" data-rem="${b.remainingCommissions || 0}">
+            💵 صرف عمولة
+          </button>
+        </td>
+      </tr>
+    `).join('');
+
+    document.querySelectorAll('.open-pay-broker-modal-btn').forEach(btn => {
+      btn.onclick = (e) => {
+        const id = e.currentTarget.getAttribute('data-id');
+        const name = e.currentTarget.getAttribute('data-name');
+        const rem = e.currentTarget.getAttribute('data-rem');
+
+        document.getElementById('pay-broker-id').value = id;
+        document.getElementById('pay-broker-info').textContent = `صرف عمولة لشركة: ${name} (المستحق المتبقي: ${Number(rem).toLocaleString()} ج.م)`;
+        document.getElementById('pay-broker-amount').value = rem > 0 ? rem : '';
+
+        const modal = document.getElementById('pay-broker-modal');
+        if (modal) modal.style.display = 'flex';
+      };
+    });
+  }
+
+  // Modals for Brokers
+  const brokerModal = document.getElementById('broker-modal');
+  const openBrokerBtn = document.getElementById('open-broker-modal');
+  const closeBrokerBtn = document.getElementById('close-broker-modal');
+  const cancelBrokerBtn = document.getElementById('cancel-broker-btn');
+
+  if (openBrokerBtn) openBrokerBtn.onclick = () => { if (brokerModal) brokerModal.style.display = 'flex'; };
+  if (closeBrokerBtn) closeBrokerBtn.onclick = () => { if (brokerModal) brokerModal.style.display = 'none'; };
+  if (cancelBrokerBtn) cancelBrokerBtn.onclick = () => { if (brokerModal) brokerModal.style.display = 'none'; };
+
+  const payBrokerModal = document.getElementById('pay-broker-modal');
+  const closePayBrokerBtn = document.getElementById('close-pay-broker-modal');
+  const cancelPayBrokerBtn = document.getElementById('cancel-pay-broker-btn');
+
+  if (closePayBrokerBtn) closePayBrokerBtn.onclick = () => { if (payBrokerModal) payBrokerModal.style.display = 'none'; };
+  if (cancelPayBrokerBtn) cancelPayBrokerBtn.onclick = () => { if (payBrokerModal) payBrokerModal.style.display = 'none'; };
+
+  const newBrokerForm = document.getElementById('new-broker-form');
+  if (newBrokerForm) {
+    newBrokerForm.onsubmit = async (e) => {
+      e.preventDefault();
+      const name = document.getElementById('broker-name').value;
+      const contactPerson = document.getElementById('broker-contact').value;
+      const phone = document.getElementById('broker-phone').value;
+      const email = document.getElementById('broker-email').value;
+      const defaultCommRate = document.getElementById('broker-comm-rate').value;
+      const notes = document.getElementById('broker-notes').value;
+
+      const res = await fetch('/api/erp/brokers', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'create_broker', name, contactPerson, phone, email, defaultCommRate, notes })
+      });
+      const data = await res.json();
+      if (data.success) {
+        alert('✅ تم تسجيل شركة البروكر بنجاح وإضافتها لدليل الوسطاء');
+        if (brokerModal) brokerModal.style.display = 'none';
+        newBrokerForm.reset();
+        loadBrokers();
+        loadSalesData();
+      } else {
+        alert(data.error || 'فشلت العملية');
+      }
+    };
+  }
+
+  const payBrokerForm = document.getElementById('pay-broker-form');
+  if (payBrokerForm) {
+    payBrokerForm.onsubmit = async (e) => {
+      e.preventDefault();
+      const brokerId = document.getElementById('pay-broker-id').value;
+      const amount = document.getElementById('pay-broker-amount').value;
+      const notes = document.getElementById('pay-broker-notes').value;
+
+      const res = await fetch('/api/erp/brokers', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'pay_commission', brokerId, amount, notes })
+      });
+      const data = await res.json();
+      if (data.success) {
+        alert(`✅ ${data.message}`);
+        if (payBrokerModal) payBrokerModal.style.display = 'none';
+        payBrokerForm.reset();
+        loadBrokers();
+      } else {
+        alert(data.error || 'فشل صرف العمولة');
+      }
+    };
+  }
+
+  // ==========================================
+  // OFFICIAL CONTRACT & EOI PDF PRINT ENGINE
+  // ==========================================
+  window.printDoc = (resId, docType) => {
+    const r = salesData.reservations.find(x => x.id === resId);
+    if (!r) {
+      alert('التعاقد غير موجود');
+      return;
+    }
+
+    const unit = r.unit || {};
+    const proj = r.project || {};
+    const plan = r.paymentPlan || {};
+    const installments = r.scheduledInstallments || [];
+    const dateStr = new Date(r.contractDate).toLocaleDateString('ar-EG');
+
+    const printWin = window.open('', '_blank', 'width=920,height=800');
+    if (!printWin) {
+      alert('يرجى السماح بالنوافذ المنبثقة لطباعة المستند');
+      return;
+    }
+
+    const isEOI = docType === 'eoi';
+    const title = isEOI ? 'استمارة حجز وتخصيص وحدة عقارية (EOI)' : 'عقد بيع ابتدائي لوحدة عقارية';
+
+    const htmlContent = `
+      <!DOCTYPE html>
+      <html lang="ar" dir="rtl">
+      <head>
+        <meta charset="UTF-8">
+        <title>${title} - ${r.clientName}</title>
+        <style>
+          @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap');
+          * { box-sizing: border-box; }
+          body { font-family: 'Cairo', sans-serif; margin: 0; padding: 2.5rem; color: #0f172a; background: #fff; line-height: 1.6; }
+          .doc-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 3px double #0f172a; padding-bottom: 1.25rem; margin-bottom: 2rem; }
+          .company-brand h2 { margin: 0; font-size: 1.5rem; font-weight: 900; color: #1e3a8a; }
+          .company-brand p { margin: 0.2rem 0 0; font-size: 0.85rem; color: #64748b; }
+          .doc-meta { text-align: left; font-size: 0.85rem; font-weight: 700; color: #334155; }
+          .doc-meta span { display: block; }
+          .doc-title { text-align: center; margin: 1.5rem 0 2rem; }
+          .doc-title h1 { margin: 0; font-size: 1.7rem; font-weight: 900; color: #0f172a; text-decoration: underline; }
+          .doc-title p { margin: 0.4rem 0 0; color: #64748b; font-size: 0.95rem; }
+          .section-block { margin-bottom: 1.5rem; }
+          .section-block h3 { margin: 0 0 0.75rem; font-size: 1.1rem; font-weight: 800; color: #1e3a8a; border-right: 4px solid #1e3a8a; padding-right: 0.5rem; }
+          .info-table { width: 100%; border-collapse: collapse; margin-bottom: 1rem; font-size: 0.92rem; }
+          .info-table th, .info-table td { border: 1px solid #cbd5e1; padding: 0.65rem 0.85rem; text-align: right; }
+          .info-table th { background: #f8fafc; font-weight: 800; width: 28%; color: #334155; }
+          .clause { font-size: 0.92rem; margin-bottom: 1rem; text-align: justify; }
+          .clause strong { color: #1e3a8a; }
+          .installments-table { width: 100%; border-collapse: collapse; font-size: 0.88rem; margin-top: 0.75rem; }
+          .installments-table th, .installments-table td { border: 1px solid #94a3b8; padding: 0.5rem; text-align: center; }
+          .installments-table th { background: #1e3a8a; color: white; }
+          .signatures-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-top: 3rem; page-break-inside: avoid; }
+          .sig-box { border: 1px dashed #94a3b8; border-radius: 12px; padding: 1.25rem; text-align: center; min-height: 130px; }
+          .sig-box strong { display: block; margin-bottom: 2.5rem; }
+          .print-btn-bar { position: fixed; top: 1rem; left: 1rem; background: #fff; padding: 0.5rem; box-shadow: 0 4px 12px rgba(0,0,0,0.15); border-radius: 8px; }
+          .btn-print { background: #1e3a8a; color: white; border: none; padding: 0.6rem 1.25rem; font-family: inherit; font-weight: 800; border-radius: 6px; cursor: pointer; }
+          @media print {
+            .print-btn-bar { display: none !important; }
+            body { padding: 1rem; }
+          }
+        </style>
+      </head>
+      <body>
+        <div class="print-btn-bar">
+          <button class="btn-print" onclick="window.print()">🖨️ طباعة المستند / حفظ PDF</button>
+        </div>
+
+        <div class="doc-header">
+          <div class="company-brand">
+            <h2>شركة الإيمان للاستثمار والتطوير العقاري</h2>
+            <p>سجل تجاري: 849201 • بطاقة ضريبية: 492-108 • قطاع التطوير والمبيعات</p>
+          </div>
+          <div class="doc-meta">
+            <span>رقم المستند: #${r.id.slice(0, 8).toUpperCase()}</span>
+            <span>تاريخ التحرير: ${dateStr}</span>
+            <span>المشروع: ${proj.projectName || ''}</span>
+          </div>
+        </div>
+
+        <div class="doc-title">
+          <h1>${title}</h1>
+          <p>${isEOI ? 'إقرار حجز وتخصيص وحدة عقارية طبقاً للشروط والمواصفات' : 'بين شركة الإيمان للتطوير العقاري والطرف الثاني المشتري'}</p>
+        </div>
+
+        <div class="section-block">
+          <h3>أولاً: بيانات أطراف التعاقد</h3>
+          <table class="info-table">
+            <tr>
+              <th>الطرف الأول (البائع / المطور):</th>
+              <td>شركة الإيمان للتطوير العقاري، ويمثلها رئيس مجلس الإدارة أو من يفوضه.</td>
+            </tr>
+            <tr>
+              <th>الطرف الثاني (المشتري / العميل):</th>
+              <td><strong>${r.clientName}</strong></td>
+            </tr>
+            <tr>
+              <th>رقم الهاتف المسجل:</th>
+              <td>${r.clientPhone}</td>
+            </tr>
+            <tr>
+              <th>الرقم القومي / إثبات الشخصية:</th>
+              <td>${r.clientNationalId || 'مرفق صورة بالملف'}</td>
+            </tr>
+            ${r.broker ? `
+              <tr>
+                <th>شركة التسويق / الوسيط العقاري:</th>
+                <td>${r.broker.name} (مسؤول الاتصال: ${r.broker.contactPerson || '--'})</td>
+              </tr>
+            ` : ''}
+          </table>
+        </div>
+
+        <div class="section-block">
+          <h3>ثانياً: مواصفات الوحدة محل التعاقد</h3>
+          <table class="info-table">
+            <tr>
+              <th>اسم المشروع:</th>
+              <td>${proj.projectName || ''}</td>
+            </tr>
+            <tr>
+              <th>رقم الوحدة والعمارة:</th>
+              <td>وحدة رقم: <strong>${unit.unitNumber || '--'}</strong> - عمارة: <strong>${unit.building?.name || 'A'}</strong></td>
+            </tr>
+            <tr>
+              <th>الطابق والمساحة:</th>
+              <td>الدور ${unit.floor !== undefined ? unit.floor : '--'} • المساحة الإجمالية: <strong>${unit.area || 0} متر مربع</strong></td>
+            </tr>
+            <tr>
+              <th>التقسيم الداخلي والإطلالة:</th>
+              <td>${unit.roomsCount || 0} غرف نوم • ${unit.bathroomsCount || 0} حمام • إطلالة: ${unit.view || 'واجهة رئيسية'}</td>
+            </tr>
+            <tr>
+              <th>نوع التشطيب المعتمد:</th>
+              <td>${unit.finishingType || 'نص تشطيب (محارة وحلوق ووصلات أساسية)'}</td>
+            </tr>
+          </table>
+        </div>
+
+        <div class="section-block">
+          <h3>ثالثاً: القيمة المالية وطريقة السداد</h3>
+          <table class="info-table">
+            <tr>
+              <th>إجمالي ثمن الوحدة:</th>
+              <td><strong>${r.totalPrice.toLocaleString()} ج.م</strong></td>
+            </tr>
+            <tr>
+              <th>المقدم المدفوع عند التعاقد:</th>
+              <td><strong>${r.downPayment.toLocaleString()} ج.م</strong> (تم استلامها وتوريدها بالخزينة)</td>
+            </tr>
+            <tr>
+              <th>المبلغ المتبقي للتقسيط:</th>
+              <td><strong>${(r.totalPrice - r.downPayment).toLocaleString()} ج.م</strong></td>
+            </tr>
+            <tr>
+              <th>نظام التقسيط المعتمد:</th>
+              <td>${plan.name || 'خطة سداد مخصصة'} • عدد الأقساط: ${installments.length} قسط</td>
+            </tr>
+          </table>
+
+          ${installments.length > 0 ? `
+            <p style="font-weight: 700; margin-bottom: 0.35rem;">جدول الأقساط والشيكات المجدولة:</p>
+            <table class="installments-table">
+              <thead>
+                <tr>
+                  <th>م</th>
+                  <th>البيان</th>
+                  <th>قيمة القسط</th>
+                  <th>تاريخ الاستحقاق</th>
+                  <th>الحالة</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${installments.slice(0, 16).map((inst, idx) => `
+                  <tr>
+                    <td>${idx + 1}</td>
+                    <td>${inst.title}</td>
+                    <td><strong>${inst.amount.toLocaleString()} ج.م</strong></td>
+                    <td>${new Date(inst.dueDate).toLocaleDateString('ar-EG')}</td>
+                    <td>${inst.status === 'paid' ? 'مسدد بالكامل' : 'مستحق بشيك'}</td>
+                  </tr>
+                `).join('')}
+                ${installments.length > 16 ? `<tr><td colspan="5">... ومرفق ملحق تفصيلي بباقي الأقساط (${installments.length} قسط) ...</td></tr>` : ''}
+              </tbody>
+            </table>
+          ` : ''}
+        </div>
+
+        <div class="section-block">
+          <h3>رابعاً: الشروط العامة والتعهدات</h3>
+          <p class="clause"><strong>البند الأول:</strong> يقر الطرف الثاني بمعاينة موقع المشروع والرسومات الهندسية الخاصة بالوحدة محل هذا العقد المعاينة التامة النافية للجهالة شرعاً وقانوناً وقبوله التعاقد بالثمن وطريقة السداد الموضحة أعلاه.</p>
+          <p class="clause"><strong>البند الثاني:</strong> يلتزم الطرف الثاني بسداد الأقساط والشيكات البنكية المحررة في مواعيد استحقاقها المحددة، وفي حالة التأخر عن السداد لأكثر من 30 يوماً يحق للشركة تطبيق غرامة التأخير المتفق عليها.</p>
+          <p class="clause"><strong>البند الثالث:</strong> يلتزم الطرف الأول بتسليم الوحدة كاملة التشطيب/الهيكل طبقاً للمواصفات المعتمدة وخلال الموعد المحدد مع منح فترة سماح 6 أشهر طبقاً للأعراف الهندسية والإنشائية.</p>
+        </div>
+
+        <div class="signatures-grid">
+          <div class="sig-box">
+            <strong>الطرف الأول (عن شركة الإيمان للتطوير):</strong>
+            <span>الاسم: .......................................</span><br>
+            <span>التوقيع والختم: ................................</span>
+          </div>
+          <div class="sig-box">
+            <strong>الطرف الثاني (المشتري):</strong>
+            <span>الاسم: ${r.clientName}</span><br>
+            <span>التوقيع: .......................................</span>
+          </div>
+        </div>
+      </body>
+      </html>
+    `;
+
+    printWin.document.open();
+    printWin.document.write(htmlContent);
+    printWin.document.close();
+  };
+
+  // Ownership Transfer Modal handlers
+  window.openTransferModal = (resId) => {
+    const r = salesData?.reservations?.find(res => res.id === resId);
+    if (!r) return;
+
+    document.getElementById('transfer-reservation-id').value = r.id;
+    document.getElementById('transfer-unit-info').textContent = `الوحدة: ${r.unit?.unitNumber || ''} (${r.project?.projectName || ''})`;
+    document.getElementById('transfer-current-client').textContent = `العميل الحالي: ${r.clientName}`;
+    document.getElementById('transfer-to-name').value = '';
+    document.getElementById('transfer-to-phone').value = '';
+    document.getElementById('transfer-to-natid').value = '';
+    document.getElementById('transfer-fee').value = 0;
+    document.getElementById('transfer-notes').value = '';
+
+    const modal = document.getElementById('transfer-modal');
+    if (modal) modal.style.display = 'flex';
+  };
+
+  const closeTransferModal = () => {
+    const modal = document.getElementById('transfer-modal');
+    if (modal) modal.style.display = 'none';
+  };
+  document.getElementById('close-transfer-modal')?.addEventListener('click', closeTransferModal);
+  document.getElementById('cancel-transfer-btn')?.addEventListener('click', closeTransferModal);
+
+  document.getElementById('transfer-form')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const reservationId = document.getElementById('transfer-reservation-id').value;
+    const toClientName = document.getElementById('transfer-to-name').value;
+    const toClientPhone = document.getElementById('transfer-to-phone').value;
+    const toClientNatId = document.getElementById('transfer-to-natid').value;
+    const transferFee = document.getElementById('transfer-fee').value;
+    const notes = document.getElementById('transfer-notes').value;
+
+    try {
+      const res = await fetch('/api/erp/sales', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'transfer_ownership',
+          reservationId,
+          toClientName,
+          toClientPhone,
+          toClientNatId,
+          transferFee,
+          notes
+        })
+      });
+      const data = await res.json();
+      if (data.success) {
+        alert('✅ تم اعتماد التنازل ونقل الملكية بنجاح وتحديث بيانات التعاقد');
+        closeTransferModal();
+        loadSalesData();
+      } else {
+        alert(data.error || 'فشلت عملية التنازل');
+      }
+    } catch (err) {
+      console.error(err);
+      alert('حدث خطأ أثناء تنفيذ التنازل');
+    }
+  });
+</script>
+
+<style is:global>
+  * { box-sizing: border-box; }
+  .erp-container { direction: rtl; font-family: 'Cairo', system-ui, sans-serif; background-color: #f8fafc; min-height: 100vh; padding: 2rem; }
+  .loading-state { text-align: center; padding: 5rem; font-family: 'Cairo', sans-serif; }
+  .spinner { width: 40px; height: 40px; border: 4px solid #e2e8f0; border-top-color: #10b981; border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 1rem; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .erp-topbar { display: flex; justify-content: space-between; align-items: center; background: white; border: 1px solid #e2e8f0; padding: 1rem 1.75rem; border-radius: 16px; margin-bottom: 2rem; }
+  .brand-crumb { display: flex; align-items: center; gap: 0.65rem; font-weight: 700; }
+  .back-link { display: inline-flex; align-items: center; gap: 0.35rem; color: #0284c7; text-decoration: none; }
+  .sep { color: #94a3b8; }
+  .active-crumb { color: #0f172a; }
+
+  .subsystem-hero { background: linear-gradient(135deg, #059669 0%, #064e3b 100%); color: white; border-radius: 24px; padding: 2.75rem; margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center; }
+  .hero-badge { display: inline-block; padding: 0.35rem 0.95rem; border-radius: 20px; background: rgba(255,255,255,0.18); font-size: 0.8rem; font-weight: 800; margin-bottom: 0.75rem; }
+  .hero-text h1 { margin: 0 0 0.65rem 0; font-size: 2rem; font-weight: 900; }
+  .hero-text p { margin: 0; max-width: 600px; font-size: 0.96rem; color: #a7f3d0; }
+  .hero-stats-row { display: flex; gap: 1.25rem; flex-wrap: wrap; }
+  .hero-stat-card { background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.2); border-radius: 18px; padding: 1.25rem 1.75rem; text-align: center; min-width: 130px; }
+  .hero-stat-card.highlight-card { background: rgba(16, 185, 129, 0.25); border-color: rgba(52, 211, 153, 0.45); }
+  .stat-number { display: block; font-size: 2.1rem; font-weight: 900; margin-bottom: 0.3rem; }
+  .stat-title { font-size: 0.8rem; color: #a7f3d0; }
+  .text-emerald { color: #6ee7b7; }
+
+  .sales-tabs { display: flex; gap: 0.5rem; margin-bottom: 1.5rem; flex-wrap: wrap; }
+  .s-tab-btn { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.85rem 1.4rem; background: white; border: 1.5px solid #e2e8f0; border-radius: 14px; font-family: inherit; font-size: 0.95rem; font-weight: 800; color: #475569; cursor: pointer; transition: all 0.2s ease; }
+  .s-tab-btn:hover { border-color: #cbd5e1; background: #f8fafc; }
+  .s-tab-btn.active { background: #059669; color: white; border-color: #059669; box-shadow: 0 4px 14px rgba(5, 150, 105, 0.25); }
+  .tab-badge { display: inline-flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.25); color: inherit; padding: 0.15rem 0.55rem; border-radius: 20px; font-size: 0.8rem; font-weight: 900; }
+  .s-tab-btn:not(.active) .tab-badge { background: #e2e8f0; color: #0f172a; }
+
+  .s-tab-pane { background: white; border: 1px solid #e2e8f0; border-radius: 24px; padding: 2rem; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03); }
+  .erp-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+  .erp-table th, .erp-table td { padding: 0.85rem 1rem; text-align: right; border-bottom: 1px solid #f1f5f9; }
+  .erp-table th { background: #f8fafc; color: #475569; font-weight: 700; }
+
+  .status-badge { padding: 0.25rem 0.65rem; border-radius: 20px; font-size: 0.75rem; font-weight: 700; }
+  .lead-new { background: #dbeafe; color: #1e40af; }
+  .lead-contacted { background: #fef3c7; color: #b45309; }
+  .lead-viewing { background: #ede9fe; color: #6d28d9; }
+  .lead-negotiating { background: #ffedd5; color: #c2410c; }
+  .lead-converted { background: #dcfce7; color: #15803d; }
+  .badge-sold { background: #fee2e2; color: #b91c1c; }
+
+  /* ========================================================
+     INVENTORY TOOLBAR & FILTERS
+     ======================================================== */
+  .inv-topbar-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 1.5rem; margin-bottom: 1.5rem; padding-bottom: 1.25rem; border-bottom: 1.5px solid #f1f5f9; flex-wrap: wrap; }
+  .inv-title { margin: 0 0 0.4rem 0; font-size: 1.45rem; font-weight: 900; color: #0f172a; }
+  .inv-subtitle { margin: 0; font-size: 0.9rem; color: #64748b; max-width: 650px; line-height: 1.5; }
+  .inv-quick-counts { display: flex; gap: 0.65rem; align-items: center; flex-wrap: wrap; }
+  .inv-count-chip { padding: 0.45rem 0.9rem; border-radius: 12px; font-size: 0.85rem; font-weight: 700; display: inline-flex; align-items: center; gap: 0.35rem; }
+  .chip-avail { background: #ecfdf5; color: #065f46; border: 1px solid #a7f3d0; }
+  .chip-sold { background: #fef2f2; color: #991b1b; border: 1px solid #fecdd3; }
+  .chip-total { background: #f1f5f9; color: #334155; border: 1px solid #e2e8f0; }
+
+  .inv-filters-container { background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 18px; padding: 1.25rem; margin-bottom: 1.25rem; display: flex; flex-direction: column; gap: 1rem; }
+  .inv-search-wrap { position: relative; width: 100%; }
+  .inv-search-wrap .search-icon { position: absolute; right: 1rem; top: 50%; transform: translateY(-50%); font-size: 1.1rem; pointer-events: none; }
+  .inv-search-wrap input { width: 100%; padding: 0.85rem 2.85rem 0.85rem 1.25rem; border: 1.5px solid #cbd5e1; border-radius: 14px; font-family: inherit; font-size: 0.95rem; background: white; transition: all 0.2s ease; }
+  .inv-search-wrap input:focus { outline: none; border-color: #059669; box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.15); }
+
+  .inv-filters-row { display: flex; gap: 0.85rem; align-items: flex-end; flex-wrap: wrap; }
+  .inv-filter-item { display: flex; flex-direction: column; gap: 0.35rem; flex: 1; min-width: 160px; }
+  .inv-filter-item label { font-size: 0.8rem; font-weight: 800; color: #475569; }
+  .inv-filter-item select { padding: 0.65rem 0.9rem; border: 1.5px solid #cbd5e1; border-radius: 12px; font-family: inherit; font-size: 0.9rem; background: white; font-weight: 700; color: #1e293b; cursor: pointer; }
+  .inv-filter-item select:focus { outline: none; border-color: #059669; }
+  .btn-reset { height: 40px; padding: 0 1rem; border-color: #cbd5e1; color: #475569; font-size: 0.85rem; border-radius: 12px; }
+  .btn-reset:hover { background: #e2e8f0; color: #0f172a; }
+
+  .inv-results-summary { font-size: 0.88rem; color: #64748b; margin-bottom: 1.25rem; font-weight: 600; display: flex; justify-content: space-between; align-items: center; }
+
+  /* ========================================================
+     UNIT BOXES / CARDS GRID
+     ======================================================== */
+  .units-inventory-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1.4rem; }
+
+  .unit-card-box {
+    background: white;
+    border-radius: 20px;
+    padding: 1.4rem;
+    border: 1.5px solid #e2e8f0;
+    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.04);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    position: relative;
+    overflow: hidden;
+  }
+  .unit-card-box:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 16px 36px rgba(15, 23, 42, 0.09);
+  }
+
+  /* Status Specific Card Accents */
+  .unit-card-box.status-available { border-color: #a7f3d0; background: linear-gradient(180deg, #ffffff 0%, #fafffc 100%); }
+  .unit-card-box.status-available:hover { border-color: #34d399; box-shadow: 0 16px 36px rgba(16, 185, 129, 0.12); }
+  .unit-card-box.status-sold { border-color: #fecdd3; background: linear-gradient(180deg, #ffffff 0%, #fffbfb 100%); opacity: 0.92; }
+  .unit-card-box.status-reserved { border-color: #fde68a; background: linear-gradient(180deg, #ffffff 0%, #fffdf5 100%); }
+
+  /* Card Header */
+  .unit-card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; }
+  .unit-title-group { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
+  .unit-badge-number { font-size: 1.2rem; font-weight: 900; color: #0f172a; }
+  .unit-type-tag { background: #f1f5f9; color: #334155; font-size: 0.75rem; font-weight: 800; padding: 0.2rem 0.6rem; border-radius: 10px; }
+
+  .unit-status-badge { font-size: 0.75rem; font-weight: 800; padding: 0.25rem 0.65rem; border-radius: 20px; }
+  .badge-available { background: #dcfce7; color: #15803d; border: 1px solid #86efac; }
+  .badge-sold { background: #fee2e2; color: #b91c1c; border: 1px solid #fca5a5; }
+  .badge-reserved { background: #fef3c7; color: #b45309; border: 1px solid #fde047; }
+
+  /* Location Row */
+  .unit-location-row { display: flex; gap: 0.5rem; margin-bottom: 1rem; flex-wrap: wrap; font-size: 0.85rem; font-weight: 700; color: #475569; }
+  .proj-badge { background: #eff6ff; color: #1d4ed8; padding: 0.2rem 0.6rem; border-radius: 8px; border: 1px solid #bfdbfe; }
+  .bldg-badge { background: #f8fafc; color: #334155; padding: 0.2rem 0.6rem; border-radius: 8px; border: 1px solid #e2e8f0; }
+
+  /* Specs Grid */
+  .unit-specs-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.55rem;
+    margin-bottom: 1.15rem;
+  }
+  .spec-cell {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 0.55rem 0.75rem;
+    font-size: 0.82rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.4rem;
+  }
+  .spec-label { color: #64748b; font-weight: 600; }
+  .spec-val { color: #0f172a; font-weight: 800; text-align: left; }
+  .spec-cell.highlight-green { background: #ecfdf5; border-color: #a7f3d0; }
+  .spec-cell.highlight-green .spec-label { color: #047857; }
+  .spec-cell.highlight-green .spec-val { color: #065f46; }
+
+  /* Pricing Bar */
+  .unit-pricing-bar {
+    background: #f8fafc;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 14px;
+    padding: 0.85rem 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.15rem;
+  }
+  .price-meter-col, .price-total-col { display: flex; flex-direction: column; gap: 0.15rem; }
+  .price-sub { font-size: 0.75rem; font-weight: 700; color: #64748b; }
+  .price-meter-val { font-size: 0.92rem; font-weight: 800; color: #334155; }
+  .price-total-val { font-size: 1.25rem; font-weight: 900; color: #059669; }
+
+  /* Action Buttons */
+  .unit-card-actions { display: flex; gap: 0.6rem; margin-top: auto; }
+  .btn-reserve-unit { flex: 1.2; justify-content: center; font-size: 0.88rem; padding: 0.65rem 0.8rem; background: #059669; box-shadow: 0 4px 12px rgba(5, 150, 105, 0.2); }
+  .btn-reserve-unit:hover { background: #047857; }
+  .btn-whatsapp-share { flex: 1; justify-content: center; font-size: 0.85rem; padding: 0.65rem 0.8rem; background: #25d366; color: white; border: none; }
+  .btn-whatsapp-share:hover { background: #1ebc59; }
+
+  .sold-indicator, .reserved-indicator {
+    width: 100%;
+    text-align: center;
+    padding: 0.65rem;
+    border-radius: 12px;
+    font-size: 0.85rem;
+    font-weight: 800;
+  }
+  .sold-indicator { background: #fee2e2; color: #991b1b; border: 1px solid #fecdd3; }
+  .reserved-indicator { background: #fef3c7; color: #92400e; border: 1px solid #fde68a; }
+
+  /* Empty State */
+  .empty-inventory-state { grid-column: 1 / -1; text-align: center; padding: 4rem 1.5rem; background: #f8fafc; border: 2px dashed #cbd5e1; border-radius: 20px; }
+  .empty-icon { font-size: 3rem; margin-bottom: 0.75rem; }
+  .empty-inventory-state h3 { font-size: 1.2rem; font-weight: 900; color: #1e293b; margin: 0 0 0.5rem 0; }
+  .empty-inventory-state p { color: #64748b; font-size: 0.9rem; margin: 0; }
+
+  .btn { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.75rem 1.4rem; border-radius: 12px; font-weight: 700; font-size: 0.95rem; cursor: pointer; border: none; text-decoration: none; }
+  .btn-sm { padding: 0.45rem 0.85rem; font-size: 0.85rem; border-radius: 10px; }
+  .btn-primary { background: #0284c7; color: white; }
+  .btn-success { background: #059669; color: white; }
+  .btn-secondary { background: #f1f5f9; color: #475569; }
+  .btn-outline { background: white; color: #0284c7; border: 1px solid #bae6fd; }
+
+  /* Modals */
+  .modal-backdrop { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(8px); z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 1.5rem; }
+  .modal-card { background: white; border-radius: 24px; width: 100%; max-width: 600px; padding: 2.25rem; box-shadow: 0 25px 60px rgba(0, 0, 0, 0.25); }
+  .modal-large { max-width: 850px; }
+  .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
+  .modal-header h3 { margin: 0; font-size: 1.35rem; font-weight: 900; }
+  .close-modal-btn { background: #f1f5f9; border: none; width: 34px; height: 34px; border-radius: 50%; cursor: pointer; font-size: 1.4rem; }
+  .modal-form { display: flex; flex-direction: column; gap: 1.15rem; }
+  .form-group { display: flex; flex-direction: column; gap: 0.45rem; flex: 1; }
+  .form-group label { font-size: 0.85rem; font-weight: 700; color: #334155; }
+  .form-group input, .form-group select { padding: 0.75rem 1rem; border: 1.5px solid #e2e8f0; border-radius: 12px; font-family: inherit; font-size: 0.95rem; }
+  .form-row { display: flex; gap: 1rem; }
+  .form-actions { display: flex; justify-content: flex-end; gap: 0.75rem; margin-top: 1.25rem; }
+</style>

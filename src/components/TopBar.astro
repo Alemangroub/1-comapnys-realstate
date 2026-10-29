@@ -1,0 +1,93 @@
+<div class="top-bar">
+    <div class="contact-info">
+        <a href="mailto:info@realestate-dev.com">info@realestate-dev.com <i class="fas fa-envelope"></i></a>
+        <a href="tel:19000">19000 <i class="fas fa-phone-alt"></i></a>
+    </div>
+    <div class="social-icons">
+        <a href="/contact" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a>
+        <a href="/contact" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+        <a href="/contact" aria-label="YouTube"><i class="fab fa-youtube"></i></a>
+    </div>
+</div>
+
+<style>
+    @keyframes slideDown {
+        from {
+            opacity: 0;
+            transform: translateY(-100%);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .top-bar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        padding: 8px 20px;
+        background-color: #2c3e50;
+        color: white;
+        font-family: 'Almarai', sans-serif;
+        font-size: 14px;
+        direction: ltr;
+        animation: slideDown 0.6s ease-out forwards;
+    }
+
+    .contact-info a,
+    .social-icons a {
+        display: inline-flex;
+        align-items: center;
+        margin: 5px 10px;
+        color: white;
+        text-decoration: none;
+        transition: color 0.3s ease;
+    }
+
+    .contact-info a:hover,
+    .social-icons a:hover {
+        color: #D3BFA9;
+    }
+
+    .contact-info i,
+    .social-icons i {
+        margin: 0 5px;
+        font-size: 16px;
+    }
+
+    /* Mobile Responsive Styles */
+    @media (max-width: 768px) {
+        .top-bar {
+            flex-direction: column;
+            padding: 10px;
+        }
+
+        .contact-info {
+            order: 1;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-bottom: 8px;
+            text-align: center;
+        }
+
+        .social-icons {
+            order: 2;
+            display: flex;
+            justify-content: center;
+            width: 100%;
+        }
+
+        .contact-info a {
+            margin: 5px 8px;
+            font-size: 13px;
+        }
+
+        .social-icons a {
+            margin: 0 12px;
+            font-size: 18px;
+        }
+    }
+</style>

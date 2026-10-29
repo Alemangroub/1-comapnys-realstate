@@ -1,0 +1,161 @@
+---
+import Layout from '../layouts/Layout.astro';
+import TopBar from '../components/TopBar.astro';
+import Header from '../components/Header.astro';
+import Achievements from '../components/Achievements.astro';
+import Footer from '../components/Footer.astro';
+import FloatingButton from '../components/FloatingButton.astro';
+
+const philosophyContent = {
+  p1: "تأسست شركتنا ككيان طموح يهدف إلى ترك بصمة معمارية وحضارية مميزة. منذ انطلاقتنا، وضعنا نصب أعيننا مهمة واضحة: تطوير مشاريع عقارية لا تقتصر على كونها مجرد مبانٍ، بل تمثل مجتمعات سكنية وتجارية متكاملة تنبض بالحياة وتوفر بيئة مثالية للعيش والعمل والاستثمار.",
+  p2: "نحن نؤمن بأن التنمية الحقيقية تبدأ من فهم عميق لاحتياجات المجتمع وتطلعاته. لذلك، ترتكز استراتيجيتنا على اختيار المواقع الحيوية والمستقبلية، وتطبيق أحدث المفاهيم الهندسية، مع الجمع بين الأصالة والمعاصرة لتقديم منتج عقاري فريد يضمن جودة الحياة ومستقبلًا واعدًا."
+};
+
+const impactContent = {
+  p1: "كل رقم في إنجازاتنا يروي قصة أعمق من مجرد إحصائية. فالمشاريع التي نطورها لا تقاس فقط بعددها، بل بحجم القيمة التي تخلقها لمجتمعنا وشركائنا. كل مشروع هو محرك حقيقي للتنمية، يوفر فرص عمل واستثمار، ويساهم في تنشيط السوق العقاري والاقتصادي.",
+  p2: "الوحدات التي نسلمها هي أكثر من مجرد جدران وأسقف؛ إنها مساحات تحتضن أحلام الأسر وتطلعات المستثمرين. نحن نؤسس لمجتمعات متكاملة ومترابطة، ونساهم في رفع مستوى جودة الحياة من خلال توفير بنية تحتية عصرية وخدمات متكاملة، لنصنع أثرًا إيجابيًا مستداماً."
+};
+---
+
+<Layout title="إنجازاتنا - للاستثمار والتطوير العقاري">
+  <TopBar />
+  <Header showMenu={true} />
+
+  <main class="achievements-page">
+    <Achievements />
+
+    <section class="achieve-details-section">
+      <div class="container">
+        <!-- Philosophy Card -->
+        <article class="detail-glass-panel">
+          <div class="panel-header">
+            <span class="panel-badge">رؤية والتزام</span>
+            <h2 class="panel-title">أساس نجاحنا: رؤية والتزام</h2>
+            <p class="panel-subtitle">أرقامنا لم تكن وليدة الصدفة، بل هي نتاج رؤية واضحة والتزام راسخ تجاه عملائنا ومجتمعنا.</p>
+          </div>
+          <div class="text-content-grid">
+            <p>{philosophyContent.p1}</p>
+            <p>{philosophyContent.p2}</p>
+          </div>
+        </article>
+
+        <!-- Impact Card -->
+        <article class="detail-glass-panel">
+          <div class="panel-header">
+            <span class="panel-badge">أثر مستدام</span>
+            <h2 class="panel-title">أثرنا في المجتمع: أبعد من مجرد أرقام</h2>
+            <p class="panel-subtitle">نحن نؤمن بأن النجاح الحقيقي يقاس بمدى الأثر الإيجابي الذي نتركه في حياة الناس والمجتمع.</p>
+          </div>
+          <div class="text-content-grid">
+            <p>{impactContent.p1}</p>
+            <p>{impactContent.p2}</p>
+          </div>
+        </article>
+      </div>
+    </section>
+  </main>
+
+  <Footer />
+  <FloatingButton />
+</Layout>
+
+<style>
+  .achievements-page {
+    position: relative;
+    background: radial-gradient(circle at 50% 20%, #0d1627 0%, #080d19 60%, #050812 100%);
+    direction: rtl;
+    padding-bottom: 90px;
+    overflow: hidden;
+  }
+
+  .achieve-details-section {
+    padding: 20px 0 60px;
+  }
+
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 25px;
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+  }
+
+  .detail-glass-panel {
+    background: linear-gradient(160deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.015) 100%);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.09);
+    border-radius: 20px;
+    padding: 45px 40px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+  }
+
+  .panel-header {
+    text-align: center;
+    margin-bottom: 30px;
+  }
+
+  .panel-badge {
+    display: inline-block;
+    font-family: 'Cairo', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #d3bfa9;
+    background: rgba(211, 191, 169, 0.1);
+    border: 1px solid rgba(211, 191, 169, 0.25);
+    padding: 4px 14px;
+    border-radius: 20px;
+    margin-bottom: 12px;
+  }
+
+  .panel-title {
+    font-family: 'Cairo', sans-serif;
+    font-size: 2.2rem;
+    font-weight: 800;
+    color: #ffffff;
+    margin-bottom: 10px;
+    background: linear-gradient(180deg, #ffffff 40%, #cbd5e1 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .panel-subtitle {
+    font-family: 'Almarai', sans-serif;
+    font-size: 1.12rem;
+    color: #94a3b8;
+    max-width: 720px;
+    margin: 0 auto;
+    line-height: 1.7;
+  }
+
+  .text-content-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 30px;
+  }
+
+  @media (min-width: 768px) {
+    .text-content-grid {
+      grid-template-columns: 1fr 1fr;
+      gap: 40px;
+    }
+  }
+
+  .text-content-grid p {
+    font-family: 'Almarai', sans-serif;
+    font-size: 1.1rem;
+    color: #cbd5e1;
+    line-height: 1.9;
+    margin: 0;
+  }
+
+  @media (max-width: 768px) {
+    .detail-glass-panel {
+      padding: 30px 20px;
+    }
+    .panel-title {
+      font-size: 1.8rem;
+    }
+  }
+</style>

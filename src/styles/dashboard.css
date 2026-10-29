@@ -1,0 +1,140 @@
+/* Global styles for the supervisor dashboard */
+
+.supervisor-dashboard-page { 
+  direction: rtl; 
+  font-family: 'Cairo', sans-serif; 
+  background-color: #f4f7f6; 
+  min-height: 100vh; 
+  padding: 2rem; 
+}
+
+#auth-loading-message { 
+  text-align: center; 
+  padding-top: 5rem; 
+  font-size: 1.2rem; 
+}
+
+.dashboard-header { 
+  display: flex; 
+  justify-content: space-between; 
+  align-items: center; 
+  margin-bottom: 2rem; 
+  padding-bottom: 1.5rem; 
+  border-bottom: 2px solid #e2e8f0; 
+}
+
+.dashboard-header h1 { 
+  font-size: 2.2rem; 
+  color: #1a202c; 
+  font-weight: 800; 
+}
+
+.dashboard-header p { 
+  color: #4a5568; 
+}
+
+.btn-logout { 
+  background-color: #ef4444; 
+  color: white; 
+  border: none; 
+  padding: 0.6rem 1.2rem; 
+  border-radius: 8px; 
+  cursor: pointer; 
+  font-weight: 600; 
+  transition: background-color 0.2s; 
+}
+
+.btn-logout:hover { 
+  background-color: #dc2626; 
+}
+
+.projects-grid { 
+  display: grid; 
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); 
+  gap: 2rem; 
+}
+
+.project-card { 
+  display: flex;
+  background: #ffffff;
+  border-radius: 12px; 
+  box-shadow: 0 4px 12px rgba(0,0,0,0.07); 
+  overflow: hidden;
+  text-decoration: none;
+  color: inherit;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.project-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+}
+
+.project-card-content {
+  flex-grow: 1;
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  text-align: right;
+}
+
+.project-card h3 { 
+  font-size: 1.4rem; 
+  font-weight: 700; 
+  color: #2d3748; 
+  margin: 0 0 0.5rem 0;
+}
+
+.project-address { 
+  font-size: 1rem; 
+  color: #718096; 
+  margin: 0;
+  flex-grow: 1;
+}
+
+.project-card-action {
+  margin-top: 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: 600;
+  color: #3f51b5;
+}
+
+.project-card:hover .project-card-action {
+  color: #36469e;
+}
+
+.arrow-icon {
+  font-size: 1.5rem;
+  transition: transform 0.2s;
+}
+
+.project-card:hover .arrow-icon {
+  transform: translateX(-5px);
+}
+
+.project-card-icon-wrapper {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 110px;
+  background-color: #f0f2f9;
+}
+
+.card-icon {
+  width: 40px;
+  height: 40px;
+  color: #3f51b5;
+}
+
+.info-message, 
+.error-message { 
+  text-align: center; 
+  font-size: 1.1rem; 
+  color: #555; 
+  background-color: #fff; 
+  border-radius: 8px; 
+  padding: 2rem; 
+}
